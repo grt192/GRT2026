@@ -1,6 +1,6 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.1.1"
+    id "edu.wpi.first.GradleRIO" version "2025.3.2"
 }
 
 java {
@@ -69,6 +69,13 @@ dependencies {
     nativeRelease wpi.java.deps.wpilibJniRelease(wpi.platforms.desktop)
     nativeRelease wpi.java.vendor.jniRelease(wpi.platforms.desktop)
     simulationRelease wpi.sim.enableRelease()
+
+    implementation 'com.pathplanner.lib:PathplannerLib-java:2025.2.7'
+    implementation 'com.revrobotics.frc:REVLib-java:2025.0.3'
+    implementation 'org.photonvision:photonlib-java:v2025.3.1'
+    implementation 'org.photonvision:photontargeting-java:v2025.3.1'
+    implementation 'com.studica.frc:Studica-java:2025.0.1'
+    implementation 'com.ctre.phoenix6:wpiapi-java:25.4.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
