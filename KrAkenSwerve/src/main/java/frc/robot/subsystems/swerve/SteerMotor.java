@@ -1,8 +1,10 @@
 package frc.robot.subsystems.swerve;
+
 //Constants Import 
 import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
+
 
 //CTRE imports
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
