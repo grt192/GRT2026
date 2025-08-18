@@ -2,21 +2,27 @@ package frc.robot.subsystems.swerve;
 
 //Constants Import 
 <<<<<<< HEAD
+<<<<<<< HEAD
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 =======
+=======
+>>>>>>> parent of 22b7d10 (unlock files)
 import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
 
+<<<<<<< HEAD
 
 //CTRE imports
 >>>>>>> parent of 003b66c (Ready for review)
+=======
+//CTRE imports
+>>>>>>> parent of 22b7d10 (unlock files)
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -27,10 +33,13 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
-import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
-import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
-import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
 import frc.robot.util.GRTUtil;
+
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 
 //Logging and NT imports
 
@@ -275,6 +284,7 @@ public class SteerMotor {
      * @param targetRads target position in radiants
      */
     public void setPosition(double targetRads) {
+<<<<<<< HEAD
         // Convert radians to normalized position (0-1)
         // The motor expects values from 0-1, where 0 = -180°, 0.5 = 0°, 1 = 180°
         double normalizedPosition = (targetRads + Math.PI) / (2.0 * Math.PI);
@@ -290,6 +300,24 @@ public class SteerMotor {
         
         // Set the motor position directly in normalized units
         motor.setControl(positionRequest.withPosition(normalizedPosition));
+=======
+
+        // Convert RADS to Degree
+        double targetDegrees = (targetRads * 360) / (2. * Math.PI);
+
+        // Gets Current Position in *
+        double currentDegrees = getPosition() * 360.0; 
+
+        // Figure Out position to go To
+        double goalTurn = fasterTurnDirection(currentDegrees, targetDegrees);
+
+        // Converts from degrees to rotations
+        double desiredMotorRotations = degreesToMotorRotations(currentDegrees + goalTurn);
+
+        //Creates a reqest to go to that said position
+        positionRequest.withPosition(desiredMotorRotations);
+        motor.setControl(positionRequest);
+>>>>>>> parent of 22b7d10 (unlock files)
     }
 }
 
