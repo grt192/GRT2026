@@ -1,12 +1,12 @@
 package frc.robot.subsystems.swerve;
 //Constants Import 
-import com.ctre.phoenix6.StatusCode;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
+import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
+import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
+import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
+
+//CTRE imports
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -17,10 +17,13 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
-import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
-import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
-import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
 import frc.robot.util.GRTUtil;
+
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 
 //Logging and NT imports
 
@@ -264,11 +267,22 @@ public class SteerMotor {
      * @param targetRads target position in radiants
      */
     public void setPosition(double targetRads) {
-        // Convert to motor rotations and apply gear reduction
-        double motorRotations = (targetRads / (2.0 * Math.PI)) * STEER_GEAR_REDUCTION;
-        
-        // The motor's continuous wrap will handle finding the shortest path
-        motor.setControl(positionRequest.withPosition(motorRotations));
+
+        // Convert RADS to Degree
+        double targetDegrees = (targetRads * 360) / (2. * Math.PI);
+
+        // Gets Current Position in *
+        double currentDegrees = getPosition() * 360.0; 
+
+        // Figure Out position to go To
+        double goalTurn = fasterTurnDirection(currentDegrees, targetDegrees);
+
+        // Converts from degrees to rotations
+        double desiredMotorRotations = degreesToMotorRotations(currentDegrees + goalTurn);
+
+        //Creates a reqest to go to that said position
+        positionRequest.withPosition(desiredMotorRotations);
+        motor.setControl(positionRequest);
     }
 }
 
