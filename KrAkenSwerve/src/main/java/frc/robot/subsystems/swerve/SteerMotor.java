@@ -1,9 +1,19 @@
 package frc.robot.subsystems.swerve;
+
 //Constants Import 
+<<<<<<< HEAD
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+=======
+import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
+import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
+import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
+
+
+//CTRE imports
+>>>>>>> parent of 003b66c (Ready for review)
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
