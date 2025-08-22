@@ -1,5 +1,12 @@
 package frc.robot.subsystems.swerve;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.studica.frc.AHRS;
+import com.studica.frc.AHRS.NavXComType;
+
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,21 +23,33 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import static frc.robot.Constants.DebugConstants.DRIVE_DEBUG;
+import static frc.robot.Constants.DebugConstants.STEER_DEBUG;
+import static frc.robot.Constants.LoggingConstants.SWERVE_TABLE;
+import static frc.robot.Constants.SwerveConstants.BL_DRIVE;
+import static frc.robot.Constants.SwerveConstants.BL_ENCODER;
+import static frc.robot.Constants.SwerveConstants.BL_OFFSET;
+import static frc.robot.Constants.SwerveConstants.BL_POS;
+import static frc.robot.Constants.SwerveConstants.BL_STEER;
+import static frc.robot.Constants.SwerveConstants.BR_DRIVE;
+import static frc.robot.Constants.SwerveConstants.BR_ENCODER;
+import static frc.robot.Constants.SwerveConstants.BR_OFFSET;
+import static frc.robot.Constants.SwerveConstants.BR_POS;
+import static frc.robot.Constants.SwerveConstants.BR_STEER;
+import static frc.robot.Constants.SwerveConstants.FL_DRIVE;
+import static frc.robot.Constants.SwerveConstants.FL_ENCODER;
+import static frc.robot.Constants.SwerveConstants.FL_OFFSET;
+import static frc.robot.Constants.SwerveConstants.FL_POS;
+import static frc.robot.Constants.SwerveConstants.FL_STEER;
+import static frc.robot.Constants.SwerveConstants.FR_DRIVE;
+import static frc.robot.Constants.SwerveConstants.FR_ENCODER;
+import static frc.robot.Constants.SwerveConstants.FR_OFFSET;
+import static frc.robot.Constants.SwerveConstants.FR_POS;
+import static frc.robot.Constants.SwerveConstants.FR_STEER;
+import static frc.robot.Constants.SwerveConstants.MAX_OMEGA;
+import static frc.robot.Constants.SwerveConstants.MAX_VEL;
 import frc.robot.subsystems.Vision.TimestampedVisionUpdate;
 import frc.robot.util.GRTUtil;
-
-import static frc.robot.Constants.SwerveConstants.*;
-import static frc.robot.Constants.DebugConstants.*;
-
-import static frc.robot.Constants.LoggingConstants.*;
-
-import com.ctre.phoenix6.swerve.SwerveModule;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.studica.frc.AHRS;
-import com.studica.frc.AHRS.NavXComType;
 
 public class SwerveSubsystem extends SubsystemBase {
 

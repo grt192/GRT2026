@@ -1,14 +1,13 @@
 package frc.robot.subsystems.swerve;
 
 //Constants Import 
-import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
-import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
-import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
-
-
-//CTRE imports
+import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -19,13 +18,10 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.wpilibj.DataLogManager;
+import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
+import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
+import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
 import frc.robot.util.GRTUtil;
-
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.StatusCode;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
 
 //Logging and NT imports
 
@@ -117,7 +113,7 @@ public class SteerMotor {
         // Encoder Being Applied
         motorConfig.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID(); 
         motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-        motorConfig.Feedback.RotorToSensorRatio = STEER_GEAR_REDUCTION; // ensures sensor scaling matches gear reduction 
+        motorConfig.Feedback.RotorToSensorRatio = 1.0; // Should be 1.0 for CANcoder
 
         // Enable position wrapping (by default values are from 0-1)
         closedLoopGeneralConfigs.ContinuousWrap = true; //basicaly turns stacking off
@@ -129,6 +125,9 @@ public class SteerMotor {
                 break; // Success
             }
         }
+        
+        // Reset motor position to 0 for consistent starting point
+        motor.setPosition(0);
     }
 
     private void initLogs(int canId) {
@@ -242,7 +241,7 @@ public class SteerMotor {
     
 
     private double degreesToMotorRotations(double degrees) {
-        return (degrees / 360.0) * STEER_GEAR_REDUCTION;
+        return (degrees / 360.0) / STEER_GEAR_REDUCTION;
     }
 
     public static double fasterTurnDirection(double current, double target) {
@@ -273,14 +272,8 @@ public class SteerMotor {
         // Convert RADS to Degree
         double targetDegrees = (targetRads * 360) / (2. * Math.PI);
 
-        // Gets Current Position in *
-        double currentDegrees = getPosition() * 360.0; 
-
-        // Figure Out position to go To
-        double goalTurn = fasterTurnDirection(currentDegrees, targetDegrees);
-
-        // Converts from degrees to rotations
-        double desiredMotorRotations = degreesToMotorRotations(currentDegrees + goalTurn);
+        // Convert target degrees to motor rotations (divide by gear reduction)
+        double desiredMotorRotations = (targetDegrees / 360.0) / STEER_GEAR_REDUCTION;
 
         //Creates a reqest to go to that said position
         positionRequest.withPosition(desiredMotorRotations);

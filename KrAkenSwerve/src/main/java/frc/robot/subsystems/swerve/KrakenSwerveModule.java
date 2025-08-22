@@ -1,14 +1,21 @@
 package frc.robot.subsystems.swerve;
 
+import java.util.EnumSet;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
-
-import static frc.robot.Constants.SwerveConstants.*;
-
-import java.util.EnumSet;
+import static frc.robot.Constants.SwerveConstants.DRIVE_D;
+import static frc.robot.Constants.SwerveConstants.DRIVE_I;
+import static frc.robot.Constants.SwerveConstants.DRIVE_P;
+import static frc.robot.Constants.SwerveConstants.DRIVE_S;
+import static frc.robot.Constants.SwerveConstants.DRIVE_V;
+import static frc.robot.Constants.SwerveConstants.STEER_D;
+import static frc.robot.Constants.SwerveConstants.STEER_FF;
+import static frc.robot.Constants.SwerveConstants.STEER_I;
+import static frc.robot.Constants.SwerveConstants.STEER_P;
 
 public class KrakenSwerveModule {
 
