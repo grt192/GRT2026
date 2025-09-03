@@ -107,7 +107,9 @@ public class SteerMotor {
          *      Inverse Direction
          *      Turn Range into -180 to 180
          */
-        cancoderconfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        // cancoderconfig.MagnetSensor.MagnetOffset = offsetRads / (2.0 * Math.PI);
+        cancoder.getConfigurator().apply(cancoderconfig);
+
         // Apply config with retries (max 5 attempts)
         for (int i = 0; i < 5; i++) {
             if (cancoder.getConfigurator().apply(cancoderconfig, 0.1) == StatusCode.OK) {
