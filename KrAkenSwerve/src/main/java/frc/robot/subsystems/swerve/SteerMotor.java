@@ -81,7 +81,7 @@ public class SteerMotor {
     public SteerMotor(int motorCAN, int encoderCAN) {
         // Set motor and encoder
         motor = new TalonFX(motorCAN, "can");
-        cancoder = new CANcoder(encoderCAN);
+        cancoder = new CANcoder(encoderCAN, "can");
 
         // Configure CANcoder and Kraken
         configureCancoder(); // called to ensure settings are applied programmatically
