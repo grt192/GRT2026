@@ -40,7 +40,7 @@ public final class Constants {
       public static final double STEER_RAMP_RATE = 0; // Time in seconds for the motor to go from neutral to full throttle NEED TO TUNE
   
       // Physical Measurements (STEER)
-      public static final double STEER_GEAR_REDUCTION = 14.8; // Gear reduction ratio for steer
+      public static final double STEER_GEAR_REDUCTION = 444/35.0; // Gear reduction ratio for steer
   
 
   }
