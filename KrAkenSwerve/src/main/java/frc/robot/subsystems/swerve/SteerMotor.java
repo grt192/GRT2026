@@ -361,11 +361,7 @@ public class SteerMotor {
     double rotorRotations;
     public void setPosition(double targetRads) {
 
-        double currentRads = getCurrentPositionRads(); 
-
-        double deltaRads = fasterTurnDirection(currentRads, targetRads);
-        double newTargetRads = currentRads + deltaRads;
-        double rotorRotations = (newTargetRads / (2.0 * Math.PI));
+        double rotorRotations = (targetRads / (2.0 * Math.PI));
         positionRequest.withPosition(rotorRotations).withSlot(0);
         motor.setControl(positionRequest);
         publishStats();
