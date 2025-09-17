@@ -72,6 +72,10 @@ public class SteerMotor {
     private DoublePublisher supplyCurrentPublisher;
     private DoublePublisher torqueCurrentPublisher;
     private DoublePublisher positionErrorPublisher;
+    private DoublePublisher rotationPublisher;
+    private DoublePublisher positionControlPositionPublisher;
+    private DoublePublisher closedLoopReferencePublisher;
+
 
     // Phoenix 6 Status Signals
     private StatusSignal<Angle> positionSignal;
@@ -93,7 +97,7 @@ public class SteerMotor {
         initNT(motorCAN);
 
         // Initialize logs
-        initLogs(motorCAN);
+        // initLogs(motorCAN);
         
         // Initialize Phoenix 6 signals
         initSignals();
@@ -206,17 +210,29 @@ public class SteerMotor {
         supplyCurrentPublisher = steerStatsTable.getDoubleTopic(canId + "supplyCurrent").publish();
         torqueCurrentPublisher = steerStatsTable.getDoubleTopic(canId + "torqueCurrent").publish();
         positionErrorPublisher = steerStatsTable.getDoubleTopic(canId + "positionError").publish();
+        rotationPublisher = steerStatsTable.getDoubleTopic(canId + "targetMotorRotationPosition").publish();
+        closedLoopReferencePublisher = steerStatsTable.getDoubleTopic(canId + "targetMotorRotationPosition").publish();
+
+        positionControlPositionPublisher = steerStatsTable.getDoubleTopic(canId + "positionControlPosition").publish();
+
     }
 
     public void publishStats() {
         motorPositionPublisher.set(getPosition());
+  
         encoderPositionPublisher.set(cancoder.getPosition().getValueAsDouble());
-        targetPositionPublisher.set(getPosition()); // Just show current position for now
+        targetPositionPublisher.set(motor.getRotorPosition().getValueAsDouble()); // Just show current position for now
+        rotationPublisher.set(motor.getPosition().getValueAsDouble()); // get position
+        closedLoopReferencePublisher.set(motor.getClosedLoopReference().getValueAsDouble()); // TODO: Calculate actual position error
+
         motorTemperaturePublisher.set(getTemperature());
         appliedVoltsPublisher.set(appliedVoltsSignal.getValueAsDouble());
         supplyCurrentPublisher.set(supplyCurrentSignal.getValueAsDouble());
         torqueCurrentPublisher.set(torqueCurrentSignal.getValueAsDouble());
         positionErrorPublisher.set(0.0); // TODO: Calculate actual position error
+
+        positionControlPositionPublisher.set(positionRequest.Position);
+    
     }
     
 
@@ -228,7 +244,7 @@ public class SteerMotor {
      * @return position in double from 0 to 1
      */
     public double getPosition() {
-        return cancoder.getAbsolutePosition().getValueAsDouble(); // 0..1 rotations, absolute
+        return cancoder.getAbsolutePosition().getValueAsDouble() + 0.5; // 0..1 rotations, absolute
 
     }
 
@@ -332,10 +348,13 @@ public class SteerMotor {
      * 
      * @param targetRads target position in radiants
      */
+    double rotorRotations;
     public void setPosition(double targetRads) {
 
-        double rotorRotations = (targetRads / (2.0 * Math.PI)) * STEER_GEAR_REDUCTION;
-        positionRequest.withPosition(rotorRotations).withSlot(0);
+        // rotorRotations = (targetRads / (2.0 * Math.PI)) * STEER_GEAR_REDUCTION;
+
+        positionRequest.withPosition(targetRads/2.0/Math.PI*STEER_GEAR_REDUCTION).withSlot(0);
+        // motor.setControl(positionRequest);
         motor.setControl(positionRequest);
         publishStats();
     }

@@ -25,6 +25,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.DebugConstants.DRIVE_DEBUG;
 import static frc.robot.Constants.DebugConstants.STEER_DEBUG;
+import static frc.robot.Constants.DebugConstants.STATE_DEBUG;
+
 import static frc.robot.Constants.LoggingConstants.SWERVE_TABLE;
 import static frc.robot.Constants.SwerveConstants.BL_DRIVE;
 import static frc.robot.Constants.SwerveConstants.BL_ENCODER;
@@ -76,12 +78,12 @@ public class SwerveSubsystem extends SubsystemBase {
     private StructArrayPublisher<SwerveModuleState> swerveStatesPublisher;
 
     private StructPublisher<Pose2d> estimatedPosePublisher;
-    private StructLogEntry<Pose2d> estimatedPoseLogEntry =
-        StructLogEntry.create(
-            DataLogManager.getLog(),
-            "estimatedPose",
-            Pose2d.struct
-        );
+    // private StructLogEntry<Pose2d> estimatedPoseLogEntry =
+    //     StructLogEntry.create(
+    //         DataLogManager.getLog(),
+    //         "estimatedPose",
+    //         Pose2d.struct
+    //     );
 
     public SwerveSubsystem() {
         //initialize and reset the NavX gyro
@@ -152,8 +154,8 @@ public class SwerveSubsystem extends SubsystemBase {
         }
 
         //logging
-        estimatedPoseLogEntry.append(estimatedPose, GRTUtil.getFPGATime()); 
-        // publishStats();
+        // estimatedPoseLogEntry.append(estimatedPose, GRTUtil.getFPGATime()); 
+        publishStats();
         // logStats();
     }
 
@@ -331,30 +333,30 @@ public class SwerveSubsystem extends SubsystemBase {
         ).publish();
     }
 
-    // /**
-    //  * publishes swerve stats to NT
-    //  */
-    // private void publishStats() {
-    //     estimatedPosePublisher.set(estimatedPose);
+    /**
+     * publishes swerve stats to NT
+     */
+    private void publishStats() {
+        estimatedPosePublisher.set(estimatedPose);
 
-    //     if(STATE_DEBUG || DRIVE_DEBUG || STEER_DEBUG) {
-    //         swerveStatesPublisher.set(getModuleStates());
-    //     }
+        if(STATE_DEBUG || DRIVE_DEBUG || STEER_DEBUG) {
+            swerveStatesPublisher.set(getModuleStates());
+        }
 
-    //     if(DRIVE_DEBUG) {
-    //         frontLeftModule.publishDriveStats();
-    //         frontRightModule.publishDriveStats();
-    //         backLeftModule.publishDriveStats();
-    //         backRightModule.publishDriveStats();
-    //     }
+        if(DRIVE_DEBUG) {
+            frontLeftModule.publishDriveStats();
+            frontRightModule.publishDriveStats();
+            backLeftModule.publishDriveStats();
+            backRightModule.publishDriveStats();
+        }
 
-    //     if(STEER_DEBUG) {
-    //         frontLeftModule.publishSteerStats();
-    //         frontRightModule.publishSteerStats();
-    //         backLeftModule.publishSteerStats();
-    //         backRightModule.publishSteerStats();
-    //     }
-    // }
+        if(STEER_DEBUG) {
+            frontLeftModule.publishSteerStats();
+            frontRightModule.publishSteerStats();
+            backLeftModule.publishSteerStats();
+            backRightModule.publishSteerStats();
+        }
+    }
 
     // private void logStats() {
     //     frontLeftModule.logStats();

@@ -207,14 +207,14 @@ public class KrakenSwerveModule {
     /**
      * Logs drive motor statistics to data log
      */
-    public void logDriveStats() {
-        driveMotor.logStats();
-    }
+    // public void logDriveStats() {
+    //     driveMotor.logStats();
+    // }
 
     /**
      * Logs steer motor statistics to data log
      */
-    public void logSteerStats() {
-        steerMotor.logStats();
-    }
+    // public void logSteerStats() {
+    //     steerMotor.logStats();
+    // }
 }
