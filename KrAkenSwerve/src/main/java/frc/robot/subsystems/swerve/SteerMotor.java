@@ -18,6 +18,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
@@ -27,6 +29,9 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
+
+import java.util.EnumSet;
+
 import frc.robot.util.GRTUtil;
 
 //Logging and NT imports
@@ -75,8 +80,10 @@ public class SteerMotor {
     private DoublePublisher rotationPublisher;
     private DoublePublisher positionControlPositionPublisher;
     private DoublePublisher closedLoopReferencePublisher;
+    private DoublePublisher gurtMotorPos1;
 
-
+    private NetworkTableEntry motorNewPos;
+    private double gurtMotorPos = 0.0;
     // Phoenix 6 Status Signals
     private StatusSignal<Angle> positionSignal;
     private StatusSignal<Voltage> appliedVoltsSignal;
@@ -95,6 +102,7 @@ public class SteerMotor {
 
         // Initialize NetworkTables
         initNT(motorCAN);
+
 
         // Initialize logs
         // initLogs(motorCAN);
@@ -202,6 +210,8 @@ public class SteerMotor {
     private void initNT(int canId) {
         ntInstance = NetworkTableInstance.getDefault();
         steerStatsTable = ntInstance.getTable("SwerveSteer");
+        motorNewPos = steerStatsTable.getEntry(canId + "motorPosThing");
+
         encoderPositionPublisher = steerStatsTable.getDoubleTopic(canId + "encoderPosition").publish();
         motorPositionPublisher = steerStatsTable.getDoubleTopic(canId + "motorPosition").publish();
         targetPositionPublisher = steerStatsTable.getDoubleTopic(canId + "targetPosition").publish();
@@ -212,8 +222,12 @@ public class SteerMotor {
         positionErrorPublisher = steerStatsTable.getDoubleTopic(canId + "positionError").publish();
         rotationPublisher = steerStatsTable.getDoubleTopic(canId + "targetMotorRotationPosition").publish();
         closedLoopReferencePublisher = steerStatsTable.getDoubleTopic(canId + "targetMotorRotationPosition").publish();
-
+        gurtMotorPos1 = steerStatsTable.getDoubleTopic(canId + "motorPosThing").publish();
+        gurtMotorPos1.set(0.0);
         positionControlPositionPublisher = steerStatsTable.getDoubleTopic(canId + "positionControlPosition").publish();
+        steerStatsTable.addListener( canId + "motorPosThing", EnumSet.of(NetworkTableEvent.Kind.kValueAll), (table, key, event) ->{
+            gurtMotorPos = event.valueData.value.getDouble();
+        });
 
     }
 
@@ -224,7 +238,7 @@ public class SteerMotor {
         targetPositionPublisher.set(motor.getRotorPosition().getValueAsDouble()); // Just show current position for now
         rotationPublisher.set(motor.getPosition().getValueAsDouble()); // get position
         closedLoopReferencePublisher.set(motor.getClosedLoopReference().getValueAsDouble()); // TODO: Calculate actual position error
-
+        
         motorTemperaturePublisher.set(getTemperature());
         appliedVoltsPublisher.set(appliedVoltsSignal.getValueAsDouble());
         supplyCurrentPublisher.set(supplyCurrentSignal.getValueAsDouble());
@@ -362,11 +376,10 @@ public class SteerMotor {
     public void setPosition(double targetRads) {
 
         double currentRads = getCurrentPositionRads(); 
-
-        double deltaRads = fasterTurnDirection(currentRads, targetRads);
-        double newTargetRads = currentRads + deltaRads;
+        // double deltaRads = fasterTurnDirection(currentRads, targetRads);
+        double newTargetRads = currentRads; //+ deltaRads;
         double rotorRotations = (newTargetRads / (2.0 * Math.PI));
-        positionRequest.withPosition(rotorRotations).withSlot(0);
+        positionRequest.withPosition(gurtMotorPos).withSlot(0);
         motor.setControl(positionRequest);
         publishStats();
     }

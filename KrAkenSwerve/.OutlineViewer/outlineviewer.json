@@ -1,0 +1,23 @@
+{
+  "Connections": {
+    "open": true
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT4)",
+    "serverTeam": "10.1.92.2"
+  },
+  "Server": {
+    "Subscribers": {
+      "open": true
+    },
+    "open": true
+  },
+  "transitory": {
+    "SwerveStats": {
+      "open": true
+    },
+    "SwerveSteer": {
+      "open": true
+    }
+  }
+}

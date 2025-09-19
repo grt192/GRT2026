@@ -80,7 +80,7 @@ public class SwerveSubsystem extends SubsystemBase {
             new Pose2d()
             );
 
-        buildAuton(); 
+        // buildAuton(); 
         initNT();
 
         if(DRIVE_DEBUG) {
