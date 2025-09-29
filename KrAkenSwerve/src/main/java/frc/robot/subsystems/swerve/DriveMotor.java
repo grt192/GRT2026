@@ -162,7 +162,9 @@ public class DriveMotor {
     public void setVelocity(double metersPerSec){
 
         targetRotationsPerSec = metersPerSec / DRIVE_WHEEL_CIRCUMFERENCE * DRIVE_GEAR_REDUCTION; //turns meters per sec into wheel rotation per sec
+        //disabled set velocity for noise reduction
         motor.setControl(torqueCurrentFOC.withVelocity(targetRotationsPerSec)); //apply this constant speed 
+        
     }
 
     /**

@@ -21,6 +21,12 @@
     },
     "SwerveSteer": {
       "open": true
+    },
+    "steerDebug": {
+      "double[]##v_/steerDebug/3PIDF": {
+        "open": true
+      },
+      "open": true
     }
   }
 }

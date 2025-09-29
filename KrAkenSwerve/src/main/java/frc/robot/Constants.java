@@ -55,10 +55,10 @@ public final class Constants {
     public static final double[] DRIVE_V = new double[] {0.0, 0.0, 0.0, 0.0}; 
 
     // Swerve Steer PID values
-    public static final double[] STEER_P = new double[] {5.62, 5.5, 5.45, 5.54};
-    public static final double[] STEER_I = new double[] {0, 0, 0, 0};
-    public static final double[] STEER_D = new double[] {0, 0, 0, 0};
-    public static final double[] STEER_FF = new double[] {0.023,.02,0.025,0.03}; 
+    public static final double[] STEER_P = new double[] {5.62, 4, 5.45, 5.54};
+    public static final double[] STEER_I = new double[] {0, 0, 0.1, 0};
+    public static final double[] STEER_D = new double[] {0, 0, 0.1, 0};
+    public static final double[] STEER_FF = new double[] {0.023,12,0.025,0.03}; 
 
     // Front Left Module
     public static final int    FL_DRIVE   = 0;

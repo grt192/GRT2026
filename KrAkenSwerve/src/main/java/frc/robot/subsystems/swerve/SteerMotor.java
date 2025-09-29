@@ -9,6 +9,8 @@ import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -44,6 +46,7 @@ public class SteerMotor {
 
     // Configuration for Kraken stored in one Object
     private final TalonFXConfiguration motorConfig = new TalonFXConfiguration();
+    private final TalonFXConfiguration simplePIDConfig = new TalonFXConfiguration();
 
     // Cancoder Creation
     private CANcoder cancoder;
@@ -52,8 +55,12 @@ public class SteerMotor {
     private final  CANcoderConfiguration cancoderconfig = new CANcoderConfiguration();
 
     // For fine control of velocity and torque using FOC (Field-Oriented Control)
-    private PositionTorqueCurrentFOC positionRequest = new PositionTorqueCurrentFOC(0).withSlot(0);
-
+    private PositionTorqueCurrentFOC positionRequest = new PositionTorqueCurrentFOC(0)
+                .withSlot(0)
+                .withFeedForward(0)
+                .withUpdateFreqHz(100.0);
+    private PositionVoltage positionVoltageRequest = new PositionVoltage(0.0)
+                .withSlot(0);
     // For making positions wrap from 0-1 and resetting to not stack
     private final ClosedLoopGeneralConfigs closedLoopGeneralConfigs = new ClosedLoopGeneralConfigs();
 
@@ -84,6 +91,7 @@ public class SteerMotor {
 
     private NetworkTableEntry motorNewPos;
     private double gurtMotorPos = 0.0;
+    private int gurtMotorCanID;
     // Phoenix 6 Status Signals
     private StatusSignal<Angle> positionSignal;
     private StatusSignal<Voltage> appliedVoltsSignal;
@@ -95,7 +103,7 @@ public class SteerMotor {
         // Set motor and encoder
         motor = new TalonFX(motorCAN, "can");
         cancoder = new CANcoder(encoderCAN, "can");
-
+        gurtMotorCanID = motorCAN;
         // Configure CANcoder and Kraken
         configureCancoder(); // called to ensure settings are applied programmatically
         configureMotor();
@@ -159,11 +167,18 @@ public class SteerMotor {
         // Enable position wrapping (by default values are from 0-1)
         closedLoopGeneralConfigs.ContinuousWrap = true; //basicaly turns stacking off
         motorConfig.ClosedLoopGeneral = closedLoopGeneralConfigs;
-
+        
+        simplePIDConfig.Slot0.kP = 0.01;
+        simplePIDConfig.Slot0.kI = 0;
+        simplePIDConfig.Slot0.kD = 0;
+        // simplePIDConfig.ClosedLoopGeneral.ContinuousWrap = true;
         // Apply motor config with retries (max 5 attempts)
         for (int i = 0; i < 5; i++) {
-            if (motor.getConfigurator().apply(motorConfig, 0.1) == StatusCode.OK) {
+            if (motor.getConfigurator().apply(simplePIDConfig, 0.1) == StatusCode.OK) {
                 break; // Success
+            }
+            if (i == 4){
+                System.out.println("VERY BAD MOTOR DID NOT GET CONFIGURED");
             }
         }
         
@@ -235,7 +250,7 @@ public class SteerMotor {
         motorPositionPublisher.set(getPosition());
   
         encoderPositionPublisher.set(cancoder.getPosition().getValueAsDouble());
-        targetPositionPublisher.set(motor.getRotorPosition().getValueAsDouble()); // Just show current position for now
+        targetPositionPublisher.set(rotorRotations); // Just show current position for now
         rotationPublisher.set(motor.getPosition().getValueAsDouble()); // get position
         closedLoopReferencePublisher.set(motor.getClosedLoopReference().getValueAsDouble()); // TODO: Calculate actual position error
         
@@ -261,6 +276,7 @@ public class SteerMotor {
         return cancoder.getAbsolutePosition().getValueAsDouble();// 0..1 rotations, absolute
     }
 
+    
     /**
      * Configures drive motor's PIDSV
      * @param p :Determines how much the config will react to the error
@@ -345,11 +361,14 @@ public class SteerMotor {
     * @return the current position in radians
     */
     private double getCurrentPositionRads() {
+        
         return getPosition() * 2.0 * Math.PI; // Convert from 0..1 rotations to radians
     }
 
     
-    public double fasterTurnDirection(double current, double target) {
+    public double fasterTurnDirection(double current, double target) {  
+        current = current / (Math.PI * 2)*360;
+        target = target / (Math.PI * 2)*360;
 
         // Normalize the angles between 0 and 360
         current = ((current % 360) + 360) % 360;
@@ -361,9 +380,9 @@ public class SteerMotor {
 
         // Determine the faster direction
         if (clockwise <= counterClockwise) {
-            return clockwise; // turn clockwise
+            return clockwise*Math.PI*2/360; // turn clockwise
         } else {
-            return -counterClockwise; // turn counterclockwise
+            return -counterClockwise*Math.PI*2/360; // turn counterclockwise
         }
     }
 
@@ -375,11 +394,17 @@ public class SteerMotor {
     double rotorRotations;
     public void setPosition(double targetRads) {
 
-        double currentRads = getCurrentPositionRads(); 
+        // double currentRads = getCurrentPositionRads(); 
         // double deltaRads = fasterTurnDirection(currentRads, targetRads);
-        double newTargetRads = currentRads; //+ deltaRads;
-        double rotorRotations = (newTargetRads / (2.0 * Math.PI));
-        positionRequest.withPosition(gurtMotorPos).withSlot(0);
+        // double newTargetRads = currentRads + deltaRads;
+        rotorRotations = (targetRads / (2.0 * Math.PI)*gurtMotorPos);
+        
+
+
+        if (gurtMotorCanID == 1){
+            System.out.println(gurtMotorPos);
+        }
+        positionRequest.withPosition(rotorRotations);
         motor.setControl(positionRequest);
         publishStats();
     }
