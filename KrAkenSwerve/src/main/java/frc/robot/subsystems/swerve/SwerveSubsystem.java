@@ -38,7 +38,7 @@ public class SwerveSubsystem extends SubsystemBase {
         new SwerveModuleState(),
         new SwerveModuleState()
     };
-
+    SwerveModuleState testState = new SwerveModuleState();
     private Pose2d estimatedPose;
     private final SwerveDriveKinematics kinematics;
     private final SwerveDrivePoseEstimator poseEstimator;
@@ -129,7 +129,7 @@ public class SwerveSubsystem extends SubsystemBase {
             backLeftModule.setDesiredState(states[2]);
             backRightModule.setDesiredState(states[3]);
         }
-
+        
         //logging
         // estimatedPoseLogEntry.append(estimatedPose, GRTUtil.getFPGATime()); 
         publishStats();
@@ -156,6 +156,7 @@ public class SwerveSubsystem extends SubsystemBase {
             states, speeds,
             MAX_VEL, MAX_VEL, MAX_OMEGA
         );
+        
     }
 
         /** Executes swerve X locking, putting swerve's wheels into an X configuration to prevent motion.

@@ -77,6 +77,7 @@ public class RobotContainer {
             driveController.getLeftPower(),
             driveController.getRotatePower()
           );
+          driveController.getRotatePower();
           }, swerveSubsystem)
     );
 

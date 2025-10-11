@@ -21,7 +21,7 @@ import static frc.robot.Constants.SwerveConstants.STEER_P;
 public class KrakenSwerveModule {
 
     private final DriveMotor driveMotor;
-    private final SteerMotor steerMotor;
+    private final SteerMotor2 steerMotor;
 
     private int drivePort;
     private int steerPort;
@@ -46,13 +46,21 @@ public class KrakenSwerveModule {
         driveIndex = drivePort / 2;
         steerIndex = (steerPort -1) / 2;
 
-        steerMotor = new SteerMotor(steerPort, canCoderPort);
+        // steerMotor = new SteerMotor(steerPort, canCoderPort);
+        // steerMotor.configPID(
+        //     STEER_P[steerIndex],
+        //     STEER_I[steerIndex],
+        //     STEER_D[steerIndex],
+        //     STEER_FF[steerIndex]
+        // );
+        steerMotor = new SteerMotor2(steerPort, canCoderPort);
         steerMotor.configPID(
             STEER_P[steerIndex],
             STEER_I[steerIndex],
             STEER_D[steerIndex],
             STEER_FF[steerIndex]
         );
+
 
         driveMotor = new DriveMotor(drivePort);
         driveMotor.configPID(
@@ -75,7 +83,7 @@ public class KrakenSwerveModule {
         state.optimize(currentAngle);
 
 
-
+        
         double targetAngleRads = state.angle.getRadians() - offsetRads;
         double angleErrorRads  = state.angle.minus(currentAngle).getRadians();
         double targetVelocity  = state.speedMetersPerSecond * Math.cos(angleErrorRads);
@@ -89,10 +97,10 @@ public class KrakenSwerveModule {
      *
      * @param state The desired SwerveModuleState
      */
-    public void setOptomizedDesiredState(SwerveModuleState state) {
-        driveMotor.setVelocity(state.speedMetersPerSecond);
-        steerMotor.setPosition(state.angle.getRadians()); 
-    }
+    // public void setOptomizedDesiredState(SwerveModuleState state) {
+    //     driveMotor.setVelocity(state.speedMetersPerSecond);
+    //     steerMotor.setPosition(state.angle.getRadians()); 
+    // }
 
     /** Gets the current state of the swerve module.
      *
@@ -202,7 +210,7 @@ public class KrakenSwerveModule {
      * Publishes steer motor statistics to NetworkTables
      */
     public void publishSteerStats() {
-        steerMotor.publishStats();
+        // steerMotor.publishStats();
     }
 
     /**

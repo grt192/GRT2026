@@ -168,10 +168,19 @@ public class SteerMotor {
         closedLoopGeneralConfigs.ContinuousWrap = true; //basicaly turns stacking off
         motorConfig.ClosedLoopGeneral = closedLoopGeneralConfigs;
         
-        simplePIDConfig.Slot0.kP = 0.01;
-        simplePIDConfig.Slot0.kI = 0;
+        simplePIDConfig.Slot0.kP = 3;
+        simplePIDConfig.Slot0.kI = 0.1;
         simplePIDConfig.Slot0.kD = 0;
-        // simplePIDConfig.ClosedLoopGeneral.ContinuousWrap = true;
+        if (gurtMotorCanID == 1){
+            simplePIDConfig.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID();
+            simplePIDConfig.Feedback.FeedbackSensorSource   = FeedbackSensorSourceValue.RemoteCANcoder;
+
+            simplePIDConfig.Feedback.SensorToMechanismRatio = 1.0;
+            simplePIDConfig.Feedback.RotorToSensorRatio = STEER_GEAR_REDUCTION;
+            // simplePIDConfig.ClosedLoopGeneral.ContinuousWrap = true;
+
+        }
+
         // Apply motor config with retries (max 5 attempts)
         for (int i = 0; i < 5; i++) {
             if (motor.getConfigurator().apply(simplePIDConfig, 0.1) == StatusCode.OK) {
@@ -336,7 +345,7 @@ public class SteerMotor {
         * Feedforward makes the motor control smoother, faster, and prevents the controller from working too hard correcting errors later.
         */
         slot0Configs.kV = ff;
-
+        
         motor.getConfigurator().apply(slot0Configs);
     }
 
@@ -399,11 +408,8 @@ public class SteerMotor {
         // double newTargetRads = currentRads + deltaRads;
         rotorRotations = (targetRads / (2.0 * Math.PI)*gurtMotorPos);
         
+        
 
-
-        if (gurtMotorCanID == 1){
-            System.out.println(gurtMotorPos);
-        }
         positionRequest.withPosition(rotorRotations);
         motor.setControl(positionRequest);
         publishStats();

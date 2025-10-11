@@ -6,13 +6,13 @@
     "mode": "Client (NT4)",
     "serverTeam": "10.1.92.2"
   },
-  "Persistent Values": {
-    "open": false
-  },
   "Retained Values": {
     "open": false
   },
   "Server": {
+    "Subscribers": {
+      "open": true
+    },
     "open": true
   },
   "transitory": {
@@ -23,7 +23,16 @@
       "open": true
     },
     "steerDebug": {
+      "double[]##v_/steerDebug/1PIDF": {
+        "open": true
+      },
       "double[]##v_/steerDebug/3PIDF": {
+        "open": true
+      },
+      "double[]##v_/steerDebug/5PIDF": {
+        "open": true
+      },
+      "double[]##v_/steerDebug/7PIDF": {
         "open": true
       },
       "open": true

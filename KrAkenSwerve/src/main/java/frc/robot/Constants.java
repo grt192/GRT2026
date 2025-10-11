@@ -55,10 +55,10 @@ public final class Constants {
     public static final double[] DRIVE_V = new double[] {0.0, 0.0, 0.0, 0.0}; 
 
     // Swerve Steer PID values
-    public static final double[] STEER_P = new double[] {5.62, 4, 5.45, 5.54};
-    public static final double[] STEER_I = new double[] {0, 0, 0.1, 0};
-    public static final double[] STEER_D = new double[] {0, 0, 0.1, 0};
-    public static final double[] STEER_FF = new double[] {0.023,12,0.025,0.03}; 
+    public static final double[] STEER_P = new double[] {50, 50, 50, 50};
+    public static final double[] STEER_I = new double[] {1, 1, 1, 1};
+    public static final double[] STEER_D = new double[] {1, 1, 1, 1};
+    public static final double[] STEER_FF = new double[] {2,2,2,2}; 
 
     // Front Left Module
     public static final int    FL_DRIVE   = 0;
@@ -69,19 +69,19 @@ public final class Constants {
     // Front Right Module
     public static final int    FR_DRIVE   = 2;
     public static final int    FR_STEER   = 3;
-    public static final int    FR_ENCODER = 9;
+    public static final int    FR_ENCODER = 11;
     public static final double FR_OFFSET  = 0;
 
     // Back Left Module
-    public static final int    BL_DRIVE   = 4;
-    public static final int    BL_STEER   = 5;
+    public static final int    BL_DRIVE   = 6;
+    public static final int    BL_STEER   = 7;
     public static final int    BL_ENCODER = 10;
     public static final double BL_OFFSET  = 0;
 
     // Back Right Module
-    public static final int    BR_DRIVE   = 6;
-    public static final int    BR_STEER   = 7;
-    public static final int    BR_ENCODER = 11;
+    public static final int    BR_DRIVE   = 4;
+    public static final int    BR_STEER   = 5;
+    public static final int    BR_ENCODER = 9;
     public static final double BR_OFFSET  = 0;
 
     // Module distance from center (in meters)
