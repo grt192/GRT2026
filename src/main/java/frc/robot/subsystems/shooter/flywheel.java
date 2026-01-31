@@ -29,7 +29,7 @@ public class flywheel extends SubsystemBase {
 
     public void config(){
         TalonFXConfiguration cfg = new TalonFXConfiguration();
-        //cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         FeedbackConfigs b = new FeedbackConfigs();
         b.SensorToMechanismRatio = 3;
@@ -37,6 +37,10 @@ public class flywheel extends SubsystemBase {
         cfg.withCurrentLimits(currLim);
         upperMotor.getConfigurator().apply(cfg);
         upperMotor.getConfigurator().apply(b);
+    }
+
+    public void setVelocity(double vel){
+        velocity = vel;
     }
 
     public void shoot(){

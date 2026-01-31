@@ -87,7 +87,7 @@ public class RobotContainer {
     shootn.whileTrue(new RunCommand(() -> wheel.dontShoot(), wheel));
 
     hooded.setDefaultCommand(
-      new hoodCommand(hooded);
+      new hoodCommand(hooded, wheel);
     );
     
     
