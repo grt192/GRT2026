@@ -12,11 +12,13 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 
 public class flywheel extends SubsystemBase {
 
     private final TalonFX upperMotor;
-    private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
+    private VelocityVoltage spinner = new VelocityVoltage(0);
+    private double velocity = 0;
 
     public flywheel(CANBus cn) {
         // Construct motors directly on the CAN bus
@@ -37,7 +39,13 @@ public class flywheel extends SubsystemBase {
         upperMotor.getConfigurator().apply(b);
     }
 
-    public void flySpeed(double speed){
-        upperMotor.setControl(dutyCycl.withOutput(speed));
+    public void shoot(){
+        spinner.Velocity = velocity;
+        upperMotor.setControl(new VelocityVoltage(spinner.Velocity));
+    }
+
+    public void dontShoot(){
+        spinner.Velocity = 0;
+        upperMotor.setControl(new VelocityVoltage(spinner.Velocity));
     }
 }

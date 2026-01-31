@@ -7,6 +7,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -20,6 +21,7 @@ public class hood extends SubsystemBase {
     private final TalonFX hoodMotor;
     private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
     private CANdi limit;
+    private PositionTorqueCurrentFOC focThing;
 
     public hood(CANBus cn) {
         // Construct motors directly on the CAN bus
@@ -43,35 +45,8 @@ public class hood extends SubsystemBase {
         hoodMotor.getConfigurator().apply(b);
     }
 
-    public void hoodSpeed(double speed){
-        
-        if(hoodMotor.getPosition().getValueAsDouble() >= railgunConstants.initHoodAngle && speed >0){
-            hoodMotor.setControl(dutyCycl.withOutput(0));
-        }else if(hoodMotor.getPosition().getValueAsDouble() <= railgunConstants.lowerAngle && speed <0){
-            hoodMotor.setControl(dutyCycl.withOutput(0));
-        }else{
-            hoodMotor.setControl(dutyCycl.withOutput(speed));
-        }
-        
+    public void setHoodAngle(double rotationAngle){
+        hoodMotor.setControl(focThing.withPosition(rotationAngle));
     }
 
-    boolean prevPress = false;
-    @Override
-    public void periodic(){
-        if(limit.getS1Closed().refresh().getValue() && !prevPress){
-            hoodMotor.setPosition(railgunConstants.initHoodAngle);
-            prevPress = true;
-        }
-        
-        if(!limit.getS1Closed().refresh().getValue()){
-            prevPress = false;
-        }
-
-        System.out.println(hoodMotor.getPosition().toString());
-        SmartDashboard.putNumber("Position", hoodMotor.getPosition().getValueAsDouble());
-        double pivotPosition = hoodMotor.getPosition().getValueAsDouble();
-        Logger.recordOutput("Pivot_Position", pivotPosition);
-        SmartDashboard.putNumber("Speed", hoodMotor.getVelocity().getValueAsDouble());
-            
-    }
 }

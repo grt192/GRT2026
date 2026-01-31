@@ -8,6 +8,7 @@ package frc.robot;
 import frc.robot.controllers.PS5DriveController;
 import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.subsystems.shooter.hood;
+import frc.robot.commands.shooter.hood.hoodCommand;
 // Subsystems
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 
@@ -79,26 +80,17 @@ public class RobotContainer {
       )
     );
     */
-    Trigger dpadUp = new Trigger(() -> gamer.getHID().getPOV() == 0);
-    Trigger dpadDown = new Trigger(() -> gamer.getHID().getPOV() == 180);
-    Trigger dpadNeutral = new Trigger(() -> {
-      int pov = gamer.getHID().getPOV();
-      return pov != 0 && pov != 180;
-    });
-  
-    
-    wheel.setDefaultCommand(
-      new RunCommand(
-          () -> {
-            double r2 = gamer.getR2Axis();
-            wheel.flySpeed((r2+1)/2);
-          },
-          wheel));
-    
+    Trigger shooty = new Trigger(() -> gamer.getR2Axis() != 0);
+    Trigger shootn = new Trigger(() -> gamer.getR2Axis() == 0);
 
-    dpadUp.whileTrue(new RunCommand(() -> hooded.hoodSpeed(0.05), hooded));
-    dpadDown.whileTrue(new RunCommand(() -> hooded.hoodSpeed(-0.05), hooded));
-    dpadNeutral.onTrue(new RunCommand(() -> hooded.hoodSpeed(0.0), hooded));
+    shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
+    shootn.whileTrue(new RunCommand(() -> wheel.dontShoot(), wheel));
+
+    hooded.setDefaultCommand(
+      new hoodCommand(hooded);
+    );
+    
+    
           
    
 
