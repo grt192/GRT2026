@@ -52,4 +52,8 @@ public class flywheel extends SubsystemBase {
         spinner.Velocity = 0;
         upperMotor.setControl(new VelocityVoltage(spinner.Velocity));
     }
+
+    public void flySpeed(double speed){
+        upperMotor.setControl(dutyCycl.withOutput(speed));
+    }
 }
