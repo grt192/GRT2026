@@ -100,23 +100,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
     private final PIDController ROTATION_PID = new PIDController(4.0, 0.0, 0.2);
 
-    public void facePose() {
-        Pose2d currentPose = getRobotPosition();
-
-        double dx = railgunConstants.hubPos.getX() - currentPose.getX();
-        double dy = railgunConstants.hubPos.getY() - currentPose.getY();
-
-        Rotation2d targetHeading = new Rotation2d(Math.atan2(dy, dx));
-
-        Rotation2d headingError =
-            targetHeading.minus(currentPose.getRotation());
-
-        double omega =
-            ROTATION_PID.calculate(headingError.getRadians(), 0.0);
-
-        setDrivePowers(0.0, 0.0, omega);
-    }
-
     @Override
     public void periodic() {
         //update the poseestimator with curent gyro reading      

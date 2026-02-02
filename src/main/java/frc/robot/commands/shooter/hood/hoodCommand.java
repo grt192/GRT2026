@@ -2,11 +2,11 @@ package frc.robot.commands.shooter.hood;
 
 import frc.robot.subsystems.shooter.hood;
 import frc.robot.subsystems.shooter.flywheel;
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.shooter.kinemat;
 import com.ctre.phoenix6.CANBus;
 
-public class hoodCommand extends CommandBase{
+public class hoodCommand extends Command{
 
     private hood hd;
     private flywheel fly;
@@ -27,5 +27,9 @@ public class hoodCommand extends CommandBase{
         hd.setHoodAngle(angle);
     }
 
-    
+    public void end(){
+        fly.setVelocity(0);
+        fly.flySpeed(0);
+    }
+ 
 }

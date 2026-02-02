@@ -18,6 +18,7 @@ public class flywheel extends SubsystemBase {
 
     private final TalonFX upperMotor;
     private VelocityVoltage spinner = new VelocityVoltage(0);
+    private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
     private double velocity = 0;
 
     public flywheel(CANBus cn) {
@@ -29,14 +30,22 @@ public class flywheel extends SubsystemBase {
 
     public void config(){
         TalonFXConfiguration cfg = new TalonFXConfiguration();
+        cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-        FeedbackConfigs b = new FeedbackConfigs();
-        b.SensorToMechanismRatio = 3;
-        CurrentLimitsConfigs currLim = new CurrentLimitsConfigs().withStatorCurrentLimit(40.0).withStatorCurrentLimitEnable(true);
+        CurrentLimitsConfigs currLim = new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(50.0)
+            .withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(40)
+            .withSupplyCurrentLimitEnable(true);;
         cfg.withCurrentLimits(currLim);
+        cfg.Feedback.SensorToMechanismRatio = railgunConstants.gearRatioUpper;
+
+        cfg.Slot0.kP = 2;
+        cfg.Slot0.kI = 0.0;
+        cfg.Slot0.kD = 0.0;
+        cfg.Slot0.kG = 1.0;
+
         upperMotor.getConfigurator().apply(cfg);
-        upperMotor.getConfigurator().apply(b);
     }
 
     public void setVelocity(double vel){

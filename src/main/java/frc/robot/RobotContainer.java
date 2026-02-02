@@ -87,7 +87,7 @@ public class RobotContainer {
 
     shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
     shootn.whileTrue(new RunCommand(() -> wheel.dontShoot(), wheel));
-    hoodAuto.onTrue(new hoodCommand(hooded, wheel);
+    hoodAuto.onTrue(new hoodCommand(hooded, wheel));
 
     Trigger shootManual = new Trigger(() -> manualMode);
     Trigger dpadUp = new Trigger(() -> gamer.getHID().getPOV() == 0 && manualMode);
@@ -97,7 +97,6 @@ public class RobotContainer {
       return (pov != 0 && pov != 180) && manualMode;
     });
 
-    shootManual.onTrue(wheel.flySpeed(0));
     shootManual.whileTrue(
       new RunCommand(
           () -> {
@@ -110,12 +109,7 @@ public class RobotContainer {
     dpadDown.whileTrue(new RunCommand(() -> hooded.hoodSpeed(-0.05), hooded));
     dpadNeutral.onTrue(new RunCommand(() -> hooded.hoodSpeed(0.0), hooded));
 
-    
-    
-          
-   
 
-      
     /*driveController.getRelativeMode().whileTrue(
       new RunCommand(
         () -> {

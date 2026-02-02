@@ -1,6 +1,5 @@
 package frc.robot.subsystems.shooter;
 
-
 import frc.robot.Constants.railgunConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -21,7 +20,7 @@ public class hood extends SubsystemBase {
     private final TalonFX hoodMotor;
     private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
     private CANdi limit;
-    private PositionTorqueCurrentFOC focThing;
+    private PositionTorqueCurrentFOC focThing = new PositionTorqueCurrentFOC(0);
 
     public hood(CANBus cn) {
         // Construct motors directly on the CAN bus
@@ -37,16 +36,30 @@ public class hood extends SubsystemBase {
         TalonFXConfiguration cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        FeedbackConfigs b = new FeedbackConfigs();
-        b.SensorToMechanismRatio = 12;
-        CurrentLimitsConfigs currLim = new CurrentLimitsConfigs().withStatorCurrentLimit(50.0).withStatorCurrentLimitEnable(true);
+        CurrentLimitsConfigs currLim = new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(50.0)
+            .withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(40)
+            .withSupplyCurrentLimitEnable(true);;
         cfg.withCurrentLimits(currLim);
+        cfg.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = railgunConstants.upperAngle;
+        cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = railgunConstants.lowerAngle;
+        cfg.Feedback.SensorToMechanismRatio = railgunConstants.gearRatioHood;
+
+        cfg.Slot0.kP = 2;
+        cfg.Slot0.kI = 0.0;
+        cfg.Slot0.kD = 0.0;
+        cfg.Slot0.kG = 1.0;
+
         hoodMotor.getConfigurator().apply(cfg);
-        hoodMotor.getConfigurator().apply(b);
     }
 
     public void setHoodAngle(double rotationAngle){
-        hoodMotor.setControl(focThing.withPosition(rotationAngle));
+        if(rotationAngle >= railgunConstants.lowerAngle && rotationAngle <= railgunConstants.upperAngle){
+            hoodMotor.setControl(focThing.withPosition(rotationAngle));
+        }
     }
 
     public void hoodSpeed(double speed){
