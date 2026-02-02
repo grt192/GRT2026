@@ -41,6 +41,7 @@ public class RobotContainer {
   private flywheel wheel = new flywheel(c);
   private hood hooded = new hood(c);
   private CommandPS5Controller gamer = new CommandPS5Controller(1);
+  boolean manualMode = false;
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -80,8 +81,8 @@ public class RobotContainer {
       )
     );
     */
-    Trigger shooty = new Trigger(() -> gamer.getR2Axis() != 0);
-    Trigger shootn = new Trigger(() -> gamer.getR2Axis() == 0);
+    Trigger shooty = new Trigger(() -> gamer.getR2Axis() != 0 && !manualMode);
+    Trigger shootn = new Trigger(() -> gamer.getR2Axis() == 0 && !manualMode);
 
     shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
     shootn.whileTrue(new RunCommand(() -> wheel.dontShoot(), wheel));
