@@ -15,6 +15,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
 // WPILib imports
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -86,8 +87,8 @@ public class RobotContainer {
     Trigger hoodAuto = new Trigger(() -> !manualMode);
 
     shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
-    shootn.whileTrue(new RunCommand(() -> wheel.dontShoot(), wheel));
-    hoodAuto.onTrue(new hoodCommand(hooded, wheel));
+    shootn.onTrue(new InstantCommand(() -> wheel.dontShoot(), wheel));
+    hoodAuto.whileTrue(new hoodCommand(hooded, wheel));
 
     Trigger shootManual = new Trigger(() -> manualMode);
     Trigger dpadUp = new Trigger(() -> gamer.getHID().getPOV() == 0 && manualMode);
@@ -107,7 +108,15 @@ public class RobotContainer {
     
     dpadUp.whileTrue(new RunCommand(() -> hooded.hoodSpeed(0.05), hooded));
     dpadDown.whileTrue(new RunCommand(() -> hooded.hoodSpeed(-0.05), hooded));
-    dpadNeutral.onTrue(new RunCommand(() -> hooded.hoodSpeed(0.0), hooded));
+    dpadNeutral.onTrue(new InstantCommand(() -> hooded.hoodSpeed(0.0), hooded));
+
+    new Trigger(() -> manualMode).onTrue(
+      new InstantCommand(() -> { wheel.dontShoot(); hooded.hoodSpeed(0.0); }, wheel, hooded)
+    );
+
+    new Trigger(() -> !manualMode).onTrue(
+      new InstantCommand(() -> { wheel.dontShoot(); hooded.hoodSpeed(0.0); }, wheel, hooded)
+    );
 
 
     /*driveController.getRelativeMode().whileTrue(

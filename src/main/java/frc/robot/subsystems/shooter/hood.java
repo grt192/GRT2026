@@ -64,7 +64,7 @@ public class hood extends SubsystemBase {
 
     public void hoodSpeed(double speed){
         
-        if(hoodMotor.getPosition().getValueAsDouble() >= railgunConstants.initHoodAngle && speed >0){
+        if(hoodMotor.getPosition().getValueAsDouble() >= railgunConstants.upperAngle && speed >0){
             hoodMotor.setControl(dutyCycl.withOutput(0));
         }else if(hoodMotor.getPosition().getValueAsDouble() <= railgunConstants.lowerAngle && speed <0){
             hoodMotor.setControl(dutyCycl.withOutput(0));
