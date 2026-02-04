@@ -122,7 +122,7 @@ public class flywheel extends SubsystemBase {
             upperMotor.getSupplyCurrent().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "TemperatureC",
-            upperMotor.getMotorTemperature().getValueAsDouble());
+            upperMotor.getDeviceTemp().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "CommandedDutyCycle",
             commandedDutyCycle);
