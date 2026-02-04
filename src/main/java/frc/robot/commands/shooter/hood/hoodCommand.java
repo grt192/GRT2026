@@ -5,6 +5,7 @@ import frc.robot.subsystems.shooter.flywheel;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.shooter.kinemat;
 import com.ctre.phoenix6.CANBus;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class hoodCommand extends Command{
 
@@ -21,6 +22,8 @@ public class hoodCommand extends Command{
 
     @Override
     public void execute() {
+        SmartDashboard.putNumber("Pos", distance);
+        distance = SmartDashboard.getNumber("Pos", distance);
         angle = kinemat.calculateAngle(distance);
         velocity = kinemat.calculateVel(angle);
         fly.setVelocity(velocity);

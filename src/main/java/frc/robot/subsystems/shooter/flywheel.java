@@ -21,6 +21,12 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import org.littletonrobotics.junction.Logger;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
+import edu.wpi.first.units.measure.Voltage;
 
 public class flywheel extends SubsystemBase {
 
@@ -29,6 +35,9 @@ public class flywheel extends SubsystemBase {
     private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
     private double velocity = 0;
     private final CANcoder flywheelCoder;
+
+    private double commandedDutyCycle = 0.0;
+    private static final String LOG_PREFIX = "FlyWheel/";
 
     public flywheel(CANBus cn) {
         // Construct motors directly on the CAN bus
@@ -70,6 +79,7 @@ public class flywheel extends SubsystemBase {
     }
 
     public void setVelocity(double vel){
+        commandedDutyCycle = vel;
         velocity = vel;
     }
 
@@ -83,6 +93,42 @@ public class flywheel extends SubsystemBase {
     }
 
     public void flySpeed(double speed){
+        commandedDutyCycle = speed;
         upperMotor.setControl(dutyCycl.withOutput(speed));
     }
+
+    @Override
+    public void periodic(){
+        SmartDashboard.putNumber("spinVel", velocity);
+    }
+
+    public void sendData(){
+        Logger.recordOutput(LOG_PREFIX + "PositionRotations",
+            upperMotor.getPosition().getValueAsDouble());
+
+        Logger.recordOutput(LOG_PREFIX + "VelocityRPS",
+            upperMotor.getVelocity().getValueAsDouble());
+
+        Logger.recordOutput(LOG_PREFIX + "AppliedVolts",
+            upperMotor.getMotorVoltage().getValueAsDouble());
+
+        Logger.recordOutput(LOG_PREFIX + "SupplyVoltage",
+            upperMotor.getSupplyVoltage().getValueAsDouble());
+
+        Logger.recordOutput(LOG_PREFIX + "StatorCurrentAmps",
+            upperMotor.getStatorCurrent().getValueAsDouble());
+
+        Logger.recordOutput(LOG_PREFIX + "SupplyCurrentAmps",
+            upperMotor.getSupplyCurrent().getValueAsDouble());
+
+        Logger.recordOutput(LOG_PREFIX + "TemperatureC",
+            upperMotor.getMotorTemperature().getValueAsDouble());
+
+        Logger.recordOutput(LOG_PREFIX + "CommandedDutyCycle",
+            commandedDutyCycle);
+
+        Logger.recordOutput(LOG_PREFIX + "Connected",
+            upperMotor.isConnected());
+    }
+
 }

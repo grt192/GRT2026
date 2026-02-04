@@ -42,7 +42,7 @@ public class RobotContainer {
   private flywheel wheel = new flywheel(c);
   private hood hooded = new hood(c);
   private CommandPS5Controller gamer = new CommandPS5Controller(1);
-  boolean manualMode = false;
+  boolean manualMode = true;
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
