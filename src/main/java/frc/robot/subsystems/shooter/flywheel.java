@@ -44,12 +44,6 @@ public class flywheel extends SubsystemBase {
         TalonFXConfiguration cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        CurrentLimitsConfigs currLim = new CurrentLimitsConfigs()
-            .withStatorCurrentLimit(50.0)
-            .withStatorCurrentLimitEnable(true)
-            .withSupplyCurrentLimit(40)
-            .withSupplyCurrentLimitEnable(true);;
-        cfg.withCurrentLimits(currLim);
         cfg.Feedback.SensorToMechanismRatio = 1;
 
         cfg.Slot0.kP = 2;
