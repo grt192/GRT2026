@@ -24,12 +24,11 @@ import org.littletonrobotics.junction.Logger;
 public class flywheel extends SubsystemBase {
 
     private final TalonFX upperMotor;
-    private VelocityVoltage spinner = new VelocityVoltage(0);
-    private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
+    private VelocityVoltage spinner;
+    private DutyCycleOut dutyCycl;
     private double velocity = 0;
     private final CANcoder flywheelCoder;
 
-    private double commandedDutyCycle = 0.0;
     private static final String LOG_PREFIX = "FlyWheel/";
 
     public flywheel(CANBus cn) {
@@ -44,12 +43,13 @@ public class flywheel extends SubsystemBase {
         TalonFXConfiguration cfg = new TalonFXConfiguration();
         cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        CurrentLimitsConfigs currLim = new CurrentLimitsConfigs()
+        /*CurrentLimitsConfigs currLim = new CurrentLimitsConfigs()
             .withStatorCurrentLimit(50.0)
             .withStatorCurrentLimitEnable(true)
             .withSupplyCurrentLimit(40)
             .withSupplyCurrentLimitEnable(true);;
         cfg.withCurrentLimits(currLim);
+        */
         cfg.Feedback.SensorToMechanismRatio = 1;
 
         cfg.Slot0.kP = 2;
@@ -72,7 +72,6 @@ public class flywheel extends SubsystemBase {
     }
 
     public void setVelocity(double vel){
-        commandedDutyCycle = vel;
         velocity = vel;
     }
 
@@ -81,18 +80,16 @@ public class flywheel extends SubsystemBase {
     }
 
     public void dontShoot(){
-        spinner.Velocity = 0;
         upperMotor.setControl(spinner.withVelocity(0));
     }
 
     public void flySpeed(double speed){
-        commandedDutyCycle = speed;
+        velocity = speed;
         upperMotor.setControl(dutyCycl.withOutput(speed));
     }
 
     @Override
     public void periodic(){
-        //SmartDashboard.putNumber("spinVel", velocity);
         sendData();
     }
 
@@ -119,7 +116,7 @@ public class flywheel extends SubsystemBase {
             upperMotor.getDeviceTemp().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "CommandedDutyCycle",
-            commandedDutyCycle);
+            velocity);
 
         Logger.recordOutput(LOG_PREFIX + "Connected",
             upperMotor.isConnected());
