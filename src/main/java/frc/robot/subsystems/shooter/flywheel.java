@@ -12,7 +12,6 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -20,13 +19,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.configs.Slot0Configs;
 import org.littletonrobotics.junction.Logger;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Temperature;
-import edu.wpi.first.units.measure.Voltage;
 
 public class flywheel extends SubsystemBase {
 
@@ -66,7 +59,7 @@ public class flywheel extends SubsystemBase {
 
         CANcoderConfiguration ccfg = new CANcoderConfiguration();
         ccfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; 
-        //ccfg.MagnetSensor.MagnetOffset = railgunConstants.upperMagnetOffset;
+        ccfg.MagnetSensor.MagnetOffset = railgunConstants.upperMagnetOffset;
 
         flywheelCoder.getConfigurator().apply(ccfg);
 
@@ -99,7 +92,8 @@ public class flywheel extends SubsystemBase {
 
     @Override
     public void periodic(){
-        SmartDashboard.putNumber("spinVel", velocity);
+        //SmartDashboard.putNumber("spinVel", velocity);
+        sendData();
     }
 
     public void sendData(){

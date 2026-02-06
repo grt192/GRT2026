@@ -82,7 +82,7 @@ public class RobotContainer {
       )
     );
     */
-    Trigger shooty = new Trigger(() -> gamer.getR2Axis() != 0 && !manualMode);
+    Trigger shooty = new Trigger(() -> gamer.getR2Axis() >-0.95 && !manualMode);
     Trigger hoodAuto = new Trigger(() -> !manualMode);
 
     shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
