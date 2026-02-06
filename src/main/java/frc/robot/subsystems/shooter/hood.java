@@ -138,22 +138,9 @@ public class hood extends SubsystemBase {
     }
 
     boolean prevPress = false;
-    double offset = railgunConstants.hoodMagnetOffset;
     @Override
     public void periodic(){
         if(limit.getS1Closed().refresh().getValue() && !prevPress){
-            
-            offset = hoodCoder.getAbsolutePosition().getValueAsDouble()
-                 - railgunConstants.initHoodAngle;
-
-             offset = offset - Math.floor(offset);
-
-              hoodCoder.getConfigurator().apply(
-                    new CANcoderConfiguration() {{
-                        MagnetSensor.MagnetOffset = offset;
-                    }}
-                );
-
             hoodMotor.setPosition(railgunConstants.initHoodAngle);
             prevPress = true;
         }
