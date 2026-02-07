@@ -36,14 +36,6 @@ public class hood extends SubsystemBase {
     private PositionTorqueCurrentFOC focThing = new PositionTorqueCurrentFOC(0);
     private final CANcoder hoodCoder;
 
-    private final StatusSignal<AngularVelocity> velocitySignal;
-    private final StatusSignal<Angle> positionSignal;
-    private final StatusSignal<Voltage> supplyVoltageSignal;
-    private final StatusSignal<Voltage> motorVoltageSignal;
-    private final StatusSignal<Current> statorCurrentSignal;
-    private final StatusSignal<Current> supplyCurrentSignal;
-    private final StatusSignal<Temperature> temperatureSignal;
-
     private double commandedDutyCycle = 0.0;
     private static final String LOG_PREFIX = "Hood/";
 
@@ -56,30 +48,7 @@ public class hood extends SubsystemBase {
 
         double hoodRot = hoodCoder.getAbsolutePosition().refresh().getValueAsDouble();
         hoodMotor.setPosition(hoodRot);
-
-        // Initialize status signals
-        velocitySignal = hoodMotor.getVelocity();
-        positionSignal = hoodMotor.getPosition();
-        supplyVoltageSignal = hoodMotor.getSupplyVoltage();
-        motorVoltageSignal = hoodMotor.getMotorVoltage();
-        statorCurrentSignal = hoodMotor.getStatorCurrent();
-        supplyCurrentSignal = hoodMotor.getSupplyCurrent();
-        temperatureSignal = hoodMotor.getDeviceTemp();
-
-        // Set update frequency for all signals (optimize CAN bus usage)
-        BaseStatusSignal.setUpdateFrequencyForAll(
-            50.0, // 50 Hz update rate
-            velocitySignal,
-            positionSignal,
-            supplyVoltageSignal,
-            motorVoltageSignal,
-            statorCurrentSignal,
-            supplyCurrentSignal,
-            temperatureSignal
-        );
-
-        // Optimize bus utilization
-        hoodMotor.optimizeBusUtilization();
+        
     }
 
     public void config(){
@@ -154,41 +123,33 @@ public class hood extends SubsystemBase {
     }
 
     public void sendData(){
-        BaseStatusSignal.refreshAll(
-            velocitySignal,
-            positionSignal,
-            supplyVoltageSignal,
-            motorVoltageSignal,
-            statorCurrentSignal,
-            supplyCurrentSignal,
-            temperatureSignal
-        );
+        Logger.recordOutput(LOG_PREFIX + "PositionRotations",
+            upperMotor.getPosition().getValueAsDouble());
 
-        // Motor state logging
-        Logger.recordOutput(LOG_PREFIX + "VelocityRPS", velocitySignal.getValueAsDouble());
-        Logger.recordOutput(LOG_PREFIX + "VelocityRPM", velocitySignal.getValueAsDouble() * 60.0);
-        Logger.recordOutput(LOG_PREFIX + "PositionRotations", positionSignal.getValueAsDouble());
+        Logger.recordOutput(LOG_PREFIX + "VelocityRPS",
+            upperMotor.getVelocity().getValueAsDouble());
 
-        // Electrical logging
-        Logger.recordOutput(LOG_PREFIX + "SupplyVoltage", supplyVoltageSignal.getValueAsDouble());
-        Logger.recordOutput(LOG_PREFIX + "MotorVoltage", motorVoltageSignal.getValueAsDouble());
-        Logger.recordOutput(LOG_PREFIX + "StatorCurrentAmps", statorCurrentSignal.getValueAsDouble());
-        Logger.recordOutput(LOG_PREFIX + "SupplyCurrentAmps", supplyCurrentSignal.getValueAsDouble());
+        Logger.recordOutput(LOG_PREFIX + "AppliedVolts",
+            upperMotor.getMotorVoltage().getValueAsDouble());
 
-        // Thermal logging
-        Logger.recordOutput(LOG_PREFIX + "TemperatureCelsius", temperatureSignal.getValueAsDouble());
+        Logger.recordOutput(LOG_PREFIX + "SupplyVoltage",
+            upperMotor.getSupplyVoltage().getValueAsDouble());
 
-        // Command logging
-        Logger.recordOutput(LOG_PREFIX + "CommandedDutyCycle", commandedDutyCycle);
-        Logger.recordOutput(LOG_PREFIX + "CommandedVoltage", commandedDutyCycle * supplyVoltageSignal.getValueAsDouble());
+        Logger.recordOutput(LOG_PREFIX + "StatorCurrentAmps",
+            upperMotor.getStatorCurrent().getValueAsDouble());
 
-        // Calculated metrics
-        double power = motorVoltageSignal.getValueAsDouble() * statorCurrentSignal.getValueAsDouble();
-        Logger.recordOutput(LOG_PREFIX + "PowerWatts", power);
+        Logger.recordOutput(LOG_PREFIX + "SupplyCurrentAmps",
+            upperMotor.getSupplyCurrent().getValueAsDouble());
 
-        // Connection status
-        Logger.recordOutput(LOG_PREFIX + "Connected", hoodMotor.isConnected());
-        Logger.recordOutput("Torque", hoodMotor.getTorqueCurrent().getValueAsDouble() * hoodMotor.getMotorKT().getValueAsDouble());
+        Logger.recordOutput(LOG_PREFIX + "TemperatureC",
+            upperMotor.getDeviceTemp().getValueAsDouble());
+
+        Logger.recordOutput(LOG_PREFIX + "CommandedDutyCycle",
+            commandedDutyCycle);
+
+        Logger.recordOutput(LOG_PREFIX + "Connected",
+            upperMotor.isConnected());
     }
+
 
 }
