@@ -1,4 +1,5 @@
 package frc.robot.subsystems.shooter;
+import frc.robot.Constants.railgunConstants;
 
 public class kinemat {
     
@@ -8,5 +9,9 @@ public class kinemat {
 
     public static double calculateVel(double ang){
         return Math.sqrt(6*9.8/ ((Math.toDegrees(Math.sin(Math.toRadians(ang))))*(Math.toDegrees(Math.sin(Math.toRadians(ang))))) );
+    }
+
+    public static double rotationSpeed(double linearVel){
+        return linearVel/(Math.PI * railgunConstants.flyDia);
     }
 }

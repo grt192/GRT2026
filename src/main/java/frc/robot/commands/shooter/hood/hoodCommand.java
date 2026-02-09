@@ -25,7 +25,8 @@ public class hoodCommand extends Command{
         distance = SmartDashboard.getNumber("Pos", distance);
         angle = kinemat.calculateAngle(distance);
         velocity = kinemat.calculateVel(angle);
-        fly.setVelocity(velocity);
+
+        fly.setVelocity(kinemat.rotationSpeed(velocity));
         hd.setHoodAngle(angle);
     }
 

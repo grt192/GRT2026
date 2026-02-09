@@ -5,9 +5,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -18,15 +16,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Temperature;
-import edu.wpi.first.units.measure.Voltage;
 
 public class hood extends SubsystemBase {
 
@@ -74,7 +65,7 @@ public class hood extends SubsystemBase {
 
         CANcoderConfiguration ccfg = new CANcoderConfiguration();
         ccfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; 
-        ccfg.MagnetSensor.MagnetOffset = railgunConstants.hoodMagnetOffset;
+        //ccfg.MagnetSensor.MagnetOffset = railgunConstants.hoodMagnetOffset;
 
         hoodCoder.getConfigurator().apply(ccfg);
 
@@ -124,31 +115,31 @@ public class hood extends SubsystemBase {
 
     public void sendData(){
         Logger.recordOutput(LOG_PREFIX + "PositionRotations",
-            upperMotor.getPosition().getValueAsDouble());
+            hoodMotor.getPosition().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "VelocityRPS",
-            upperMotor.getVelocity().getValueAsDouble());
+            hoodMotor.getVelocity().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "AppliedVolts",
-            upperMotor.getMotorVoltage().getValueAsDouble());
+            hoodMotor.getMotorVoltage().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "SupplyVoltage",
-            upperMotor.getSupplyVoltage().getValueAsDouble());
+            hoodMotor.getSupplyVoltage().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "StatorCurrentAmps",
-            upperMotor.getStatorCurrent().getValueAsDouble());
+            hoodMotor.getStatorCurrent().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "SupplyCurrentAmps",
-            upperMotor.getSupplyCurrent().getValueAsDouble());
+            hoodMotor.getSupplyCurrent().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "TemperatureC",
-            upperMotor.getDeviceTemp().getValueAsDouble());
+            hoodMotor.getDeviceTemp().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "CommandedDutyCycle",
             commandedDutyCycle);
 
         Logger.recordOutput(LOG_PREFIX + "Connected",
-            upperMotor.isConnected());
+            hoodMotor.isConnected());
     }
 
 

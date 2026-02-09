@@ -45,6 +45,8 @@ public final class Constants {
     public static double maxVelo = 1;
     public static double initHoodAngle = 0.5;
 
+    public static double flyDia = 0.127;
+
   }
 
   public static class SwerveDriveConstants {
