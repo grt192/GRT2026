@@ -84,9 +84,13 @@ public class RobotContainer {
     );
     */
 
+    //Switch Mode
+    Trigger changeMode = new Trigger(() -> mechController.circle().getAsBoolean());
+    changeMode.onTrue(new InstantCommand(() -> { manualModeShooter = !manualModeShooter; }));
+
     //Auto
-    Trigger shooty = new Trigger(() -> mechController.square().getAsBoolean() && gamer.getR2Axis() >-0.95 && !manualModeShooter);
-    Trigger hoodAuto = new Trigger(() -> !manualModeShooter);
+    Trigger shooty = new Trigger(() -> mechController.square().getAsBoolean() && gamer.getR2Axis() >-0.95 && manualModeShooter == false);
+    Trigger hoodAuto = new Trigger(() -> manualModeShooter == false);
 
     shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
     shooty.whileFalse(new InstantCommand(() -> wheel.dontShoot(), wheel));
