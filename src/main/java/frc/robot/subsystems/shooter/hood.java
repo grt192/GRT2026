@@ -65,13 +65,11 @@ public class hood extends SubsystemBase {
 
         CANcoderConfiguration ccfg = new CANcoderConfiguration();
         ccfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; 
-        //ccfg.MagnetSensor.MagnetOffset = railgunConstants.hoodMagnetOffset;
 
         hoodCoder.getConfigurator().apply(ccfg);
 
         cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
         cfg.Feedback.FeedbackRemoteSensorID = railgunConstants.hoodEncoderId;
-
         cfg.Feedback.RotorToSensorRatio = railgunConstants.gearRatioHood;
 
         hoodMotor.getConfigurator().apply(cfg);

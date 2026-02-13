@@ -27,13 +27,13 @@ public final class Constants {
   public static class railgunConstants {
         
     //Everything in metric pls
-    public static int upperId = 14;
-    public static int hoodId = 15;
-    public static int upperEncoderId = 1;
+    public static int upperId = 17;
+    public static int hoodId = 16;
+    public static int upperEncoderId = 18;
     public static int hoodEncoderId = 3;
     public static int limitId = 3;
 
-    public static double gearRatioUpper = 1;
+    public static double gearRatioUpper = 1.5;
     public static double gearRatioHood = 12;
 
     public static double hoodMagnetOffset = 0.5;
@@ -41,8 +41,6 @@ public final class Constants {
 
     public static double upperAngle = 0.45;
     public static double lowerAngle = 0.14;
-    
-    public static double maxVelo = 1;
     public static double initHoodAngle = 0.5;
 
     public static double flyDia = 0.127;

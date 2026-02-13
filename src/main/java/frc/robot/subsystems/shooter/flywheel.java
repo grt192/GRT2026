@@ -59,8 +59,6 @@ public class flywheel extends SubsystemBase {
 
         CANcoderConfiguration ccfg = new CANcoderConfiguration();
         ccfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; 
-        ccfg.MagnetSensor.MagnetOffset = railgunConstants.upperMagnetOffset;
-
         flywheelCoder.getConfigurator().apply(ccfg);
 
         cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;

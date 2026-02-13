@@ -27,7 +27,7 @@ public class hoodCommand extends Command{
         velocity = kinemat.calculateVel(angle);
 
         fly.setVelocity(kinemat.rotationSpeed(velocity));
-        hd.setHoodAngle(angle);
+        hd.setHoodAngle(0.25 - kinemat.angleToRot(angle));
     }
 
     public void end(){

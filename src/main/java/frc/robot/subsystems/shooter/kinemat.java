@@ -14,4 +14,8 @@ public class kinemat {
     public static double rotationSpeed(double linearVel){
         return linearVel/(Math.PI * railgunConstants.flyDia);
     }
+
+    public static double angleToRot(double ang){
+        return ang / 360.0;
+    }
 }
