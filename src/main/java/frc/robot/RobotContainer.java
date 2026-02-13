@@ -90,10 +90,11 @@ public class RobotContainer {
 
     //Auto
     Trigger shooty = new Trigger(() -> mechController.square().getAsBoolean() && gamer.getR2Axis() >-0.95 && manualModeShooter == false);
+    Trigger shootn = new Trigger(() -> (mechController.square().getAsBoolean() && gamer.getR2Axis() >-0.95) == false && manualModeShooter == false);
     Trigger hoodAuto = new Trigger(() -> manualModeShooter == false);
 
     shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
-    shooty.whileFalse(new InstantCommand(() -> wheel.dontShoot(), wheel));
+    shootn.whileTrue(new InstantCommand(() -> wheel.dontShoot(), wheel));
     
     hoodAuto.whileTrue(new hoodCommand(hooded, wheel));
 
