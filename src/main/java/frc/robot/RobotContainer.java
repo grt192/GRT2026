@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import com.ctre.phoenix6.CANBus;
+import org.littletonrobotics.junction.Logger;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 
@@ -62,12 +64,7 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  @Override
-  private void periodic(){
-    Logger.recordOutput("Robot" + "Mode",
-            manualModeShooter);
-    SmartDashboard.putBoolean("Mode", manualModeShooter);
-  }
+  
   private void configureBindings() {
 
       //gun.run();
@@ -89,7 +86,10 @@ public class RobotContainer {
       )
     );
     */
-
+    Trigger exist = new Trigger(() -> 1==1);
+    exist.whileTrue(new InstantCommand(() -> {
+      SmartDashboard.putBoolean("Mode", manualModeShooter);
+      Logger.recordOutput("Robot" + "Mode", manualModeShooter);}));
     //Switch Mode
     Trigger changeMode = new Trigger(() -> mechController.circle().getAsBoolean());
     changeMode.onTrue(new InstantCommand(() -> { manualModeShooter = !manualModeShooter; }));

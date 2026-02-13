@@ -33,7 +33,7 @@ public class hoodCommand extends Command{
         Logger.recordOutput("Calculate" + "Expected_Linear_Output",
             velocity);
 
-        Logger.recordOutput("Calculate" + "Expected_RPS", kinemat.rotationSpeed(velocity))
+        Logger.recordOutput("Calculate" + "Expected_RPS", kinemat.rotationSpeed(velocity));
     }
 
     public void end(){
