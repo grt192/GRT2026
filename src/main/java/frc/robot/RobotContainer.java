@@ -15,6 +15,7 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
 // WPILib imports
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
@@ -42,7 +43,7 @@ public class RobotContainer {
   private flywheel wheel = new flywheel(c);
   private hood hooded = new hood(c);
   private CommandPS5Controller gamer = new CommandPS5Controller(1);
-  boolean manualMode = true;
+  boolean manualModeShooter = true;
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -82,39 +83,42 @@ public class RobotContainer {
       )
     );
     */
-    Trigger shooty = new Trigger(() -> gamer.getR2Axis() >-0.95 && !manualMode);
-    Trigger hoodAuto = new Trigger(() -> !manualMode);
+
+    //Auto
+    Trigger shooty = new Trigger(() -> mechController.square().getAsBoolean() && gamer.getR2Axis() >-0.95 && !manualModeShooter);
+    Trigger hoodAuto = new Trigger(() -> !manualModeShooter);
 
     shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
     shooty.whileFalse(new InstantCommand(() -> wheel.dontShoot(), wheel));
     
     hoodAuto.whileTrue(new hoodCommand(hooded, wheel));
 
-    Trigger shootManual = new Trigger(() -> manualMode);
-    Trigger dpadUp = new Trigger(() -> gamer.getHID().getPOV() == 0 && manualMode);
-    Trigger dpadDown = new Trigger(() -> gamer.getHID().getPOV() == 180 && manualMode);
-    Trigger dpadNeutral = new Trigger(() -> {
-      int pov = gamer.getHID().getPOV();
-      return (pov != 0 && pov != 180) && manualMode;
-    });
+    //Manual
+    wheel.setDefaultCommand(Commands.run(() -> {
+      if (mechController.square().getAsBoolean() && manualModeShooter) {
+        double speed = (mechController.getR2Axis() + 1) / 2;
+        wheel.flySpeed(speed);
+      } else if(manualModeShooter){
+        wheel.flySpeed(0);
+      }
+    }, wheel));
 
-    shootManual.whileTrue(
-      new RunCommand(
-          () -> {
-            double r2 = gamer.getR2Axis();
-            wheel.flySpeed((r2+1)/2);
-          },
-          wheel));
-    
-    dpadUp.whileTrue(new RunCommand(() -> hooded.hoodSpeed(0.05), hooded));
-    dpadDown.whileTrue(new RunCommand(() -> hooded.hoodSpeed(-0.05), hooded));
-    dpadNeutral.onTrue(new InstantCommand(() -> hooded.hoodSpeed(0.0), hooded));
+    hooded.setDefaultCommand(Commands.run(() -> {
+      if (mechController.L3().getAsBoolean() && manualModeShooter) {
+        hooded.hoodSpeed(0.05);
+      }else if(mechController.R3().getAsBoolean() && manualModeShooter){
+        hooded.hoodSpeed(-0.05);
+      } else if( manualModeShooter) {
+        hooded.hoodSpeed(0);
+      }
+    }, hooded));
 
-    new Trigger(() -> manualMode).onTrue(
+
+    new Trigger(() -> manualModeShooter).onTrue(
       new InstantCommand(() -> { wheel.dontShoot(); hooded.hoodSpeed(0.0); }, wheel, hooded)
     );
 
-    new Trigger(() -> !manualMode).onTrue(//not manual
+    new Trigger(() -> !manualModeShooter).onTrue(//not manual
       new InstantCommand(() -> { wheel.dontShoot(); hooded.hoodSpeed(0.0); }, wheel, hooded)
     );
 
