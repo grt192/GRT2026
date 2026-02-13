@@ -5,6 +5,7 @@ import frc.robot.subsystems.shooter.flywheel;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.shooter.kinemat;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import org.littletonrobotics.junction.Logger;
 
 public class hoodCommand extends Command{
 
@@ -28,6 +29,11 @@ public class hoodCommand extends Command{
 
         fly.setVelocity(kinemat.rotationSpeed(velocity));
         hd.setHoodAngle(0.25 - kinemat.angleToRot(angle));
+
+        Logger.recordOutput("Calculate" + "Expected_Linear_Output",
+            velocity);
+
+        Logger.recordOutput("Calculate" + "Expected_RPS", kinemat.rotationSpeed(velocity))
     }
 
     public void end(){

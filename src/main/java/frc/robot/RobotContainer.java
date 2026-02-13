@@ -62,6 +62,12 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
+  @Override
+  private void periodic(){
+    Logger.recordOutput("Robot" + "Mode",
+            manualModeShooter);
+    SmartDashboard.putBoolean("Mode", manualModeShooter);
+  }
   private void configureBindings() {
 
       //gun.run();
