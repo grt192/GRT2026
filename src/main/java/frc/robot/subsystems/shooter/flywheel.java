@@ -15,6 +15,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
@@ -24,7 +25,7 @@ import org.littletonrobotics.junction.Logger;
 public class flywheel extends SubsystemBase {
 
     private final TalonFX upperMotor;
-    private VelocityVoltage spinner;
+    private MotionMagicVelocityVoltage spinner;
     private DutyCycleOut dutyCycl;
     private double velocity = 0;
     private final CANcoder flywheelCoder;
@@ -50,21 +51,25 @@ public class flywheel extends SubsystemBase {
             .withSupplyCurrentLimitEnable(true);;
         cfg.withCurrentLimits(currLim);
         */
-        cfg.Feedback.SensorToMechanismRatio = 1;
+        cfg.MotionMagic.MotionMagicCruiseVelocity = 120;   // target RPS cap
+        cfg.MotionMagic.MotionMagicAcceleration = 160;    // RPS per second
+        cfg.MotionMagic.MotionMagicJerk = 800;            // optional, smoothness
 
         cfg.Slot0.kP = 2;
         cfg.Slot0.kI = 0.0;
         cfg.Slot0.kD = 0.0;
-        cfg.Slot0.kG = 1.0;
+        cfg.Slot0.kS = 0.0;
+        cfg.Slot0.kV = 0.12;
+        cfg.Slot0.kA = 0.0;
 
         CANcoderConfiguration ccfg = new CANcoderConfiguration();
         ccfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; 
-        flywheelCoder.getConfigurator().apply(ccfg);
+        //flywheelCoder.getConfigurator().apply(ccfg);
 
-        cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-        cfg.Feedback.FeedbackRemoteSensorID = railgunConstants.upperEncoderId;
+        //cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        //cfg.Feedback.FeedbackRemoteSensorID = railgunConstants.upperEncoderId;
 
-        cfg.Feedback.RotorToSensorRatio = railgunConstants.gearRatioUpper;
+        cfg.Feedback.SensorToMechanismRatio = railgunConstants.gearRatioUpper;
 
         upperMotor.getConfigurator().apply(cfg);
     }
