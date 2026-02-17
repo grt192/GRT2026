@@ -52,14 +52,14 @@ public class flywheel extends SubsystemBase {
         cfg.withCurrentLimits(currLim);
         */
         cfg.MotionMagic.MotionMagicCruiseVelocity = 120;   // target RPS cap
-        cfg.MotionMagic.MotionMagicAcceleration = 160;    // RPS per second
-        cfg.MotionMagic.MotionMagicJerk = 800;            // optional, smoothness
+        cfg.MotionMagic.MotionMagicAcceleration = 50;    // RPS per second
+        cfg.MotionMagic.MotionMagicJerk = 150;            // optional, smoothness
 
-        cfg.Slot0.kP = 2;
+        cfg.Slot0.kP = 0.05;
         cfg.Slot0.kI = 0.0;
         cfg.Slot0.kD = 0.0;
-        cfg.Slot0.kS = 0.0;
-        cfg.Slot0.kV = 0.12;
+        cfg.Slot0.kS = 0.2;
+        cfg.Slot0.kV = 0.14;
         cfg.Slot0.kA = 0.0;
 
         CANcoderConfiguration ccfg = new CANcoderConfiguration();
