@@ -4,11 +4,11 @@ import frc.robot.Constants.railgunConstants;
 public class kinemat {
     
     public static double calculateAngle(double dista){
-        return Math.atan((2*3.0/D)*(1 + Math.sqrt(1 - 1.828/3.0)));
+        return Math.atan((2*3.0/dista)*(1 + Math.sqrt(1 - 1.828/3.0)));
     }
 
     public static double calculateVel(double ang){
-        return Math.sqrt(2*9.8*3.0) / Math.sin(theta);  
+        return Math.sqrt(2*9.8*3.0) / Math.sin(ang);  
     }
 
     public static double rotationSpeed(double linearVel){

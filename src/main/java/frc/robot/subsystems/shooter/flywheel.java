@@ -14,12 +14,9 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import org.littletonrobotics.junction.Logger;
 
 public class flywheel extends SubsystemBase {
