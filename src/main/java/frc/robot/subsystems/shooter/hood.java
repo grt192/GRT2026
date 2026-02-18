@@ -37,8 +37,7 @@ public class hood extends SubsystemBase {
 
         config();
 
-        double hoodRot = hoodCoder.getAbsolutePosition().refresh().getValueAsDouble();
-        hoodMotor.setPosition(hoodRot);
+        hoodMotor.setPosition(railgunConstants.initHoodAngle);
         
     }
 
