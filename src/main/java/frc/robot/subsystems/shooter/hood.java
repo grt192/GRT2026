@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.CANdi;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -24,7 +25,7 @@ public class hood extends SubsystemBase {
     private final TalonFX hoodMotor;
     private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
     private CANdi limit;
-    private PositionTorqueCurrentFOC focThing = new PositionTorqueCurrentFOC(0);
+    private PositionVoltage focThing = new PositionVoltage(0);
     private final CANcoder hoodCoder;
 
     private double commandedDutyCycle = 0.0;
@@ -32,7 +33,7 @@ public class hood extends SubsystemBase {
 
     public hood(CANBus cn) {
         hoodMotor = new TalonFX(railgunConstants.hoodId, cn);
-        limit = new CANdi(railgunConstants.limitId, cn);
+        //limit = new CANdi(railgunConstants.limitId, cn);
         hoodCoder = new CANcoder(railgunConstants.hoodEncoderId, cn);
 
         config();
@@ -95,7 +96,7 @@ public class hood extends SubsystemBase {
     boolean prevPress = false;
     @Override
     public void periodic(){
-        if(limit.getS1Closed().refresh().getValue() && !prevPress){
+       /*  if(limit.getS1Closed().refresh().getValue() && !prevPress){
             hoodMotor.setPosition(railgunConstants.initHoodAngle);
             prevPress = true;
         }
@@ -103,6 +104,7 @@ public class hood extends SubsystemBase {
         if(!limit.getS1Closed().refresh().getValue()){
             prevPress = false;
         }
+            */
 
         sendData();
             
