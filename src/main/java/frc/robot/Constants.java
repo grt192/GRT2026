@@ -36,9 +36,9 @@ public final class Constants {
     public static double gearRatioUpper = 1.5;
     public static double gearRatioHood = 12;
 
-    public static double upperAngle = 0.45;
-    public static double lowerAngle = 0.14;
-    public static double initHoodAngle = 0.5;
+    public static double upperAngle = 0;
+    public static double lowerAngle = -0.328;
+    public static double initHoodAngle = lowerAngle;
 
     public static double flyDia = 0.127;
 
