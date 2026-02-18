@@ -105,21 +105,23 @@ public class RobotContainer {
     hoodAuto.whileTrue(new hoodCommand(hooded, wheel));
 
     //Manual
-    wheel.setDefaultCommand(Commands.run(() -> {
-      if (manualModeShooter && DriverStation.isJoystickConnected(1)) {
+
+    Trigger manualOn = new Trigger(() -> manualModeShooter == true);
+
+    manualOn.whileTrue(Commands.run(() -> {
+      if (DriverStation.isJoystickConnected(1)) {
         double speed = (mechController.getR2Axis() + 1) / 2;
         wheel.flySpeed(speed);
-      } else if(manualModeShooter){
+      } else
         wheel.flySpeed(0);
-      }
     }, wheel));
 
-    hooded.setDefaultCommand(Commands.run(() -> {
-      if (mechController.L3().getAsBoolean() && manualModeShooter) {
+    manualOn.whileTrue(Commands.run(() -> {
+      if (mechController.L3().getAsBoolean()) {
         hooded.hoodSpeed(0.05);
-      }else if(mechController.R3().getAsBoolean() && manualModeShooter){
+      }else if(mechController.R3().getAsBoolean()){
         hooded.hoodSpeed(-0.05);
-      } else if(manualModeShooter) {
+      } else{
         hooded.hoodSpeed(0);
       }
     }, hooded));
