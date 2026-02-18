@@ -11,7 +11,7 @@ import frc.robot.subsystems.shooter.hood;
 import frc.robot.commands.shooter.hood.hoodCommand;
 // Subsystems
 import frc.robot.subsystems.swerve.SwerveSubsystem;
-
+import edu.wpi.first.wpilibj.DriverStation;
 // WPILib imports
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -88,15 +88,15 @@ public class RobotContainer {
     */
     Trigger exist = new Trigger(() -> 1==1);
     exist.whileTrue(new InstantCommand(() -> {
-      SmartDashboard.putBoolean("Mode", manualModeShooter);
       Logger.recordOutput("Robot" + "Mode", manualModeShooter);}));
+
     //Switch Mode
     Trigger changeMode = new Trigger(() -> mechController.circle().getAsBoolean());
     changeMode.onTrue(new InstantCommand(() -> { manualModeShooter = !manualModeShooter; }));
 
     //Auto
-    Trigger shooty = new Trigger(() -> mechController.square().getAsBoolean() && gamer.getR2Axis() >-0.95 && manualModeShooter == false);
-    Trigger shootn = new Trigger(() -> (mechController.square().getAsBoolean() && gamer.getR2Axis() >-0.95) == false && manualModeShooter == false);
+    Trigger shooty = new Trigger(() -> gamer.getR2Axis() >-0.95 && manualModeShooter == false);
+    Trigger shootn = new Trigger(() -> gamer.getR2Axis() >-0.95 == false && manualModeShooter == false);
     Trigger hoodAuto = new Trigger(() -> manualModeShooter == false);
 
     shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
@@ -106,7 +106,7 @@ public class RobotContainer {
 
     //Manual
     wheel.setDefaultCommand(Commands.run(() -> {
-      if (mechController.square().getAsBoolean() && manualModeShooter) {
+      if (manualModeShooter && DriverStation.isJoystickConnected(1)) {
         double speed = (mechController.getR2Axis() + 1) / 2;
         wheel.flySpeed(speed);
       } else if(manualModeShooter){
@@ -119,7 +119,7 @@ public class RobotContainer {
         hooded.hoodSpeed(0.05);
       }else if(mechController.R3().getAsBoolean() && manualModeShooter){
         hooded.hoodSpeed(-0.05);
-      } else if( manualModeShooter) {
+      } else if(manualModeShooter) {
         hooded.hoodSpeed(0);
       }
     }, hooded));
