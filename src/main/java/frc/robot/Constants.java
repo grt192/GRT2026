@@ -34,7 +34,7 @@ public final class Constants {
     public static int limitId = 3;
 
     public static double gearRatioUpper = 1.5;
-    public static double gearRatioHood = 12;
+    public static double gearRatioHood = 50;
 
     public static double upperAngle = 0;
     public static double lowerAngle = -0.328;

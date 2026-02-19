@@ -39,9 +39,8 @@ public class RobotContainer {
   private boolean isCompetition = true;
 
   private PS5DriveController driveController;
-  private CommandPS5Controller mechController;
   // private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
-  CANBus c = new CANBus("can");
+  CANBus c = new CANBus("mechCAN");
   private flywheel wheel = new flywheel(c);
   private hood hooded = new hood(c);
   private CommandPS5Controller gamer = new CommandPS5Controller(1);
@@ -51,7 +50,6 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // constructDriveController(); 
-    constructMechController();
     configureBindings();
   }
 
@@ -66,6 +64,7 @@ public class RobotContainer {
    */
   
   private void configureBindings() {
+    System.out.println("Configuring");
 
       //gun.run();
       /* Driving -- One joystick controls translation, the other rotation. If the robot-relative button is held down,
@@ -89,53 +88,52 @@ public class RobotContainer {
     Trigger exist = new Trigger(() -> 1==1);
     exist.whileTrue(new InstantCommand(() -> {
       Logger.recordOutput("Robot" + "Mode", manualModeShooter);}));
+      
 
     //Switch Mode
-    Trigger changeMode = new Trigger(() -> mechController.circle().getAsBoolean());
-    changeMode.onTrue(new InstantCommand(() -> { manualModeShooter = !manualModeShooter; }));
+    gamer.circle().onTrue(new InstantCommand(() ->{ 
+      manualModeShooter = !manualModeShooter; 
+      wheel.dontShoot(); 
+      hooded.hoodSpeed(0.0); 
+    }));
 
     //Auto
-    Trigger shooty = new Trigger(() -> gamer.getR2Axis() >-0.95 && manualModeShooter == false);
-    Trigger shootn = new Trigger(() -> gamer.getR2Axis() >-0.95 == false && manualModeShooter == false);
+    Trigger shooty = new Trigger(() -> gamer.getR2Axis() > -0.7 && manualModeShooter == false);
+    Trigger shootn = new Trigger(() -> gamer.getR2Axis() <- 0.7  && manualModeShooter == false);
     Trigger hoodAuto = new Trigger(() -> manualModeShooter == false);
 
     shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
-    shootn.whileTrue(new InstantCommand(() -> wheel.dontShoot(), wheel));
+    shootn.onTrue(new InstantCommand(() -> wheel.dontShoot(), wheel));
     
     hoodAuto.whileTrue(new hoodCommand(hooded, wheel));
 
     //Manual
+    
+    
+    wheel.setDefaultCommand(Commands.run(() -> {
+      if(manualModeShooter){
+        if (DriverStation.isJoystickConnected(1)) {
+          double speed = (gamer.getR2Axis() + 1) / 2;
+          wheel.flySpeed(speed);
+        } else{
+          wheel.flySpeed(0);
+        }
+      }
+    } , wheel));
 
-    Trigger manualOn = new Trigger(() -> manualModeShooter == true);
-
-    manualOn.whileTrue(Commands.run(() -> {
-      if (DriverStation.isJoystickConnected(1)) {
-        double speed = (mechController.getR2Axis() + 1) / 2;
-        wheel.flySpeed(speed);
-      } else
-        wheel.flySpeed(0);
-    }, wheel));
-
-    manualOn.whileTrue(Commands.run(() -> {
-      if (mechController.L3().getAsBoolean()) {
-        hooded.hoodSpeed(0.05);
-      }else if(mechController.R3().getAsBoolean()){
-        hooded.hoodSpeed(-0.05);
-      } else{
-        hooded.hoodSpeed(0);
+    hooded.setDefaultCommand(Commands.run(() -> {
+      if(manualModeShooter){
+        System.out.println("manual");
+        if (gamer.L3().getAsBoolean()) {
+          hooded.hoodSpeed(0.05);
+        }else if(gamer.R3().getAsBoolean()){
+          hooded.hoodSpeed(-0.05);
+        } else{
+          hooded.hoodSpeed(0);
+        }
       }
     }, hooded));
-
-
-    new Trigger(() -> manualModeShooter).onTrue(
-      new InstantCommand(() -> { wheel.dontShoot(); hooded.hoodSpeed(0.0); }, wheel, hooded)
-    );
-
-    new Trigger(() -> !manualModeShooter).onTrue(//not manual
-      new InstantCommand(() -> { wheel.dontShoot(); hooded.hoodSpeed(0.0); }, wheel, hooded)
-    );
-
-
+    
     /*driveController.getRelativeMode().whileTrue(
       new RunCommand(
         () -> {
@@ -169,13 +167,6 @@ public class RobotContainer {
   private void constructDriveController(){
     driveController = new PS5DriveController();
     driveController.setDeadZone(0.05);
-  }
-
-  /**
-   * Constructs mech controller
-   */
-  private void constructMechController(){
-    mechController = new CommandPS5Controller(1);
   }
 
 

@@ -22,8 +22,8 @@ import org.littletonrobotics.junction.Logger;
 public class flywheel extends SubsystemBase {
 
     private final TalonFX upperMotor;
-    private MotionMagicVelocityVoltage spinner;
-    private DutyCycleOut dutyCycl;
+    private MotionMagicVelocityVoltage spinner = new MotionMagicVelocityVoltage(0);
+    private DutyCycleOut dutyCycl = new DutyCycleOut(0);
     private double velocity = 0;
     private final CANcoder flywheelCoder;
 
