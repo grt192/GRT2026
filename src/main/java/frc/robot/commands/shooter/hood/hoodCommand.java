@@ -23,8 +23,8 @@ public class hoodCommand extends Command{
         SmartDashboard.putNumber("Pos", distance);
         SmartDashboard.putNumber("ShooterHeight", height);
         */
-        SmartDashboard.putNumber("AngleCommanded", n);
-        SmartDashboard.putNumber("LinearVelCommanded", s);
+        SmartDashboard.putNumber("ExitAngleCommanded", n);   //I want to end up using 35*, 60*, and 75*. Test using fizziq, to see what actual degrees on the hood are necessary to achieve this.
+        SmartDashboard.putNumber("LinearVelCommanded", s); //Can be set between 0 to 80 rps.
         hd = h;
         fly = f;
     }
@@ -47,7 +47,7 @@ public class hoodCommand extends Command{
         */
 
         fly.setVelocity(kinemat.rotationSpeed(SmartDashboard.getNumber("LinearVelCommanded", s)));
-        hd.setHoodAngle(-1*SmartDashboard.getNumber("AngleCommanded", n)/360 - 0.25);
+        hd.setHoodAngle(-1*SmartDashboard.getNumber("ExitAngleCommanded", n)/360 - 0.25);
 
         // Log for debug
         Logger.recordOutput("hoodCommand/" + "Expected_Linear_Output", velocity);
