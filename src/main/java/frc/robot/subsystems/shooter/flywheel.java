@@ -39,7 +39,7 @@ public class flywheel extends SubsystemBase {
 
     public void config(){
         TalonFXConfiguration cfg = new TalonFXConfiguration();
-        cfg.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         /*CurrentLimitsConfigs currLim = new CurrentLimitsConfigs()
             .withStatorCurrentLimit(50.0)

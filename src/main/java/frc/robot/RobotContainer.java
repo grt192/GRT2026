@@ -87,7 +87,7 @@ public class RobotContainer {
     */
     Trigger exist = new Trigger(() -> 1==1);
     exist.whileTrue(new InstantCommand(() -> {
-      Logger.recordOutput("Robot" + "Mode", manualModeShooter);}));
+      Logger.recordOutput("DriverMode/", manualModeShooter);}));
       
 
     //Switch Mode
@@ -98,7 +98,7 @@ public class RobotContainer {
     }));
 
     //Auto
-    Trigger shooty = new Trigger(() -> gamer.getR2Axis() > -0.7 && manualModeShooter == false);
+    Trigger shooty = new Trigger(() -> gamer.getR2Axis() > -0.7 && manualModeShooter == false && DriverStation.isJoystickConnected(1));
     Trigger shootn = new Trigger(() -> gamer.getR2Axis() <- 0.7  && manualModeShooter == false);
     Trigger hoodAuto = new Trigger(() -> manualModeShooter == false);
 
@@ -125,9 +125,9 @@ public class RobotContainer {
       if(manualModeShooter){
         System.out.println("manual");
         if (gamer.L3().getAsBoolean()) {
-          hooded.hoodSpeed(0.05);
+          hooded.hoodSpeed(0.1);
         }else if(gamer.R3().getAsBoolean()){
-          hooded.hoodSpeed(-0.05);
+          hooded.hoodSpeed(-0.1);
         } else{
           hooded.hoodSpeed(0);
         }

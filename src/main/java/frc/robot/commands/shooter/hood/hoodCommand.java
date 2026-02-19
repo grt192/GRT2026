@@ -11,29 +11,35 @@ public class hoodCommand extends Command{
 
     private hood hd;
     private flywheel fly;
-    private double distance = 0;
+    private double distance = 4.2418;
     private double angle;
     private double velocity;
+    private double height = 0;
 
     public hoodCommand(hood h, flywheel f){
+        SmartDashboard.putNumber("Pos", distance);
+        SmartDashboard.putNumber("ShooterHeight", height);
         hd = h;
         fly = f;
     }
 
     @Override
     public void execute() {
-        SmartDashboard.putNumber("Pos", distance);
         distance = SmartDashboard.getNumber("Pos", distance);
-        angle = kinemat.calculateAngle(distance);
-        velocity = kinemat.calculateVel(angle);
+        double yShooter = SmartDashboard.getNumber("ShooterHeight", height);
 
+        // Compute angle and velocity
+        angle = kinemat.calculateAngle(distance, yShooter);
+        velocity = kinemat.calculateVel(distance, yShooter);
+
+        // Set flywheel and hood
         fly.setVelocity(kinemat.rotationSpeed(velocity));
-        hd.setHoodAngle(-1*(0.25 - kinemat.angleToRot(angle))-0.25);
+        hd.setHoodAngle(kinemat.hoodRot(angle) - 0.25);
+        Logger.recordOutput("hoodCommand/" + "commandAngle", kinemat.hoodRot(angle) - 0.25);
 
-        Logger.recordOutput("Calculate" + "Expected_Linear_Output",
-            velocity);
-
-        Logger.recordOutput("Calculate" + "Expected_RPS", kinemat.rotationSpeed(velocity));
+        // Log for debug
+        Logger.recordOutput("hoodCommand/" + "Expected_Linear_Output", velocity);
+        Logger.recordOutput("hoodCommand/" + "Expected_RPS", kinemat.rotationSpeed(velocity));
     }
 
     public void end(){
