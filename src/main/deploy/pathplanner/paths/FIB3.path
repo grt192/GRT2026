@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4284019820601856,
-        "y": 4.046219401041667
+        "x": 2.6737312560873954,
+        "y": 0.6935552333697876
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.990320457175926,
-        "y": 3.3307365451388886
+        "x": 2.731910871249433,
+        "y": 1.2720694839484916
+      },
+      "isLocked": false,
+      "linkedName": "S3"
+    },
+    {
+      "anchor": {
+        "x": 3.759538339120371,
+        "y": 2.7815763888888885
+      },
+      "prevControl": {
+        "x": 3.115727704209262,
+        "y": 2.7768646013085663
+      },
+      "nextControl": {
+        "x": 4.602240017361113,
+        "y": 2.787743778935186
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.5811017071759264,
-        "y": 0.6614376446759263
+        "x": 7.73690336727784,
+        "y": 1.508638774006256
       },
       "prevControl": {
-        "x": 1.7197068865740748,
-        "y": 0.80407494212963
+        "x": 6.73690336727784,
+        "y": 1.508638774006256
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "RFIB"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -90.0
   },
   "reversed": false,
-  "folder": "POS2",
+  "folder": "POS3",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -177.81433148139539
+    "rotation": 142.02184696689892
   },
   "useDefaultConstraints": true
 }

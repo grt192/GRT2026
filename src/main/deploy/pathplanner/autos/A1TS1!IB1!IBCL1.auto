@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "A1TS1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "IB1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "IBCL1"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "POS1",
+  "choreoAuto": false
+}

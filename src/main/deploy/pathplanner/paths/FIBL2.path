@@ -3,29 +3,45 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4284019820601856,
-        "y": 4.046219401041667
+        "x": 3.0,
+        "y": 4.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.990320457175926,
-        "y": 3.3307365451388886
+        "x": 3.088567432468221,
+        "y": 4.438690578654661
+      },
+      "isLocked": false,
+      "linkedName": "S2"
+    },
+    {
+      "anchor": {
+        "x": 3.7346140095338987,
+        "y": 5.4627475613524
+      },
+      "prevControl": {
+        "x": 3.511312446846203,
+        "y": 5.350335764368129
+      },
+      "nextControl": {
+        "x": 3.9579155722215944,
+        "y": 5.575159358336672
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.5811017071759264,
-        "y": 0.6614376446759263
+        "x": 7.768279254443657,
+        "y": 6.7628919119005015
       },
       "prevControl": {
-        "x": 1.7197068865740748,
-        "y": 0.80407494212963
+        "x": 6.768279254443657,
+        "y": 6.7628919119005015
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LFIB1"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +58,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": "POS2",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -177.81433148139539
+    "rotation": -88.26211077734024
   },
   "useDefaultConstraints": true
 }

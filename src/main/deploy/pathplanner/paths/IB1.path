@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4,
-        "y": 7.4
+        "x": 2.8162349304564964,
+        "y": 7.397986181124225
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.1500866236938934,
-        "y": 7.393419396434789
+        "x": 2.56632155415039,
+        "y": 7.391405577559014
       },
       "isLocked": false,
-      "linkedName": "A1"
+      "linkedName": "S1"
     },
     {
       "anchor": {
@@ -45,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "IntakeBall",
+  "folder": "POS1",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -179.2680662920339
+    "rotation": -161.68251214665835
   },
   "useDefaultConstraints": true
 }

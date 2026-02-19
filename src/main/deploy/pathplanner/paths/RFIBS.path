@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.49256908275463,
-        "y": 7.439464916087964
+        "x": 2.0,
+        "y": 7.0
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.4630443431712967,
-        "y": 6.350526909722222
+        "x": 3.0,
+        "y": 7.0
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.6154160156250006,
-        "y": 0.6863696469907403
+        "x": 4.0,
+        "y": 6.0
       },
       "prevControl": {
-        "x": 1.660985460069445,
-        "y": 0.7140572916666668
+        "x": 3.0,
+        "y": 6.0
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "HopperBall",
+  "folder": "POS2",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 1.2542350055246727
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.505822410300926,
-        "y": 0.5653838252314813
+        "x": 2.6737312560873954,
+        "y": 0.6935552333697876
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.4783972077546297,
-        "y": 1.4448274016203708
+        "x": 2.350720463012337,
+        "y": 0.6679067983260777
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "S3"
     },
     {
       "anchor": {
@@ -20,8 +20,8 @@
         "y": 3.8643470052083337
       },
       "prevControl": {
-        "x": 2.582091724537037,
-        "y": 3.8633628472222226
+        "x": 2.0067421639350758,
+        "y": 3.86851060009063
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 2.427852470519472
   },
   "reversed": false,
-  "folder": "Climb",
+  "folder": "POS3",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 142.02184696689892
   },
   "useDefaultConstraints": true
 }

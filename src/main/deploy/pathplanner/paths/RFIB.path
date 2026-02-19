@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.1782231626157411,
-        "y": 5.943610387731481
+        "x": 7.73690336727784,
+        "y": 1.508638774006256
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.3410187146892656,
-        "y": 5.267942542814265
+        "x": 7.73690336727784,
+        "y": 1.758638774006256
       },
       "isLocked": false,
-      "linkedName": "IB2"
+      "linkedName": "RFIB"
     },
     {
       "anchor": {
-        "x": 1.6700917456776811,
-        "y": 3.2818482201113865
+        "x": 7.73690336727784,
+        "y": 3.6071312362808285
       },
       "prevControl": {
-        "x": 1.6700917456776811,
-        "y": 4.027152261217077
+        "x": 7.73690336727784,
+        "y": 3.3571312362808285
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LCLIMB"
+      "linkedName": "IRFIB"
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -0.12093513275790617
+    "rotation": -90.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "POS2",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.31652467786918
+    "rotation": -90.0
   },
   "useDefaultConstraints": true
 }

@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5,
-        "y": 0.6
+        "x": 2.6737312560873954,
+        "y": 0.6935552333697876
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.143812824502975,
-        "y": 0.5999999999999999
+        "x": 1.3175440805903702,
+        "y": 0.6935552333697877
       },
       "isLocked": false,
-      "linkedName": "A3"
+      "linkedName": "S3"
     },
     {
       "anchor": {
@@ -45,10 +45,10 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "HopperBall",
+  "folder": "POS3",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 142.02184696689892
   },
   "useDefaultConstraints": true
 }

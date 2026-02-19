@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 1.6700917456776811,
-        "y": 3.2818482201113865
+        "x": 1.6527260990466104,
+        "y": 3.6965347479696327
       },
       "prevControl": {
-        "x": 0.6700917456776811,
-        "y": 3.2818482201113865
+        "x": 1.7260104297708347,
+        "y": 3.935552334917335
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "RCLIMB"
+      "linkedName": "LCLIMB"
     }
   ],
   "rotationTargets": [],
@@ -42,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -0.12093513275790617
+    "rotation": -89.6093656358235
   },
   "reversed": false,
-  "folder": null,
+  "folder": "POS3",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
