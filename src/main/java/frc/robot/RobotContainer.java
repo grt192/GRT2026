@@ -21,6 +21,10 @@ import frc.robot.subsystems.hopper.HopperSubsystem;
 // Commands
 import frc.robot.commands.intake.ManualIntakePivotCommand;
 
+// PathPlanner 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import com.ctre.phoenix6.CANBus;
 
 // import frc.robot.commands.intake.SetIntakePivotCommand;
@@ -288,8 +292,17 @@ public class RobotContainer {
    * Config the autonomous command chooser
    */
   private void configureAutoChooser() {
-    // Add auton here
     autoChooser.setDefaultOption("Do Nothing", null);
+
+    // Position 1 autos
+    autoChooser.addOption("A1TS1!IB1!IBCL1", AutoBuilder.buildAuto("A1TS1!IB1!IBCL1"));
+
+    // Position 2 autos
+    autoChooser.addOption("A2TS2!FIBL2", AutoBuilder.buildAuto("A2TS2!FIBL2"));
+    autoChooser.addOption("A2TS2!FIBR2!RFIBS", AutoBuilder.buildAuto("A2TS2!FIBR2!RFIBS"));
+
+    // Position 3 autos
+    autoChooser.addOption("A3TS3!HB3!HBCL3", AutoBuilder.buildAuto("A3TS3!HB3!HBCL3"));
 
     SmartDashboard.putData("Auto Selector", autoChooser);
   }

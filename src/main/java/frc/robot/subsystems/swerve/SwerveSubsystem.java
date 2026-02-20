@@ -78,13 +78,13 @@ public class SwerveSubsystem extends SubsystemBase {
         //sets swerve
         kinematics = new SwerveDriveKinematics(FL_POS, FR_POS, BL_POS, BR_POS);
         poseEstimator = new SwerveDrivePoseEstimator(
-            kinematics, 
-            getGyroHeading(), 
+            kinematics,
+            getGyroHeading(),
             getModulePositions(),
             new Pose2d()
             );
 
-        // buildAuton(); 
+        buildAuton();
         initNT();
 
         if(DRIVE_DEBUG) {
