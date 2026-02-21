@@ -1,5 +1,7 @@
 package frc.robot.subsystems.swerve;
 
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -47,7 +49,8 @@ public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrivePoseEstimator poseEstimator;
     private Rotation2d driverHeadingOffset = new Rotation2d();
 
-    private final AHRS ahrs;
+    private final Pigeon2 pidgey;
+    private final CANBus canivore;
     private Timer lockTimer;
 
     //logging
@@ -65,16 +68,15 @@ public class SwerveSubsystem extends SubsystemBase {
     //     );
 
     public SwerveSubsystem() {
-        ROTATION_PID.enableContinuousInput(-Math.PI, Math.PI);
+        canivore = new CANBus("can");
         //initialize and reset the NavX gyro
-        ahrs = new AHRS(NavXComType.kMXP_SPI);
-        ahrs.reset();
-        ahrs.zeroYaw();
+        pidgey = new Pigeon2(12, canivore);
+        pidgey.reset();
 
-        frontLeftModule = new KrakenSwerveModule(FL_DRIVE, FL_STEER, FL_OFFSET, FL_ENCODER);
-        frontRightModule = new KrakenSwerveModule(FR_DRIVE, FR_STEER, FR_OFFSET, FR_ENCODER);
-        backLeftModule = new KrakenSwerveModule(BL_DRIVE, BL_STEER, BL_OFFSET, BL_ENCODER);
-        backRightModule = new KrakenSwerveModule(BR_DRIVE, BR_STEER, BR_OFFSET, BR_ENCODER);
+        frontLeftModule = new KrakenSwerveModule(FL_DRIVE, FL_STEER, FL_OFFSET, FL_ENCODER, canivore);
+        frontRightModule = new KrakenSwerveModule(FR_DRIVE, FR_STEER, FR_OFFSET, FR_ENCODER, canivore);
+        backLeftModule = new KrakenSwerveModule(BL_DRIVE, BL_STEER, BL_OFFSET, BL_ENCODER, canivore);
+        backRightModule = new KrakenSwerveModule(BR_DRIVE, BR_STEER, BR_OFFSET, BR_ENCODER, canivore);
 
         //sets swerve
         kinematics = new SwerveDriveKinematics(FL_POS, FR_POS, BL_POS, BR_POS);
@@ -150,7 +152,7 @@ public class SwerveSubsystem extends SubsystemBase {
      * @param angularPower [-1, 1] The rotational power.
      */
     public void setDrivePowers(double xPower, double yPower, double angularPower) {
-        ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+        ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(
             xPower * MAX_VEL, 
             yPower * MAX_VEL, 
             angularPower * MAX_OMEGA,
@@ -162,6 +164,7 @@ public class SwerveSubsystem extends SubsystemBase {
             states, speeds,
             MAX_VEL, MAX_VEL, MAX_OMEGA
         );
+        
         
     }
 
@@ -217,7 +220,7 @@ public class SwerveSubsystem extends SubsystemBase {
      * @return The angle of the robot relative to the driver heading.
      */
     public Rotation2d getDriverHeading() {
-        Rotation2d robotHeading = ahrs.isConnected() ? getGyroHeading() : getRobotPosition().getRotation();
+        Rotation2d robotHeading = getGyroHeading(); 
         return robotHeading.minus(driverHeadingOffset);
     }
 
@@ -240,7 +243,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Gets the gyro heading.*/
     private Rotation2d getGyroHeading() {
-        return Rotation2d.fromDegrees(-ahrs.getAngle()); // Might need to flip depending on the robot setup
+        return Rotation2d.fromDegrees(-pidgey.getYaw().getValueAsDouble()); // Might need to flip depending on the robot setup
     }
 
     /**
@@ -297,7 +300,7 @@ public class SwerveSubsystem extends SubsystemBase {
             angularPower * MAX_OMEGA, 
             new Rotation2d(0)
         );
-
+ 
         states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(
             states, speeds,

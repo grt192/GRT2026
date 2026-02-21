@@ -2,6 +2,8 @@ package frc.robot.subsystems.swerve;
 
 import java.util.EnumSet;
 
+import com.ctre.phoenix6.CANBus;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -14,7 +16,7 @@ import static frc.robot.Constants.SwerveConstants.DRIVE_P;
 import static frc.robot.Constants.SwerveConstants.DRIVE_S;
 import static frc.robot.Constants.SwerveConstants.DRIVE_V;
 import static frc.robot.Constants.SwerveConstants.STEER_D;
-import static frc.robot.Constants.SwerveConstants.STEER_FF;
+import static frc.robot.Constants.SwerveConstants.STEER_S;
 import static frc.robot.Constants.SwerveConstants.STEER_I;
 import static frc.robot.Constants.SwerveConstants.STEER_P;
 
@@ -38,13 +40,13 @@ public class KrakenSwerveModule {
      * @param offsetRads The offset of the absolute encoder (0 for our cases)
      * @param canCoderPort The CAN ID of the steer motor encoder
      */
-    public KrakenSwerveModule(int drivePort, int steerPort, double offsetRads, int canCoderPort) {
+    public KrakenSwerveModule(int drivePort, int steerPort, double offsetRads, int canCoderPort, CANBus canivore) {
 
         this.drivePort = drivePort;
         this.steerPort = steerPort;
 
         driveIndex = drivePort / 2;
-        steerIndex = (steerPort -1) / 2;
+        steerIndex = (steerPort - 1) / 2;
 
         // steerMotor = new SteerMotor(steerPort, canCoderPort);
         // steerMotor.configPID(
@@ -53,16 +55,16 @@ public class KrakenSwerveModule {
         //     STEER_D[steerIndex],
         //     STEER_FF[steerIndex]
         // );
-        steerMotor = new SteerMotor2(steerPort, canCoderPort);
+        steerMotor = new SteerMotor2(steerPort, canCoderPort, canivore);
         steerMotor.configPID(
             STEER_P[steerIndex],
             STEER_I[steerIndex],
             STEER_D[steerIndex],
-            STEER_FF[steerIndex]
+            STEER_S[steerIndex]
         );
 
 
-        driveMotor = new DriveMotor(drivePort);
+        driveMotor = new DriveMotor(drivePort, canivore);
         driveMotor.configPID(
             DRIVE_P[driveIndex],
             DRIVE_I[driveIndex],
@@ -164,7 +166,7 @@ public class KrakenSwerveModule {
                     STEER_P[steerIndex],
                     STEER_I[steerIndex],
                     STEER_D[steerIndex],
-                    STEER_FF[steerIndex]
+                    STEER_S[steerIndex]
                 }
             );
         NetworkTableInstance.getDefault().getTable("steerDebug").addListener(
