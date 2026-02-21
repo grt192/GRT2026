@@ -65,12 +65,11 @@ public class HopperSubsystem extends SubsystemBase {
     
     public void spinAtTargetRPM() {
         double rotationsPerSecond = HopperConstants.TARGET_RPM / 60.0;
-        krakenMotor.setControl(velocityControl.withVelocity(rotationsPerSecond));
+        krakenMotor.setControl(dutyCycleControl.withOutput(-0.3));
     }
     
     public void spinAtRPM(double rpm) {
-        double rotationsPerSecond = rpm / 60.0;
-        krakenMotor.setControl(velocityControl.withVelocity(rotationsPerSecond));
+        krakenMotor.setControl(dutyCycleControl.withOutput(rpm));
     }
     
     public double getCurrentRPM() {

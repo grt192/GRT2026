@@ -49,7 +49,7 @@ public class flywheel extends SubsystemBase {
         cfg.withCurrentLimits(currLim);
         */
         cfg.MotionMagic.MotionMagicCruiseVelocity = 120;   // target RPS cap
-        cfg.MotionMagic.MotionMagicAcceleration = 50;    // RPS per second
+        cfg.MotionMagic.MotionMagicAcceleration = 10;    // RPS per second
         cfg.MotionMagic.MotionMagicJerk = 150;            // optional, smoothness
 
         cfg.Slot0.kP = 0.05;

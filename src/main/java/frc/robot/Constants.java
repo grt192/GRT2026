@@ -66,7 +66,7 @@ public final class Constants {
 
     public static double upperAngle = 0;
     public static double lowerAngle = -0.328;
-    public static double initHoodAngle = lowerAngle;
+    public static double initHoodAngle = upperAngle;
 
     public static double flyDia = 0.127;
 

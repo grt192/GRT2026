@@ -45,13 +45,12 @@ public class hoodCommand extends Command{
         hd.setHoodAngle(kinemat.hoodRot(angle) - 0.25);
         Logger.recordOutput("hoodCommand/" + "commandAngle", kinemat.hoodRot(angle) - 0.25);
         */
-
-        fly.setVelocity(kinemat.rotationSpeed(SmartDashboard.getNumber("LinearVelCommanded", s)));
-        hd.setHoodAngle(-1*SmartDashboard.getNumber("HoodAngle", n));
+        double b = SmartDashboard.getNumber("RPS", s);
+        fly.setVelocity(SmartDashboard.getNumber("RPS", s));
+        hd.setHoodAngle(SmartDashboard.getNumber("HoodAngle", n));
 
         // Log for debug
-        Logger.recordOutput("hoodCommand/" + "Expected_Linear_Output", velocity);
-        Logger.recordOutput("hoodCommand/" + "Expected_RPS", kinemat.rotationSpeed(velocity));
+        Logger.recordOutput("hoodCommand/" + "RPSComanded", b);
     }
 
     public void end(){
