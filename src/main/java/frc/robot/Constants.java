@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.List;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -23,6 +25,32 @@ import edu.wpi.first.math.geometry.Pose2d;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+  public static class HopperConstants {
+    public static final int KRAKEN_CAN_ID = 15;
+
+    // Velocity control PID
+    public static final double TARGET_RPM = 3000.0;
+    public static final double HOPPER_KP = 0.5;
+    public static final double HOPPER_KI = 0.0;
+    public static final double HOPPER_KD = 0.0;
+    public static final double HOPPER_KS = 0.0;
+    public static final double HOPPER_KV = 0.12;
+
+    // Current limits
+    public static final int SUPPLY_CURRENT_LIMIT = 80;
+    public static final int STATOR_CURRENT_LIMIT = 60;
+    public static final double STATOR_CURRENT_LIMIT_AMPS = 120.0;
+    public static final boolean STATOR_CURRENT_LIMIT_ENABLE = false;
+
+    // Voltage and ramping
+    public static final int VOLTAGE_COMPENSATION = 12;
+    public static final double OPEN_LOOP_RAMP = 0.5;
+    public static final double DUTY_CYCLE_OPEN_LOOP_RAMP = 0.05;
+
+    // Motor config
+    public static final InvertedValue HOPPERINVERTED = InvertedValue.CounterClockwise_Positive;
+  }
 
   public static class railgunConstants {
         

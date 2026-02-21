@@ -6,6 +6,7 @@ package frc.robot;
 
 // frc imports
 import frc.robot.controllers.PS5DriveController;
+import frc.robot.subsystems.hopper.HopperSubsystem;
 import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.subsystems.shooter.hood;
 import frc.robot.commands.shooter.hood.hoodCommand;
@@ -45,6 +46,7 @@ public class RobotContainer {
   private hood hooded = new hood(c);
   private CommandPS5Controller gamer = new CommandPS5Controller(1);
   boolean manualModeShooter = true;
+   private final HopperSubsystem hopp = new HopperSubsystem(c);
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -106,6 +108,11 @@ public class RobotContainer {
     shootn.onTrue(new InstantCommand(() -> wheel.dontShoot(), wheel));
     
     hoodAuto.whileTrue(new hoodCommand(hooded, wheel));
+
+    //Trigger hop = new Trigger(()-> gamer.getR2Axis() > -0.7);
+
+    //hop.onTrue(new InstantCommand(() -> hopp.spinAtTargetRPM(), hopp));
+    //hop.onFalse(new InstantCommand(() -> hopp.spinAtRPM(0), hopp));
 
     //Manual
     
