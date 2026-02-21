@@ -30,7 +30,7 @@ public final class Constants {
     public static final int KRAKEN_CAN_ID = 15;
 
     // Velocity control PID
-    public static final double TARGET_RPM = 3000.0;
+    public static final double TARGET_RPM = 12;
     public static final double HOPPER_KP = 0.5;
     public static final double HOPPER_KI = 0.0;
     public static final double HOPPER_KD = 0.0;

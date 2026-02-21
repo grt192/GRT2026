@@ -109,10 +109,11 @@ public class RobotContainer {
     
     hoodAuto.whileTrue(new hoodCommand(hooded, wheel));
 
-    //Trigger hop = new Trigger(()-> gamer.getR2Axis() > -0.7);
+    Trigger hop = new Trigger(()-> gamer.getR2Axis() > -0.7);
 
-    //hop.onTrue(new InstantCommand(() -> hopp.spinAtTargetRPM(), hopp));
-    //hop.onFalse(new InstantCommand(() -> hopp.spinAtRPM(0), hopp));
+    hop.onTrue(new InstantCommand(() -> hopp.spinAtTargetRPM(), hopp));
+    
+    hop.onFalse(new InstantCommand(() -> hopp.spinAtRPM(0), hopp));
 
     //Manual
     
