@@ -90,7 +90,7 @@ public class RobotContainer {
     Trigger exist = new Trigger(() -> 1==1);
     exist.whileTrue(new InstantCommand(() -> {
       Logger.recordOutput("DriverMode/", manualModeShooter);}));
-      
+    SmartDashboard.putNumber("RPS", 10);
 
     //Switch Mode
     gamer.circle().onTrue(new InstantCommand(() ->{ 
