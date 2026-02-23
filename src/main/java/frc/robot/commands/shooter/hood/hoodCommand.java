@@ -15,22 +15,30 @@ public class hoodCommand extends Command{
     private double angle;
     private double velocity;
     private double height = 0;
-
-    int n=0; int s=0;
+    int n = 0; int s = 0;
     
     public hoodCommand(hood h, flywheel f){
         /*
         SmartDashboard.putNumber("Pos", distance);
         SmartDashboard.putNumber("ShooterHeight", height);
         */
-        // SmartDashboard.putNumber("HoodAngle", n);   //I want to end up using 35*, 60*, and 75*. Test using fizziq, to see what actual degrees on the hood are necessary to achieve this.
-        // SmartDashboard.putNumber("RPS", s); //Can be set between 0 to 80 rps.
         hd = h;
         fly = f;
+        //addRequirements(hd, fly);
+    }
+    @Override
+    public void initialize() {
+    System.out.println("hoodCommand INIT");
+    }
+
+    @Override
+    public boolean runsWhenDisabled() {
+    return true; // testing only
     }
 
     @Override
     public void execute() {
+        //System.out.println("Running");
         /*
         distance = SmartDashboard.getNumber("Pos", distance);
         double yShooter = SmartDashboard.getNumber("ShooterHeight", height);
@@ -53,9 +61,14 @@ public class hoodCommand extends Command{
         Logger.recordOutput("hoodCommand/" + "RPSComanded", b);
     }
 
-    public void end(){
+    @Override
+    public void end(boolean interrupted){
         fly.setVelocity(0);
         fly.flySpeed(0);
     }
- 
+    
+     @Override
+    public boolean isFinished() {
+        return false; // runs until canceled / trigger released
+    }
 }

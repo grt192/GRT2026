@@ -90,6 +90,7 @@ public class flywheel extends SubsystemBase {
 
     @Override
     public void periodic(){
+        System.out.println(velocity);
         sendData();
     }
 

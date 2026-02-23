@@ -45,7 +45,7 @@ public class RobotContainer {
   private flywheel wheel = new flywheel(c);
   private hood hooded = new hood(c);
   private CommandPS5Controller gamer = new CommandPS5Controller(1);
-  boolean manualModeShooter = true;
+  boolean manualModeShooter = false;
    private final HopperSubsystem hopp = new HopperSubsystem(c);
 
 
@@ -88,9 +88,10 @@ public class RobotContainer {
     );
     */
     Trigger exist = new Trigger(() -> 1==1);
-    exist.whileTrue(new InstantCommand(() -> {
-      Logger.recordOutput("DriverMode/", manualModeShooter);}));
-    SmartDashboard.putNumber("RPS", 10);
+    exist.whileTrue(Commands.run(() -> Logger.recordOutput("DriverMode/", manualModeShooter)));
+
+    SmartDashboard.putNumber("RPS", 0);
+    SmartDashboard.putNumber("HoodAngle", 0);
 
     //Switch Mode
     gamer.circle().onTrue(new InstantCommand(() ->{ 
@@ -119,6 +120,7 @@ public class RobotContainer {
     
     
     wheel.setDefaultCommand(Commands.run(() -> {
+      SmartDashboard.putBoolean("manualModeShooter", manualModeShooter);
       if(manualModeShooter){
         if (DriverStation.isJoystickConnected(1)) {
           double speed = (gamer.getR2Axis() + 1) / 2;

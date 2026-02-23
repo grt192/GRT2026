@@ -54,8 +54,16 @@ public class Robot extends LoggedRobot {
    @Override
   public void robotInit() {
 
-    Logger.recordMetadata("IntakePivot", "MyRobot");
-    Logger.recordMetadata("BuildType", currentMODE.toString());
+    CommandScheduler.getInstance().onCommandInitialize(cmd ->
+      System.out.println("[SCHED INIT] " + cmd.getName())
+    );
+    CommandScheduler.getInstance().onCommandInterrupt(cmd ->
+        System.out.println("[SCHED INTR] " + cmd.getName())
+    );
+    CommandScheduler.getInstance().onCommandFinish(cmd ->
+        System.out.println("[SCHED FIN] " + cmd.getName())
+    );
+
 
     switch (currentMODE) {
       case REAL:
