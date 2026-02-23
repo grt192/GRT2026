@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "A1TS1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "S1TLFIB"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LFIB"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "POS3",
+  "choreoAuto": false
+}
