@@ -10,6 +10,8 @@ import frc.robot.subsystems.hopper.HopperSubsystem;
 import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.subsystems.shooter.hood;
 import frc.robot.commands.shooter.hood.hoodCommand;
+import frc.robot.commands.shooter.flywheel.rampFlywheel;
+import frc.robot.commands.ShooterSequence;
 // Subsystems
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
