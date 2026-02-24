@@ -87,6 +87,8 @@ public class RobotContainer {
       )
     );
     */
+
+    /*
     Trigger exist = new Trigger(() -> 1==1);
     exist.whileTrue(Commands.run(() ->{ 
       Logger.recordOutput("DriverMode/", manualModeShooter);
@@ -112,6 +114,7 @@ public class RobotContainer {
     shootn.onTrue(new InstantCommand(() -> wheel.dontShoot(), wheel));
     
     hoodAuto.whileTrue(new hoodCommand(hooded, wheel));
+    */
 
     Trigger hop = new Trigger(()-> gamer.R1().getAsBoolean());
 
@@ -121,7 +124,7 @@ public class RobotContainer {
 
     //Manual
     
-    
+    /*
     wheel.setDefaultCommand(Commands.run(() -> {
       if(manualModeShooter){
         if (DriverStation.isJoystickConnected(1)) {
@@ -145,6 +148,7 @@ public class RobotContainer {
         }
       }
     }, hooded));
+    */
     
     /*driveController.getRelativeMode().whileTrue(
       new RunCommand(
