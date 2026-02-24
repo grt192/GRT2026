@@ -24,8 +24,7 @@ public class hood extends SubsystemBase {
 
     private final TalonFX hoodMotor;
     private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
-    private CANdi limit;
-    private PositionVoltage focThing = new PositionVoltage(0);
+    private PositionTorqueCurrentFOC focThing = new PositionTorqueCurrentFOC(0);
     private final CANcoder hoodCoder;
 
     private double commandedDutyCycle = 0.0;
@@ -33,13 +32,9 @@ public class hood extends SubsystemBase {
 
     public hood(CANBus cn) {
         hoodMotor = new TalonFX(railgunConstants.hoodId, cn);
-        //limit = new CANdi(railgunConstants.limitId, cn);
         hoodCoder = new CANcoder(railgunConstants.hoodEncoderId, cn);
-
         config();
-
         hoodMotor.setPosition(railgunConstants.initHoodAngle);
-        
     }
 
     public void config(){
@@ -56,19 +51,19 @@ public class hood extends SubsystemBase {
         cfg.SoftwareLimitSwitch.ForwardSoftLimitThreshold = railgunConstants.upperAngle;
         cfg.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
         cfg.SoftwareLimitSwitch.ReverseSoftLimitThreshold = railgunConstants.lowerAngle;
-        cfg.Feedback.SensorToMechanismRatio = railgunConstants.gearRatioHood;
+        cfg.Feedback.SensorToMechanismRatio = 1;
 
         cfg.Slot0.kP = 8;
         cfg.Slot0.kI = 3;
 
-       // CANcoderConfiguration ccfg = new CANcoderConfiguration();
-        //ccfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; 
+        CANcoderConfiguration ccfg = new CANcoderConfiguration();
+        ccfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; 
 
-        //hoodCoder.getConfigurator().apply(ccfg);
+        hoodCoder.getConfigurator().apply(ccfg);
 
-       // cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-        //cfg.Feedback.FeedbackRemoteSensorID = railgunConstants.hoodEncoderId;
-        cfg.Feedback.RotorToSensorRatio = 1;
+        cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        cfg.Feedback.FeedbackRemoteSensorID = railgunConstants.hoodEncoderId;
+        cfg.Feedback.RotorToSensorRatio = railgunConstants.gearRatioHood;
 
         hoodMotor.getConfigurator().apply(cfg);
     }
@@ -93,21 +88,14 @@ public class hood extends SubsystemBase {
         
     }
 
+    public double getPos(){
+        return hoodMotor.getPosition().getValueAsDouble();
+    }
+
     boolean prevPress = false;
     @Override
     public void periodic(){
-       /*  if(limit.getS1Closed().refresh().getValue() && !prevPress){
-            hoodMotor.setPosition(railgunConstants.initHoodAngle);
-            prevPress = true;
-        }
-        
-        if(!limit.getS1Closed().refresh().getValue()){
-            prevPress = false;
-        }
-            */
-
-        sendData();
-            
+        sendData();   
     }
 
     public void sendData(){

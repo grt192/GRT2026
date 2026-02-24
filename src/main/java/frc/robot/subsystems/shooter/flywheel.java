@@ -24,17 +24,12 @@ public class flywheel extends SubsystemBase {
     private final TalonFX upperMotor;
     private MotionMagicVelocityVoltage spinner = new MotionMagicVelocityVoltage(0);
     private DutyCycleOut dutyCycl = new DutyCycleOut(0);
-    private double velocity = 0;
-    private final CANcoder flywheelCoder;
 
     private static final String LOG_PREFIX = "FlyWheel/";
 
     public flywheel(CANBus cn) {
-        // Construct motors directly on the CAN bus
         upperMotor = new TalonFX(railgunConstants.upperId, cn);
-        flywheelCoder = new CANcoder(railgunConstants.upperEncoderId, cn);
         config();
-       
     }
 
     public void config(){
@@ -59,38 +54,31 @@ public class flywheel extends SubsystemBase {
         cfg.Slot0.kV = 0.14;
         cfg.Slot0.kA = 0.0;
 
-        CANcoderConfiguration ccfg = new CANcoderConfiguration();
-        ccfg.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive; 
-        //flywheelCoder.getConfigurator().apply(ccfg);
-
-        //cfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
-        //cfg.Feedback.FeedbackRemoteSensorID = railgunConstants.upperEncoderId;
-
         cfg.Feedback.SensorToMechanismRatio = railgunConstants.gearRatioUpper;
 
         upperMotor.getConfigurator().apply(cfg);
     }
 
-    public void setVelocity(double vel){
-        velocity = vel;
+    public void shoot(double rps){
+        upperMotor.setControl(spinner.withVelocity(rps));
     }
 
-    public void shoot(){
-        upperMotor.setControl(spinner.withVelocity(velocity));
+    public double getRPS(){
+        return upperMotor.getVelocity().getValueAsDouble();
     }
 
     public void dontShoot(){
         upperMotor.setControl(spinner.withVelocity(0));
     }
 
+    double commandedDutyCycle = 0;
     public void flySpeed(double speed){
-        velocity = speed;
+        commandedDutyCycle = 0;
         upperMotor.setControl(dutyCycl.withOutput(speed));
     }
 
     @Override
     public void periodic(){
-        System.out.println(velocity);
         sendData();
     }
 
@@ -117,7 +105,7 @@ public class flywheel extends SubsystemBase {
             upperMotor.getDeviceTemp().getValueAsDouble());
 
         Logger.recordOutput(LOG_PREFIX + "CommandedDutyCycle",
-            velocity);
+            commandedDutyCycle);
 
         Logger.recordOutput(LOG_PREFIX + "Connected",
             upperMotor.isConnected());

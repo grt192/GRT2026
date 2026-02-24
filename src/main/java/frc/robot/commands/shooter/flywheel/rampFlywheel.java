@@ -1,38 +1,38 @@
-package frc.robot.commands.shooter.hood;
+package frc.robot.commands.shooter.flywheel;
 
-import frc.robot.subsystems.shooter.hood;
+import frc.robot.subsystems.shooter.flywheel;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.shooter.kinemat;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.littletonrobotics.junction.Logger;
 
-public class hoodCommand extends Command{
-
-    private hood hd;
+public class rampFlywheel extends Command{
+    
+    private flywheel fly;
     boolean good;
     
-    public hoodCommand(hood h, boolean isGood){
-        hd = h;
+    public rampFlywheel(flywheel h, boolean isGood){
+        fly = h;
         good = isGood;
     }
 
     @Override
     public void execute() {
-        double ang = kinemat.calculateAngle();
-        hd.setHoodAngle(ang);
+        double RPS = kinemat.calculateVel();
+        fly.shoot(RPS);
 
-        if(hd.getPos() == ang){
+        if(fly.getRPS() == RPS){
             good = true;
         }
     }
 
     @Override
     public void end(boolean interrupted){
+        fly.dontShoot();
     }
 
     @Override
     public boolean isFinished(){
         return false;
     }
- 
 }

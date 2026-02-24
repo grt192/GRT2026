@@ -67,8 +67,7 @@ public class RobotContainer {
   
   private void configureBindings() {
     System.out.println("Configuring");
-
-      //gun.run();
+    
       /* Driving -- One joystick controls translation, the other rotation. If the robot-relative button is held down,
       * the robot is controlled along its own axes, otherwise controls apply to the field axes by default. If the
       * swerve aim button is held down, the robot will rotate automatically to always face a target, and only
@@ -88,7 +87,10 @@ public class RobotContainer {
     );
     */
     Trigger exist = new Trigger(() -> 1==1);
-    exist.whileTrue(Commands.run(() -> Logger.recordOutput("DriverMode/", manualModeShooter)));
+    exist.whileTrue(Commands.run(() -> {
+      Logger.recordOutput("DriverMode/", manualModeShooter);
+      SmartDashboard.putBoolean("manualModeShooter", manualModeShooter);
+    }));
 
     SmartDashboard.putNumber("RPS", 0);
     SmartDashboard.putNumber("HoodAngle", 0);
@@ -101,26 +103,12 @@ public class RobotContainer {
     }));
 
     //Auto
-    Trigger shooty = new Trigger(() -> gamer.getR2Axis() > -0.7 && manualModeShooter == false && DriverStation.isJoystickConnected(1));
-    Trigger shootn = new Trigger(() -> gamer.getR2Axis() <- 0.7  && manualModeShooter == false);
-    Trigger hoodAuto = new Trigger(() -> manualModeShooter == false);
-
-    shooty.whileTrue(new RunCommand(() -> wheel.shoot(), wheel));
-    shootn.onTrue(new InstantCommand(() -> wheel.dontShoot(), wheel));
     
-    hoodAuto.whileTrue(new hoodCommand(hooded, wheel));
-
-    Trigger hop = new Trigger(()-> gamer.R1().getAsBoolean());
-
-    hop.onTrue(new InstantCommand(() -> hopp.spinAtTargetRPM(), hopp));
-    
-    hop.onFalse(new InstantCommand(() -> hopp.spinAtRPM(0), hopp));
 
     //Manual
     
     
     wheel.setDefaultCommand(Commands.run(() -> {
-      SmartDashboard.putBoolean("manualModeShooter", manualModeShooter);
       if(manualModeShooter){
         if (DriverStation.isJoystickConnected(1)) {
           double speed = (gamer.getR2Axis() + 1) / 2;
