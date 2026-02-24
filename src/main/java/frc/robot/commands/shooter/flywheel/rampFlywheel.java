@@ -21,7 +21,7 @@ public class rampFlywheel extends Command{
         double RPS = kinemat.calculateVel();
         fly.shoot(RPS);
 
-        if(fly.getRPS() == RPS){
+        if(Math.abs(fly.getRPS()-RPS) <=5){
             good = true;
         }else{good = false;}
     }

@@ -9,11 +9,9 @@ import org.littletonrobotics.junction.Logger;
 public class hoodCommand extends Command{
 
     private hood hd;
-    boolean good;
     
-    public hoodCommand(hood h, boolean isGood){
+    public hoodCommand(hood h){
         hd = h;
-        good = isGood;
     }
 
     @Override
@@ -21,7 +19,7 @@ public class hoodCommand extends Command{
         double ang = kinemat.calculateAngle();
         hd.setHoodAngle(ang);
 
-        if(hd.getPos() == ang){
+        if(Math.abs(hd.getPos()-ang)<=0.05){
             good = true;
         }else{good = false;}
     }
