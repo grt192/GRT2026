@@ -4,9 +4,18 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.LogFileUtil;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter.AdvantageScopeOpenBehavior;
+import org.littletonrobotics.junction.LoggedRobot;
 
 /**
  * The methods in this class are called automatically corresponding to each
@@ -15,11 +24,20 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * package after creating
  * this project, you must also update the Main.java file in the project.
  */
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
   private Command m_autonomousCommand;
 
   @SuppressWarnings("unused")
   private final RobotContainer m_robotContainer;
+
+  public enum MODE {
+    REAL,
+    SIM,
+    REPLAY
+  }
+
+  public static final MODE simMode = MODE.SIM;
+  public static final MODE currentMode = RobotBase.isReal() ? MODE.REAL : simMode;
 
   /**
    * This function is run when the robot is first started up and should be used
@@ -27,6 +45,48 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {
+    // Start logging to .wpilog file (saved to USB stick or /home/lvuser/logs/)
+    DataLogManager.start();
+    // Also log DS data (joystick inputs, mode changes, etc.)
+    DriverStation.startDataLog(DataLogManager.getLog());
+
+    // Record metadata
+    Logger.recordMetadata("BuildType", currentMode.toString());
+    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
+    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
+    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
+    Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
+    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+    Logger.recordMetadata(
+        "GitDirty",
+        switch (BuildConstants.DIRTY) {
+          case 0 -> "All changes committed";
+          case 1 -> "Uncommitted changes";
+          default -> "Unknown";
+        });
+
+    switch (currentMode) {
+      case REAL:
+        Logger.addDataReceiver(new WPILOGWriter("/U/logs"));
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case SIM:
+        Logger.addDataReceiver(new NT4Publisher());
+        break;
+
+      case REPLAY:
+        setUseTiming(false); // Run as fast as possible
+        String logPath = LogFileUtil.findReplayLog();
+        Logger.setReplaySource(new WPILOGReader(logPath));
+        Logger.addDataReceiver(
+            new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_replayed"), AdvantageScopeOpenBehavior.AUTO));
+        break;
+    }
+
+    Logger.start();
+
+    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our
     // autonomous chooser on the dashboard.
@@ -54,7 +114,11 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
-    // m_robotContainer.updateDashboard();
+    Logger.recordOutput("Robot/Enabled", isEnabled());
+    Logger.recordOutput("Robot/Mode",
+      isAutonomous() ? "Auto" :
+      isTeleop() ? "Teleop" :
+      isDisabled() ? "Disabled" : "Other");
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -66,20 +130,19 @@ public class Robot extends TimedRobot {
   public void disabledPeriodic() {
   }
 
-  // @Override
-  // public void autonomousInit() {
-  // m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+  @Override
+  public void autonomousInit() {
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-  // // schedule the autonomous command
-  // if (m_autonomousCommand != null) {
-  // m_autonomousCommand.schedule();
-  // }
-  // }
+    // schedule the autonomous command
+    if (m_autonomousCommand != null) {
+      CommandScheduler.getInstance().schedule(m_autonomousCommand);
+    }
+  }
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {
-  }
+  public void autonomousPeriodic() {}
 
   @Override
   public void teleopInit() {
