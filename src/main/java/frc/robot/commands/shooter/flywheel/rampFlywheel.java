@@ -9,21 +9,15 @@ import org.littletonrobotics.junction.Logger;
 public class rampFlywheel extends Command{
     
     private flywheel fly;
-    boolean good;
     
     public rampFlywheel(flywheel h, boolean isGood){
         fly = h;
-        good = isGood;
     }
 
     @Override
     public void execute() {
         double RPS = kinemat.calculateVel();
         fly.shoot(RPS);
-
-        if(Math.abs(fly.getRPS()-RPS) <=5){
-            good = true;
-        }else{good = false;}
     }
 
     @Override
