@@ -23,7 +23,7 @@ public class rampFlywheel extends Command{
 
         if(fly.getRPS() == RPS){
             good = true;
-        }
+        }else{good = false;}
     }
 
     @Override

@@ -23,7 +23,7 @@ public class hoodCommand extends Command{
 
         if(hd.getPos() == ang){
             good = true;
-        }
+        }else{good = false;}
     }
 
     @Override
