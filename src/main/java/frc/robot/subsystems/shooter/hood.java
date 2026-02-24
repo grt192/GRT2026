@@ -24,7 +24,6 @@ public class hood extends SubsystemBase {
 
     private final TalonFX hoodMotor;
     private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
-    private CANdi limit;
     private PositionVoltage focThing = new PositionVoltage(0);
     private final CANcoder hoodCoder;
 
@@ -33,11 +32,8 @@ public class hood extends SubsystemBase {
 
     public hood(CANBus cn) {
         hoodMotor = new TalonFX(railgunConstants.hoodId, cn);
-        //limit = new CANdi(railgunConstants.limitId, cn);
         hoodCoder = new CANcoder(railgunConstants.hoodEncoderId, cn);
-
         config();
-
         hoodMotor.setPosition(railgunConstants.initHoodAngle);
         
     }
@@ -93,21 +89,9 @@ public class hood extends SubsystemBase {
         
     }
 
-    boolean prevPress = false;
     @Override
     public void periodic(){
-       /*  if(limit.getS1Closed().refresh().getValue() && !prevPress){
-            hoodMotor.setPosition(railgunConstants.initHoodAngle);
-            prevPress = true;
-        }
-        
-        if(!limit.getS1Closed().refresh().getValue()){
-            prevPress = false;
-        }
-            */
-
-        sendData();
-            
+        sendData();     
     }
 
     public void sendData(){

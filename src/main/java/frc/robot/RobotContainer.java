@@ -88,7 +88,10 @@ public class RobotContainer {
     );
     */
     Trigger exist = new Trigger(() -> 1==1);
-    exist.whileTrue(Commands.run(() -> Logger.recordOutput("DriverMode/", manualModeShooter)));
+    exist.whileTrue(Commands.run(() ->{ 
+      Logger.recordOutput("DriverMode/", manualModeShooter);
+      SmartDashboard.putBoolean("manualModeShooter", manualModeShooter);
+    }));
 
     SmartDashboard.putNumber("RPS", 0);
     SmartDashboard.putNumber("HoodAngle", 0);
@@ -120,7 +123,6 @@ public class RobotContainer {
     
     
     wheel.setDefaultCommand(Commands.run(() -> {
-      SmartDashboard.putBoolean("manualModeShooter", manualModeShooter);
       if(manualModeShooter){
         if (DriverStation.isJoystickConnected(1)) {
           double speed = (gamer.getR2Axis() + 1) / 2;
