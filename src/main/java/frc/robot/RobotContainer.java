@@ -6,6 +6,9 @@ package frc.robot;
 
 import com.ctre.phoenix6.CANBus;
 
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -20,12 +23,27 @@ public class RobotContainer {
   private CANBus canivore1 = new CANBus("mechCAN");
   private CANBus canivore2 = new CANBus("swerveCAN");
 
+  private final SendableChooser<Color> colorChooser = new SendableChooser<>();
+
+  public enum Color {
+    NONE,
+    RED,
+    GREEN,
+    BLUE
+  }
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    
+    colorChooser.setDefaultOption("OFF", Color.NONE);
+    colorChooser.addOption("Red", Color.RED);
+    colorChooser.addOption("Green", Color.GREEN);
+    colorChooser.addOption("Blue", Color.BLUE);
+
+    SmartDashboard.putData("Color Selector", colorChooser);
   }
 
 
 }
+
