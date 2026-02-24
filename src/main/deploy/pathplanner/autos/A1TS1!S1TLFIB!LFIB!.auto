@@ -26,6 +26,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "POS3",
+  "folder": "POS1",
   "choreoAuto": false
 }
