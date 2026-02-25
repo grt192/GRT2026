@@ -10,8 +10,9 @@ public class hoodCommand extends Command{
 
     private hood hd;
     
-    public hoodCommand(hood h, ){
+    public hoodCommand(hood h){
         hd = h;
+        addRequirements(hd);
     }
 
     @Override
@@ -23,10 +24,4 @@ public class hoodCommand extends Command{
     @Override
     public void end(boolean interrupted){
     }
-
-    @Override
-    public boolean isFinished(){
-        return false;
-    }
- 
 }

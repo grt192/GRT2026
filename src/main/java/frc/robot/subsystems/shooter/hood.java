@@ -27,6 +27,8 @@ public class hood extends SubsystemBase {
     private PositionTorqueCurrentFOC focThing = new PositionTorqueCurrentFOC(0);
     private final CANcoder hoodCoder;
 
+    private double wantedAngle = 0;
+
     private double commandedDutyCycle = 0.0;
     private static final String LOG_PREFIX = "Hood/";
 
@@ -68,8 +70,17 @@ public class hood extends SubsystemBase {
     }
 
     public void setHoodAngle(double rotationAngle){
+        wantedAngle = rotationAngle;
         if(rotationAngle >= railgunConstants.lowerAngle && rotationAngle <= railgunConstants.upperAngle){
             hoodMotor.setControl(focThing.withPosition(rotationAngle));
+        }
+    }
+
+    public boolean wantedAngl(){
+        if(Math.abs(wantedAngle-hoodMotor.getPosition().getValueAsDouble()) <0.5){
+            return true;
+        }else{
+            return false;
         }
     }
 
