@@ -3,12 +3,10 @@ package frc.robot.subsystems.shooter;
 import frc.robot.Constants.railgunConstants;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -16,7 +14,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import org.littletonrobotics.junction.Logger;
 
 public class flywheel extends SubsystemBase {
@@ -24,6 +21,8 @@ public class flywheel extends SubsystemBase {
     private final TalonFX upperMotor;
     private MotionMagicVelocityVoltage spinner = new MotionMagicVelocityVoltage(0);
     private DutyCycleOut dutyCycl = new DutyCycleOut(0);
+
+    private double wantedVe = 0;
 
     private static final String LOG_PREFIX = "FlyWheel/";
 
@@ -60,6 +59,7 @@ public class flywheel extends SubsystemBase {
     }
 
     public void shoot(double rps){
+        wantedVe = rps;
         upperMotor.setControl(spinner.withVelocity(rps));
     }
 
@@ -67,7 +67,15 @@ public class flywheel extends SubsystemBase {
         return upperMotor.getVelocity().getValueAsDouble();
     }
 
+    public boolean wantedVel(){
+        if(Math.abs(wantedVe - upperMotor.getVelocity().getValueAsDouble()) < 5){
+            return true;
+        }else{
+            return false;
+        }
+    }
     public void dontShoot(){
+        wantedVe = 0;
         upperMotor.setControl(spinner.withVelocity(0));
     }
 
