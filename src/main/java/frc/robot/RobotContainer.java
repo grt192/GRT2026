@@ -68,7 +68,6 @@ public class RobotContainer {
    */
   
   private void configureBindings() {
-    System.out.println("Configuring");
     
       /* Driving -- One joystick controls translation, the other rotation. If the robot-relative button is held down,
       * the robot is controlled along its own axes, otherwise controls apply to the field axes by default. If the
@@ -94,9 +93,6 @@ public class RobotContainer {
       SmartDashboard.putBoolean("manualModeShooter", manualModeShooter);
     }));
 
-    SmartDashboard.putNumber("RPS", 0);
-    SmartDashboard.putNumber("HoodAngle", 0);
-
     //Switch Mode
     gamer.circle().onTrue(new InstantCommand(() ->{ 
       manualModeShooter = !manualModeShooter; 
@@ -108,8 +104,6 @@ public class RobotContainer {
     
 
     //Manual
-    
-    
     wheel.setDefaultCommand(Commands.run(() -> {
       if(manualModeShooter){
         if (DriverStation.isJoystickConnected(1)) {
