@@ -10,7 +10,7 @@ public class hoodCommand extends Command{
 
     private hood hd;
     
-    public hoodCommand(hood h){
+    public hoodCommand(hood h, ){
         hd = h;
     }
 
@@ -18,10 +18,6 @@ public class hoodCommand extends Command{
     public void execute() {
         double ang = kinemat.calculateAngle();
         hd.setHoodAngle(ang);
-
-        if(Math.abs(hd.getPos()-ang)<=0.05){
-            good = true;
-        }else{good = false;}
     }
 
     @Override

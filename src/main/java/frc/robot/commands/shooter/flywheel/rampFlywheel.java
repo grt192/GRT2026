@@ -12,6 +12,7 @@ public class rampFlywheel extends Command{
     
     public rampFlywheel(flywheel h, boolean isGood){
         fly = h;
+        addRequirements(fly);
     }
 
     @Override
@@ -25,8 +26,4 @@ public class rampFlywheel extends Command{
         fly.dontShoot();
     }
 
-    @Override
-    public boolean isFinished(){
-        return false;
-    }
 }
