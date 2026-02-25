@@ -100,6 +100,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
     private final PIDController ROTATION_PID = new PIDController(4.0, 0.0, 0.2);
 
+    public boolean isAligned(){
+        return true;
+    }
+
     @Override
     public void periodic() {
         //update the poseestimator with curent gyro reading      

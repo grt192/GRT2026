@@ -1,4 +1,4 @@
-// package frc.robot.subsystems.Vision;
+ package frc.robot.subsystems.Vision;
 
 // import java.util.List;
 // import java.util.Optional;
@@ -25,10 +25,13 @@
 // import edu.wpi.first.util.datalog.StructLogEntry;
 // import edu.wpi.first.wpilibj.DataLogManager;
 // import edu.wpi.first.wpilibj.Filesystem;
-// import edu.wpi.first.wpilibj2.command.SubsystemBase;
+ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // import frc.robot.Constants.VisionConstants;
 // import frc.robot.util.PolynomialRegression;
-// public class VisionSubsystem extends SubsystemBase {
+ public class VisionSubsystem extends SubsystemBase {
+    public boolean hasBall(){
+        return true;
+    }
 //     private final PhotonCamera camera;
 //     private final PhotonPoseEstimator photonPoseEstimator;
 //     private static AprilTagFieldLayout aprilTagFieldLayout;
@@ -202,4 +205,4 @@
 //             Pose2d.struct
 //         );
 //     }
-// }
+ }
