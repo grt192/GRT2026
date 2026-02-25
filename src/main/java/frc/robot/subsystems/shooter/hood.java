@@ -34,7 +34,6 @@ public class hood extends SubsystemBase {
         hoodMotor = new TalonFX(railgunConstants.hoodId, cn);
         hoodCoder = new CANcoder(railgunConstants.hoodEncoderId, cn);
         config();
-        hoodMotor.setPosition(railgunConstants.initHoodAngle);
     }
 
     public void config(){
@@ -92,7 +91,6 @@ public class hood extends SubsystemBase {
         return hoodMotor.getPosition().getValueAsDouble();
     }
 
-    boolean prevPress = false;
     @Override
     public void periodic(){
         sendData();   
