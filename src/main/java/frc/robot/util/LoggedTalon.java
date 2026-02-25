@@ -3,6 +3,7 @@ package frc.robot.util;
 import static edu.wpi.first.units.Units.NewtonMeters;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -70,12 +71,14 @@ public class LoggedTalon extends TalonFX {
     private final StatusSignal<Boolean> faultBootDuringEnable = getFault_BootDuringEnable();
 
 
-    public LoggedTalon(int deviceId, String canBus) {
+    //if no name set set to motor[deviceID]
+    public LoggedTalon(int deviceId, CANBus canBus) {
         this(deviceId, canBus, ("motor" + deviceId));
     }
 
-    public LoggedTalon(int deviceId, String canBus, String dashboardKey) {
+    public LoggedTalon(int deviceId, CANBus canBus, String dashboardKey) {
         super(deviceId, canBus);
+        //the replace methods are used in case the dashboardKey gives funky results
         this.logPrefix = "TalonFX/" + dashboardKey.replace("/", "_").replace(" ", "_");
     }
 
@@ -118,6 +121,7 @@ public class LoggedTalon extends TalonFX {
 
         TelemetryLevel telemetryLevel = getEffectiveTelemetryLevel();
         if (telemetryLevel.includes(TelemetryLevel.BASIC)) {
+            
             Logger.recordOutput(logPrefix + "/Position", position.getValue().in(Units.Radians));
             Logger.recordOutput(logPrefix + "/Velocity", velocity.getValue().in(Units.RadiansPerSecond));
             Logger.recordOutput(logPrefix + "/DutyCycle", dutyCycle.getValue());
@@ -167,11 +171,16 @@ public class LoggedTalon extends TalonFX {
         return reverseLimit.getValue() == ReverseLimitValue.ClosedToGround;
     }
 
+    //torque = kt * torqueCurrent
     private Torque getTorque() {
+        //kt = torque constant
         Per<TorqueUnit, CurrentUnit> kt = motorKt.getValue();
         Current tCurrent = torqueCurrent.getValue();
         return (Torque) kt.timesDivisor(tCurrent);
     }
+
+
+    //torque = kt * torqueCurrent
 
     private double getMotorKtNmPerAmp() {
         return motorKt.getValue().timesDivisor(Units.Amps.of(1.0)).in(NewtonMeters);
