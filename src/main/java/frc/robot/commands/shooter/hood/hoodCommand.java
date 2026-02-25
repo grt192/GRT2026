@@ -21,7 +21,7 @@ public class hoodCommand extends Command{
 
     @Override
     public void execute() {
-        double ang = kinemat.calculateAngle(s.getDistance());
+        double ang = kinemat.calculateAngle(s.getDistance(), 0.5);
         hd.setHoodAngle(ang);
     }
 

@@ -104,6 +104,10 @@ public class SwerveSubsystem extends SubsystemBase {
         return true;
     }
 
+    public double getDistance(){
+        return 10;
+    }
+
     @Override
     public void periodic() {
         //update the poseestimator with curent gyro reading      

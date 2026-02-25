@@ -21,7 +21,7 @@ public class rampFlywheel extends Command{
 
     @Override
     public void execute() {
-        double RPS = kinemat.calculateVel(s.getDistance());
+        double RPS = kinemat.calculateVel(s.getDistance(), 0.5);
         fly.shoot(RPS);
     }
 
