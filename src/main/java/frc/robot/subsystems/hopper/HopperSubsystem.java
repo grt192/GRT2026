@@ -11,19 +11,22 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.HopperConstants;
+import frc.robot.util.LoggedTalon;
 
 
 public class HopperSubsystem extends SubsystemBase {
 
-    private final TalonFX krakenMotor;
+    private final LoggedTalon krakenMotor;
     // private final VelocityVoltage velocityControl;
     private final DutyCycleOut dutyCycleControl;
 
     public HopperSubsystem(CANBus canBus) {
-        krakenMotor = new TalonFX(HopperConstants.KRAKEN_CAN_ID, canBus);
+        krakenMotor = new LoggedTalon(HopperConstants.KRAKEN_CAN_ID, canBus);
         // velocityControl = new VelocityVoltage(0);
         dutyCycleControl = new DutyCycleOut(0);
 
@@ -87,10 +90,6 @@ public class HopperSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // SmartDashboard.putNumber("Hopper/CurrentRPM", getCurrentRPM());
-        SmartDashboard.putNumber("Hopper/MotorOutput", getMotorOutput());
-        SmartDashboard.putNumber("Hopper/Velocity", krakenMotor.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("Hopper/Current", krakenMotor.getStatorCurrent().getValueAsDouble());
-        SmartDashboard.putNumber("Hopper/Voltage", krakenMotor.getMotorVoltage().getValueAsDouble());
-        SmartDashboard.putNumber("Hopper/Temp", krakenMotor.getDeviceTemp().getValueAsDouble());
+        krakenMotor.updateDashboard();
     }
 }
