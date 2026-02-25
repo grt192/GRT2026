@@ -12,7 +12,7 @@ public class rampFlywheel extends Command{
     
     private flywheel fly;
     private SwerveSubsystem s;
-    
+ 
     public rampFlywheel(flywheel h, SwerveSubsystem sw){
         fly = h;
         s = sw;
