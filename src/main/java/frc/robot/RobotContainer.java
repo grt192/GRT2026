@@ -40,7 +40,7 @@ public class RobotContainer {
   private boolean isCompetition = true;
 
   private PS5DriveController driveController;
-  // private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+  private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   CANBus c = new CANBus("mechCAN");
   private flywheel wheel = new flywheel(c);
   private hood hooded = new hood(c);
@@ -51,7 +51,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // constructDriveController(); 
+    constructDriveController(); 
     configureBindings();
   }
 
@@ -68,13 +68,16 @@ public class RobotContainer {
   private void configureBindings() {
     System.out.println("Configuring");
 
+    SmartDashboard.putNumber("RPS", 0);
+    SmartDashboard.putNumber("HoodAngle", 0);
+
       //gun.run();
       /* Driving -- One joystick controls translation, the other rotation. If the robot-relative button is held down,
       * the robot is controlled along its own axes, otherwise controls apply to the field axes by default. If the
       * swerve aim button is held down, the robot will rotate automatically to always face a target, and only
       * translation will be manually controllable. */
 
-      /* 
+    
     swerveSubsystem.setDefaultCommand(
       new RunCommand(() -> {
         swerveSubsystem.setDrivePowers(
@@ -86,17 +89,14 @@ public class RobotContainer {
         swerveSubsystem
       )
     );
-    */
-
-    /*
+    
+    /* 
     Trigger exist = new Trigger(() -> 1==1);
     exist.whileTrue(Commands.run(() ->{ 
       Logger.recordOutput("DriverMode/", manualModeShooter);
       SmartDashboard.putBoolean("manualModeShooter", manualModeShooter);
     }));
 
-    SmartDashboard.putNumber("RPS", 0);
-    SmartDashboard.putNumber("HoodAngle", 0);
 
     //Switch Mode
     gamer.circle().onTrue(new InstantCommand(() ->{ 
@@ -114,17 +114,18 @@ public class RobotContainer {
     shootn.onTrue(new InstantCommand(() -> wheel.dontShoot(), wheel));
     
     hoodAuto.whileTrue(new hoodCommand(hooded, wheel));
+      
     */
-
     Trigger hop = new Trigger(()-> gamer.R1().getAsBoolean());
 
     hop.onTrue(new InstantCommand(() -> hopp.spinAtTargetRPM(), hopp));
     
     hop.onFalse(new InstantCommand(() -> hopp.spinAtRPM(0), hopp));
-
-    //Manual
     
     /*
+    //Manual
+    
+    
     wheel.setDefaultCommand(Commands.run(() -> {
       if(manualModeShooter){
         if (DriverStation.isJoystickConnected(1)) {
@@ -148,9 +149,9 @@ public class RobotContainer {
         }
       }
     }, hooded));
-    */
     
-    /*driveController.getRelativeMode().whileTrue(
+    */
+    driveController.getRelativeMode().whileTrue(
       new RunCommand(
         () -> {
           swerveSubsystem.setRobotRelativeDrivePowers(
@@ -161,18 +162,27 @@ public class RobotContainer {
           driveController.getRotatePower();
           }, swerveSubsystem)
     );
-    */
+
+    /* 
+    
 
 
     /* Pressing the button resets the field axes to the current robot axes. */
-    /* 
+    
     driveController.bindDriverHeadingReset(
       () ->{
         swerveSubsystem.resetDriverHeading();
       },
       swerveSubsystem
     );
-    */
+    
+
+
+    hooded.setDefaultCommand(
+        new hoodCommand(hooded, wheel)
+    );
+
+
   }
     
 

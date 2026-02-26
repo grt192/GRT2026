@@ -72,7 +72,7 @@ public class DriveMotor {
     public DriveMotor(int motorID){
 
         // Set Motor and reset Encoder
-        motor = new TalonFX(motorID, "can");
+        motor = new TalonFX(motorID, "swerveCAN");
         motor.setPosition(0);
 
         // Configure CANcoder and Kraken

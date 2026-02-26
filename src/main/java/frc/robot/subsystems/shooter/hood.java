@@ -91,6 +91,7 @@ public class hood extends SubsystemBase {
 
     @Override
     public void periodic(){
+        //System.out.println("hood" + hoodMotor.getVelocity().getValueAsDouble());
         sendData();     
     }
 

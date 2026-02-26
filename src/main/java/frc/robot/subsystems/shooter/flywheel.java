@@ -75,8 +75,8 @@ public class flywheel extends SubsystemBase {
         velocity = vel;
     }
 
-    public void shoot(){
-        upperMotor.setControl(spinner.withVelocity(velocity));
+    public void shoot(double vel){
+        upperMotor.setControl(spinner.withVelocity(vel));
     }
 
     public void dontShoot(){
@@ -90,7 +90,7 @@ public class flywheel extends SubsystemBase {
 
     @Override
     public void periodic(){
-        System.out.println(velocity);
+        //System.out.println("fly" + upperMotor.getVelocity().getValueAsDouble());
         sendData();
     }
 

@@ -4,6 +4,7 @@ import frc.robot.subsystems.shooter.hood;
 import frc.robot.subsystems.shooter.flywheel;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.shooter.kinemat;
+import frc.robot.subsystems.hopper.HopperSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.littletonrobotics.junction.Logger;
 
@@ -24,7 +25,7 @@ public class hoodCommand extends Command{
         */
         hd = h;
         fly = f;
-        //addRequirements(hd, fly);
+        addRequirements(hd, fly);
     }
     @Override
     public void initialize() {
@@ -54,11 +55,15 @@ public class hoodCommand extends Command{
         Logger.recordOutput("hoodCommand/" + "commandAngle", kinemat.hoodRot(angle) - 0.25);
         */
         double b = SmartDashboard.getNumber("RPS", s);
-        fly.setVelocity(SmartDashboard.getNumber("RPS", s));
+        fly.shoot(SmartDashboard.getNumber("RPS", s));
+
+        double h = SmartDashboard.getNumber("HoodAngle", n);
         hd.setHoodAngle(SmartDashboard.getNumber("HoodAngle", n));
 
         // Log for debug
         Logger.recordOutput("hoodCommand/" + "RPSComanded", b);
+
+
     }
 
     @Override
