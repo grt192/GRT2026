@@ -36,11 +36,12 @@ public class ShooterSequence extends SequentialCommandGroup {
                 // Always running
                 new rampFlywheel(fly, swerve),
                 new hoodCommand(hood, swerve),
+                new towerRoll(tower),
 
                 // Only feed when ready
                 new ConditionalCommand(
                     new indexerRun(hopper),
-                    new towerRoll(tower),
+                    edu.wpi.first.wpilibj2.command.Commands.none(),
                     () -> fly.wantedVel() && hood.wantedAngl()
                 )
             )
