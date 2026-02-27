@@ -16,7 +16,7 @@ public class AimToHubCommand extends Command{
     private final FieldManagementSubsystem fmsSubsystem;
     // Shooter offset relative to robot center (x: forward/back, y: left/right in meters)
     private static final Translation2d SHOOTER_OFFSET = new Translation2d(-0.08, 0.073);
-    private static final Rotation2d SHOOTER_ANGLE = new Rotation2d(-Math.PI);
+    private static final Rotation2d SHOOTER_ANGLE = new Rotation2d(-Math.PI/2);
 
     // Link to dimensions https://firstfrc.blob.core.windows.net/frc2026/FieldAssets/2026-field-dimension-dwgs.pdf
     public AimToHubCommand (SwerveSubsystem swerveSubsystem, FieldManagementSubsystem fmsSubsystem){
@@ -39,7 +39,7 @@ public class AimToHubCommand extends Command{
        Translation2d shooterToHub = hubTrans.minus(shooterPosition);   
        Rotation2d targetAngle = shooterToHub.getAngle().minus(SHOOTER_ANGLE);
        
-       return targetAngle.getDegrees() - robotPose.getRotation().getDegrees();
+       return targetAngle.getDegrees();
    }
 
     public Command createAimCommand(BooleanSupplier cancelCondition){

@@ -54,32 +54,32 @@
 //         Translation2d currentTrans = swerveSubsystem.getRobotPosition().getTranslation();
 //         Translation2d pathStartTrans = getAlignPath(pathName).getStartingHolonomicPose().get().getTranslation();
 
-//         if (Math.abs(currentTrans.getDistance(pathStartTrans)) <= AlignConstants.DISTANCE_TOLERANCE) {
-//             int index = AlignConstants.reefPathList.indexOf(pathName) / 2;
-//             ChassisSpeeds drivePower = AlignConstants.reefdirectionList.get(index);
+//         // if (Math.abs(currentTrans.getDistance(pathStartTrans)) <= AlignConstants.DISTANCE_TOLERANCE) {
+//         //     // int index = AlignConstants.reefPathList.indexOf(pathName) / 2;
+//         //     // ChassisSpeeds drivePower = AlignConstants.reefdirectionList.get(index);
 
-//             PathPlannerPath path = getAlignPath(pathName);
-//             if (path == null) {
-//                 System.out.println("NOOO00000000000000O");
-//                 return Commands.none();
+//         //     PathPlannerPath path = getAlignPath(pathName);
+//         //     if (path == null) {
+//         //         System.out.println("NOOO00000000000000O");
+//         //         return Commands.none();
 
-//             }
-//             Command alignPath = AutoBuilder.pathfindThenFollowPath(
-//                 path,
-//                 constraints);
+//         //     }
+//         //     Command alignPath = AutoBuilder.pathfindThenFollowPath(
+//         //         path,
+//         //         constraints);
 
-//             System.out.println("XXXXXXXXXXXXXXXXXX");
-//             alignPath.addRequirements(swerveSubsystem);
+//         //     System.out.println("XXXXXXXXXXXXXXXXXX");
+//         //     alignPath.addRequirements(swerveSubsystem);
 
-// //             runAlignPath = (Command) new SequentialCommandGroup(
-// //                 new DriveBackwardsCommand(swerveSubsystem, drivePower).until(
-// //                     () -> Math.abs(swerveSubsystem.getRobotPosition().getTranslation()
-// //                     .getDistance(pathStartTrans)) > AlignConstants.distanceTolerance),
-// //                     alignPath
-// //             );
-            
-//         }
-//         else {
+//         //     runAlignPath = (Command) new SequentialCommandGroup(
+//         //         new DriveBackwardsCommand(swerveSubsystem, drivePower).until(
+//         //             () -> Math.abs(swerveSubsystem.getRobotPosition().getTranslation()
+//         //             .getDistance(pathStartTrans)) > AlignConstants.DISTANCE_TOLERANCE),
+//         //             alignPath
+//         //     );
+
+//         // }
+//         // else {
 //             PathPlannerPath path = getAlignPath(pathName);
 //             if (path == null) {
 //                 System.out.println("NOOOOOOOOPOOOOOOO");
@@ -90,30 +90,11 @@
 //             runAlignPath = AutoBuilder.pathfindThenFollowPath(
 //                 path,
 //                 constraints);
-//         }
+//         // }
 
-// //         //TESTING PATHFIND TO PATH VS ON THE FLY PATH 
-// //         //Right is also on the fly
-// //         // if (isRight) {
-// //         //     PathPlannerPath unusedPath = getAlignPath(pathName);
-// //         //     PathPlannerPath path = getAlignPath(
-// //         //         unusedPath.getWaypoints(), 
-// //         //         unusedPath.getGoalEndState()
-// //         //     );
+//         return runAlignPath; 
 
-// //         //     runAlignPath = AutoBuilder.followPath(path);
-// //         // }
-// //         // else {
-// //         //     PathPlannerPath path = getAlignPath(pathName);
-// //         //     runAlignPath = AutoBuilder.pathfindThenFollowPath(
-// //         //         path,
-// //         //         constraints
-// //         //     );
-// //         // }
-
-// //         return runAlignPath; 
-
-// //     }
+//     }
 
 // //         /**
 // //      * takes the path name and returns the PathPlanner Path 
@@ -140,7 +121,4 @@
 //         );
 //         return getAlignPath;
 //     }
-
-
 // }
-

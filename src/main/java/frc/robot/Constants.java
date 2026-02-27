@@ -250,6 +250,12 @@ public final class Constants {
     public static final double DISTANCE_TOLERANCE = .1;
     public static final Translation2d BLUE_HUB_TRANS = new Translation2d(4.625, 4);
     public static final Translation2d RED_HUB_TRANS = new Translation2d(11.9, 4);
+
+    public final static List<String> alignPaths = List.of(
+      ""
+      
+    );
+
   }
 
 
