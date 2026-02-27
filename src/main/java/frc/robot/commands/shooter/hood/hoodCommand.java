@@ -5,8 +5,6 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.shooter.kinemat;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.littletonrobotics.junction.Logger;
 
 public class hoodCommand extends Command{
 
