@@ -4,7 +4,7 @@ import frc.robot.subsystems.shooter.hood;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.shooter.kinemat;
+import frc.robot.subsystems.shooter.table;
 
 public class hoodCommand extends Command{
 
@@ -19,7 +19,7 @@ public class hoodCommand extends Command{
 
     @Override
     public void execute() {
-        double ang = kinemat.calculateAngle(s.getDistance(), 0.5);
+        double ang = table.getAngle(s.getDistance());
         hd.setHoodAngle(ang);
     }
 

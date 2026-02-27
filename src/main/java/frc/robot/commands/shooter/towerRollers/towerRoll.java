@@ -15,7 +15,7 @@ public class towerRoll extends Command{
 
     @Override
     public void execute() {
-        t.setTower(INTAKE.OUTTAKE);
+        t.setTower(INTAKE.BALLUP);
     }
 
     @Override
