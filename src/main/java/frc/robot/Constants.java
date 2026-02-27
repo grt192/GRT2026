@@ -4,6 +4,13 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Hertz;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Rotation;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import java.util.List;
 
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -12,6 +19,15 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.AngleUnit;
+import edu.wpi.first.units.AngularVelocityUnit;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.LinearVelocity;
 import frc.robot.util.AlignUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 
@@ -47,6 +63,42 @@ public final class Constants {
     public static final int VOLTAGE_COMPENSATION = 12;
     public static final double OPEN_LOOP_RAMP = 0.5;
     public static final double DUTY_CYCLE_OPEN_LOOP_RAMP = 0.05;
+
+    // Motor config
+    public static final InvertedValue HOPPERINVERTED = InvertedValue.CounterClockwise_Positive;
+  }
+  public static class TowerConstants {
+    public static final int KRAKEN_CAN_ID = 15;
+    public enum INTAKE {
+      INTAKE,
+      OUTTAKE,
+      STOP
+    }
+    // maths 
+    public static final double GEAR_REDUCTION = 4.0;
+
+    public static final double TARGET_BPS = 4.0;//frequency
+    public static final double WHEEL_RADIUS = 1.0;//distance 
+    public static final double BALL_DIAMETER = 6.0;//distance
+    public static final double TARGET_RPS = TARGET_BPS * BALL_DIAMETER / WHEEL_RADIUS;
+
+    // Velocity control PID
+    public static final double KP = 0.5;
+    public static final double KI = 0.0;
+    public static final double KD = 0.0;
+    public static final double KS = 0.0;
+    public static final double KV = 0.12;
+
+    // Current limits
+    public static final int SUPPLY_CURRENT_LIMIT = 80;
+    public static final int STATOR_CURRENT_LIMIT = 60;
+    public static final double STATOR_CURRENT_LIMIT_AMPS = 120.0;
+    public static final boolean STATOR_CURRENT_LIMIT_ENABLE = false;
+
+//     // Voltage and ramping
+//     public static final int VOLTAGE_COMPENSATION = 12;
+//     public static final double OPEN_LOOP_RAMP = 0.5;
+//     public static final double DUTY_CYCLE_OPEN_LOOP_RAMP = 0.05;
 
     // Motor config
     public static final InvertedValue HOPPERINVERTED = InvertedValue.CounterClockwise_Positive;

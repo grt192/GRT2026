@@ -9,6 +9,7 @@ import frc.robot.controllers.PS5DriveController;
 import frc.robot.subsystems.hopper.HopperSubsystem;
 import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.subsystems.shooter.hood;
+import frc.robot.subsystems.shooter.towerRollers;
 import frc.robot.commands.shooter.hood.hoodCommand;
 import frc.robot.commands.shooter.flywheel.rampFlywheel;
 import frc.robot.commands.ShooterSequence;
@@ -46,6 +47,7 @@ public class RobotContainer {
   CANBus c = new CANBus("mechCAN");
   private flywheel wheel = new flywheel(c);
   private hood hooded = new hood(c);
+  private towerRollers towerRollers = new towerRollers(c);
   private CommandPS5Controller gamer = new CommandPS5Controller(1);
   boolean manualModeShooter = false;
    private final HopperSubsystem hopp = new HopperSubsystem(c);
