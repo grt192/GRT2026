@@ -9,7 +9,7 @@ import frc.robot.subsystems.shooter.towerRollers;
 
 import frc.robot.commands.shooter.flywheel.rampFlywheel;
 import frc.robot.commands.shooter.hood.hoodCommand;
-import frc.robot.commands.tower.towerRoll;
+// import frc.robot.commands.tower.towerRoll;
 import frc.robot.commands.hopper.indexerRun;
 
 import frc.robot.commands.allign.allignCommand;
@@ -36,7 +36,7 @@ public class ShooterSequence extends SequentialCommandGroup {
                 // Always running
                 new rampFlywheel(fly, swerve),
                 new hoodCommand(hood, swerve),
-                new towerRoll(tower),
+                // new towerRoll(tower),
 
                 // Only feed when ready
                 new ConditionalCommand(

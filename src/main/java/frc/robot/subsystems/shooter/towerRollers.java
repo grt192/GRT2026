@@ -68,10 +68,10 @@ public class towerRollers extends SubsystemBase {
     }
     public void setTower(INTAKE state){
         switch (state) {
-            case INTAKE:
+            case BALLUP:
                 krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(TowerConstants.TARGET_RPS));
                 break;
-            case OUTTAKE:
+            case BALLDOWN:
                 krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(-TowerConstants.TARGET_RPS));
                 break;
             case STOP:

@@ -15,6 +15,8 @@ import frc.robot.commands.shooter.flywheel.rampFlywheel;
 import frc.robot.commands.ShooterSequence;
 // Subsystems
 import frc.robot.subsystems.swerve.SwerveSubsystem;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.DriverStation;
 // WPILib imports
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -50,11 +52,14 @@ public class RobotContainer {
   private towerRollers towerRollers = new towerRollers(c);
   private CommandPS5Controller gamer = new CommandPS5Controller(1);
   boolean manualModeShooter = false;
-   private final HopperSubsystem hopp = new HopperSubsystem(c);
+  private final HopperSubsystem hopp = new HopperSubsystem(c);
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    UsbCamera camera = CameraServer.startAutomaticCapture();
+    // camera.setResolution(640, 480);
+    // camera.setFPS(30);
     // constructDriveController(); 
     configureBindings();
   }
