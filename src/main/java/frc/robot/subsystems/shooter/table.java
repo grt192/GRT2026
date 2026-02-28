@@ -1,20 +1,33 @@
 package frc.robot.subsystems.shooter;
 
-import java.util.HashMap;
-import java.util.Map;
-
-
-import java.util.TreeMap;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 public class table {
 
-    private final TreeMap<Double, Double> table = new TreeMap<>();
+    private static InterpolatingDoubleTreeMap shooterAngle = new InterpolatingDoubleTreeMap();
+    private static InterpolatingDoubleTreeMap shooterRPS = new InterpolatingDoubleTreeMap();
 
     public table() {
-        table.put(2.0, 2400.0);
-        table.put(2.5, 2700.0);
-        table.put(3.0, 3050.0);
-        table.put(3.5, 3400.0);
+        shooterAngle.put(1.524, -0.3);
+        shooterAngle.put(1.651, -0.3);
+        shooterAngle.put(1.981, -0.3);
+        shooterAngle.put(2.261, -0.3);
+        shooterAngle.put(2.616, -0.27);
+
+        shooterRPS.put(1.524,45.0);
+        shooterRPS.put(1.651,45.0);
+        shooterRPS.put(1.981,50.0);
+        shooterRPS.put(2.261,50.0);
+        shooterRPS.put(2.616, 60.0);
+
         
+    }
+
+    public static double getRPS(double dis){
+        return shooterRPS.get(dis);
+    }
+
+    public static double getAngle(double dis){
+        return shooterAngle.get(dis);
     }
 }
