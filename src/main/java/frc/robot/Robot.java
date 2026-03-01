@@ -51,6 +51,8 @@ public class Robot extends LoggedRobot {
     DriverStation.startDataLog(DataLogManager.getLog());
 
     // Record metadata 
+    // BUILDCONSTANTS IS GENERATED DURING BUILD 
+    // IF THIS IS THROWING AN ERROR JUST BUILD
     Logger.recordMetadata("BuildType", currentMode.toString());
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
     Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
