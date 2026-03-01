@@ -50,20 +50,20 @@ public class Robot extends LoggedRobot {
     // Also log DS data (joystick inputs, mode changes, etc.)
     DriverStation.startDataLog(DataLogManager.getLog());
 
-    // // Record metadata
-    // Logger.recordMetadata("BuildType", currentMode.toString());
-    // Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
-    // Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
-    // Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
-    // Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
-    // Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
-    // Logger.recordMetadata(
-    //     "GitDirty",
-    //     switch (BuildConstants.DIRTY) {
-    //       case 0 -> "All changes committed";
-    //       case 1 -> "Uncommitted changes";
-    //       default -> "Unknown";
-    //     });
+    // Record metadata 
+    Logger.recordMetadata("BuildType", currentMode.toString());
+    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
+    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
+    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
+    Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
+    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+    Logger.recordMetadata(
+        "GitDirty",
+        switch (BuildConstants.DIRTY) {
+          case 0 -> "All changes committed";
+          case 1 -> "Uncommitted changes";
+          default -> "Unknown";
+        });
 
     switch (currentMode) {
       case REAL:
