@@ -31,12 +31,13 @@ import com.ctre.phoenix6.CANBus;
 import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-
-
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
@@ -52,124 +53,132 @@ public class RobotContainer {
   private towerRollers towerRollers = new towerRollers(c);
   private CommandPS5Controller gamer = new CommandPS5Controller(1);
   boolean manualModeShooter = false;
-  private final HopperSubsystem hopp = new HopperSubsystem(c);
+  // private final HopperSubsystem hopp = new HopperSubsystem(c);
 
-
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     UsbCamera camera = CameraServer.startAutomaticCapture();
     // camera.setResolution(640, 480);
     // camera.setFPS(30);
     // constructDriveController()
-    // ; 
+    // ;
     configureBindings();
   }
 
   /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * Use this method to define your trigger->command mappings. Triggers can be
+   * created via the
+   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
+   * an arbitrary
    * predicate, or via the named f`actories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
+   * {@link
+   * CommandXboxController
+   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+   * PS4} controllers or
+   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  
-  private void configureBindings() {
-    
-      /* Driving -- One joystick controls translation, the other rotation. If the robot-relative button is held down,
-      * the robot is controlled along its own axes, otherwise controls apply to the field axes by default. If the
-      * swerve aim button is held down, the robot will rotate automatically to always face a target, and only
-      * translation will be manually controllable. */
 
-      /* 
-    swerveSubsystem.setDefaultCommand(
-      new RunCommand(() -> {
-        swerveSubsystem.setDrivePowers(
-          driveController.getForwardPower(),
-          driveController.getLeftPower(),
-          driveController.getRotatePower()
-        );
-        }, 
-        swerveSubsystem
-      )
-    );
-    */
-    Trigger exist = new Trigger(() -> 1==1);
+  private void configureBindings() {
+
+    /*
+     * Driving -- One joystick controls translation, the other rotation. If the
+     * robot-relative button is held down,
+     * the robot is controlled along its own axes, otherwise controls apply to the
+     * field axes by default. If the
+     * swerve aim button is held down, the robot will rotate automatically to always
+     * face a target, and only
+     * translation will be manually controllable.
+     */
+
+    /*
+     * swerveSubsystem.setDefaultCommand(
+     * new RunCommand(() -> {
+     * swerveSubsystem.setDrivePowers(
+     * driveController.getForwardPower(),
+     * driveController.getLeftPower(),
+     * driveController.getRotatePower()
+     * );
+     * },
+     * swerveSubsystem
+     * )
+     * );
+     */
+    Trigger exist = new Trigger(() -> 1 == 1);
     exist.whileTrue(Commands.run(() -> {
       Logger.recordOutput("DriverMode/", manualModeShooter);
       SmartDashboard.putBoolean("manualModeShooter", manualModeShooter);
     }));
 
-    //Switch Mode
-    gamer.circle().onTrue(new InstantCommand(() ->{ 
-      manualModeShooter = !manualModeShooter; 
-      wheel.dontShoot(); 
-      hooded.hoodSpeed(0.0); 
+    // Switch Mode
+    gamer.circle().onTrue(new InstantCommand(() -> {
+      manualModeShooter = !manualModeShooter;
+      wheel.dontShoot();
+      hooded.hoodSpeed(0.0);
     }));
 
-    //Auto
-    
+    // Auto
 
-    //Manual
+    // Manual
     wheel.setDefaultCommand(Commands.run(() -> {
-      if(manualModeShooter){
+      if (manualModeShooter) {
         if (DriverStation.isJoystickConnected(1)) {
           double speed = (gamer.getR2Axis() + 1) / 2;
           wheel.flySpeed(speed);
-        } else{
+        } else {
           wheel.flySpeed(0);
         }
       }
-    } , wheel));
+    }, wheel));
 
     hooded.setDefaultCommand(Commands.run(() -> {
-      if(manualModeShooter){
+      if (manualModeShooter) {
         System.out.println("manual");
         if (gamer.L3().getAsBoolean()) {
           hooded.hoodSpeed(0.1);
-        }else if(gamer.R3().getAsBoolean()){
+        } else if (gamer.R3().getAsBoolean()) {
           hooded.hoodSpeed(-0.1);
-        } else{
+        } else {
           hooded.hoodSpeed(0);
         }
       }
     }, hooded));
-    
-    /*driveController.getRelativeMode().whileTrue(
-      new RunCommand(
-        () -> {
-          swerveSubsystem.setRobotRelativeDrivePowers(
-            driveController.getForwardPower(),
-            driveController.getLeftPower(),
-            driveController.getRotatePower()
-          );
-          driveController.getRotatePower();
-          }, swerveSubsystem)
-    );
-    */
 
+    /*
+     * driveController.getRelativeMode().whileTrue(
+     * new RunCommand(
+     * () -> {
+     * swerveSubsystem.setRobotRelativeDrivePowers(
+     * driveController.getForwardPower(),
+     * driveController.getLeftPower(),
+     * driveController.getRotatePower()
+     * );
+     * driveController.getRotatePower();
+     * }, swerveSubsystem)
+     * );
+     */
 
     /* Pressing the button resets the field axes to the current robot axes. */
-    /* 
-    driveController.bindDriverHeadingReset(
-      () ->{
-        swerveSubsystem.resetDriverHeading();
-      },
-      swerveSubsystem
-    );
-    */
+    /*
+     * driveController.bindDriverHeadingReset(
+     * () ->{
+     * swerveSubsystem.resetDriverHeading();
+     * },
+     * swerveSubsystem
+     * );
+     */
   }
-    
 
   /**
    * Constructs the drive controller based on the name of the controller at port
    * 0
    */
-  private void constructDriveController(){
+  private void constructDriveController() {
     driveController = new PS5DriveController();
     driveController.setDeadZone(0.05);
   }
-
 
 }

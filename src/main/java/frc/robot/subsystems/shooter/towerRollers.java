@@ -13,6 +13,7 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.networktables.DoubleSubscriber;
@@ -46,13 +47,17 @@ public class towerRollers extends SubsystemBase {
     }
 
     /**
-     * Creates a NetworkTables tuning entry for a configuration value.
      *
+      
+     * 
+     * 
      * @param valueName    The name of the value in NetworkTables (ex: "P", "I",
      *                     "D").
      * @param configSetter A Consumer that takes the new double value and applies it
-     *                     to the motor configuration (ex: value ->
-     *                     pidSlots.withKP(value)).
+     *                     to the
+     * 
+     *                     
+    s.withKP(value)).
      * @param defaultVal   The default value to publish to NetworkTables on startup.
      */
 
@@ -79,7 +84,7 @@ public class towerRollers extends SubsystemBase {
         // tuneThis("A", val -> pidSlots.withKP(val), TowerConstants.KA);
         // tuneThis("G", val -> pidSlots.withKP(val), TowerConstants.KG);
         yoTuneThis("setDutyCyclePercent", val -> krakenMotor.setControl(dutyCycleControl.withOutput(val)), 0);
-        yoTuneThis("setMMVTCF", val -> krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(val)), 0);
+        yoTuneThis("setMMVTCF", val -> krakenMotor.setControl(new VelocityVoltage(val)), 0);
 
         yoTuneThis("MMAccel", val -> config.MotionMagic.MotionMagicAcceleration = val, 100);
         yoTuneThis("MMJerk", val -> config.MotionMagic.MotionMagicJerk = val, 1000);

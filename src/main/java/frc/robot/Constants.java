@@ -72,7 +72,7 @@ public final class Constants {
   }
 
   public static class TowerConstants {
-    public static final int KRAKEN_CAN_ID = 35;
+    public static final int KRAKEN_CAN_ID = 15;
 
     public enum INTAKE {
       BALLUP,
