@@ -6,6 +6,9 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.StatusSignalCollection;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.ForwardLimitValue;
@@ -43,42 +46,41 @@ public class LoggedTalon extends TalonFX {
     public TelemetryLevel logTelemetryLevel = DEFAULT_TELEMETRY_LEVEL;
 
     // ===== Cached signals (refresh once, then read many) =====
-    private final StatusSignal<Angle> position = getPosition();
-    private final StatusSignal<AngularVelocity> velocity = getVelocity();
-    private final StatusSignal<AngularAcceleration> acceleration = getAcceleration();
+    private final StatusSignal<Angle> position = getPosition(false);
+    private final StatusSignal<AngularVelocity> velocity = getVelocity(false);
+    private final StatusSignal<AngularAcceleration> acceleration = getAcceleration(false);
 
-    private final StatusSignal<Double> dutyCycle = getDutyCycle();
-    private final StatusSignal<Voltage> supplyVoltage = getSupplyVoltage();
-    private final StatusSignal<Voltage> appliedVoltage = getMotorVoltage();
-    private final StatusSignal<Current> supplyCurrent = getSupplyCurrent();
-    private final StatusSignal<Current> statorCurrent = getStatorCurrent();
+    private final StatusSignal<Double> dutyCycle = getDutyCycle(false);
+    private final StatusSignal<Voltage> supplyVoltage = getSupplyVoltage(false);
+    private final StatusSignal<Voltage> appliedVoltage = getMotorVoltage(false);
+    private final StatusSignal<Current> supplyCurrent = getSupplyCurrent(false);
+    private final StatusSignal<Current> statorCurrent = getStatorCurrent(false);
 
-    private final StatusSignal<Temperature> deviceTemp = getDeviceTemp();
+    private final StatusSignal<Temperature> deviceTemp = getDeviceTemp(false);
 
-    private final StatusSignal<Current> torqueCurrent = getTorqueCurrent();
-    private final StatusSignal<Per<TorqueUnit, CurrentUnit>> motorKt = getMotorKT();
+    private final StatusSignal<Current> torqueCurrent = getTorqueCurrent(false);
+    private final StatusSignal<Per<TorqueUnit, CurrentUnit>> motorKt = getMotorKT(false);
 
-    private final StatusSignal<Double> closedLoopReference = getClosedLoopReference();
-    private final StatusSignal<Double> closedLoopError = getClosedLoopError();
+    private final StatusSignal<Double> closedLoopReference = getClosedLoopReference(false);
+    private final StatusSignal<Double> closedLoopError = getClosedLoopError(false);
 
-    private final StatusSignal<ControlModeValue> controlMode = getControlMode();
+    private final StatusSignal<ControlModeValue> controlMode = getControlMode(false);
 
-    private final StatusSignal<ForwardLimitValue> forwardLimit = getForwardLimit();
-    private final StatusSignal<ReverseLimitValue> reverseLimit = getReverseLimit();
+    private final StatusSignal<ForwardLimitValue> forwardLimit = getForwardLimit(false);
+    private final StatusSignal<ReverseLimitValue> reverseLimit = getReverseLimit(false);
 
-    private final StatusSignal<Boolean> faultBridgeBrownout = getFault_BridgeBrownout();
-    private final StatusSignal<Boolean> faultHardware = getFault_Hardware();
-    private final StatusSignal<Boolean> faultBootDuringEnable = getFault_BootDuringEnable();
+    private final StatusSignal<Boolean> faultBridgeBrownout = getFault_BridgeBrownout(false);
+    private final StatusSignal<Boolean> faultHardware = getFault_Hardware(false);
+    private final StatusSignal<Boolean> faultBootDuringEnable = getFault_BootDuringEnable(false);
 
-
-    //if no name set set to motor[deviceID]
+    // if no name set set to motor[deviceID]
     public LoggedTalon(int deviceId, CANBus canBus) {
         this(deviceId, canBus, ("motor" + deviceId));
     }
 
     public LoggedTalon(int deviceId, CANBus canBus, String dashboardKey) {
         super(deviceId, canBus);
-        //the replace methods are used in case the dashboardKey gives funky results
+        // the replace methods are used in case the dashboardKey gives funky results
         this.logPrefix = "TalonFX/" + dashboardKey.replace("/", "_").replace(" ", "_");
     }
 
@@ -121,7 +123,7 @@ public class LoggedTalon extends TalonFX {
 
         TelemetryLevel telemetryLevel = getEffectiveTelemetryLevel();
         if (telemetryLevel.includes(TelemetryLevel.BASIC)) {
-            
+
             Logger.recordOutput(logPrefix + "/Position", position.getValue().in(Units.Radians));
             Logger.recordOutput(logPrefix + "/Velocity", velocity.getValue().in(Units.RadiansPerSecond));
             Logger.recordOutput(logPrefix + "/DutyCycle", dutyCycle.getValue());
@@ -171,16 +173,15 @@ public class LoggedTalon extends TalonFX {
         return reverseLimit.getValue() == ReverseLimitValue.ClosedToGround;
     }
 
-    //torque = kt * torqueCurrent
+    // torque = kt * torqueCurrent
     private Torque getTorque() {
-        //kt = torque constant
+        // kt = torque constant
         Per<TorqueUnit, CurrentUnit> kt = motorKt.getValue();
         Current tCurrent = torqueCurrent.getValue();
         return (Torque) kt.timesDivisor(tCurrent);
     }
 
-
-    //torque = kt * torqueCurrent
+    // torque = kt * torqueCurrent
 
     private double getMotorKtNmPerAmp() {
         return motorKt.getValue().timesDivisor(Units.Amps.of(1.0)).in(NewtonMeters);
