@@ -1,23 +1,10 @@
 {
   "NetworkTables Settings": {
-    "mode": "Client (NT4)",
-    "serverTeam": "10.1.92.2"
-  },
-  "Persistent Values": {
-    "open": false
+    "mode": "Client (NT4)"
   },
   "transitory": {
-    "driveDebug": {
-      "double[]##v_/driveDebug/0PIDSV": {
-        "open": true
-      },
-      "double[]##v_/driveDebug/2PIDSV": {
-        "open": true
-      },
-      "double[]##v_/driveDebug/4PIDSV": {
-        "open": true
-      },
-      "double[]##v_/driveDebug/6PIDSV": {
+    "tower": {
+      "Pids": {
         "open": true
       },
       "open": true
