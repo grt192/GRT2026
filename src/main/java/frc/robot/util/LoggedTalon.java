@@ -73,6 +73,8 @@ public class LoggedTalon extends TalonFX {
     private final StatusSignal<Boolean> faultHardware = getFault_Hardware(false);
     private final StatusSignal<Boolean> faultBootDuringEnable = getFault_BootDuringEnable(false);
 
+    private Per<TorqueUnit, CurrentUnit> kt;
+
     // if no name set set to motor[deviceID]
     public LoggedTalon(int deviceId, CANBus canBus) {
         this(deviceId, canBus, ("motor" + deviceId));
@@ -82,6 +84,8 @@ public class LoggedTalon extends TalonFX {
         super(deviceId, canBus);
         // the replace methods are used in case the dashboardKey gives funky results
         this.logPrefix = "TalonFX/" + dashboardKey.replace("/", "_").replace(" ", "_");
+
+        kt = getMotorKT().getValue();
     }
 
     /**
@@ -153,7 +157,6 @@ public class LoggedTalon extends TalonFX {
         if (telemetryLevel.includes(TelemetryLevel.FULL)) {
             Logger.recordOutput(logPrefix + "/TorqueCurrent", torqueCurrent.getValue().in(Units.Amps));
             Logger.recordOutput(logPrefix + "/TorqueNm", getTorque().in(NewtonMeters));
-            Logger.recordOutput(logPrefix + "/MotorKtNmPerAmp", getMotorKtNmPerAmp());
             Logger.recordOutput(logPrefix + "/ClosedLoopRef", closedLoopReference.getValue());
             Logger.recordOutput(logPrefix + "/ClosedLoopError", closedLoopError.getValue());
         }
@@ -176,14 +179,7 @@ public class LoggedTalon extends TalonFX {
     // torque = kt * torqueCurrent
     private Torque getTorque() {
         // kt = torque constant
-        Per<TorqueUnit, CurrentUnit> kt = motorKt.getValue();
         Current tCurrent = torqueCurrent.getValue();
         return (Torque) kt.timesDivisor(tCurrent);
-    }
-
-    // torque = kt * torqueCurrent
-
-    private double getMotorKtNmPerAmp() {
-        return motorKt.getValue().timesDivisor(Units.Amps.of(1.0)).in(NewtonMeters);
     }
 }
