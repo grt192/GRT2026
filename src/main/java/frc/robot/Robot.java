@@ -50,8 +50,8 @@ public class Robot extends LoggedRobot {
     // Also log DS data (joystick inputs, mode changes, etc.)
     DriverStation.startDataLog(DataLogManager.getLog());
 
-    // Record metadata 
-    // BUILDCONSTANTS IS GENERATED DURING BUILD 
+    // Record metadata
+    // BUILDCONSTANTS IS GENERATED DURING BUILD
     // IF THIS IS THROWING AN ERROR JUST BUILD
     Logger.recordMetadata("BuildType", currentMode.toString());
     Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
@@ -88,7 +88,7 @@ public class Robot extends LoggedRobot {
 
     Logger.start();
 
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+    // Instantiate our RobotContainer. This will perform all our button bindings, and put our
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our
     // autonomous chooser on the dashboard.
@@ -118,19 +118,15 @@ public class Robot extends LoggedRobot {
 
     Logger.recordOutput("Robot/Enabled", isEnabled());
     Logger.recordOutput("Robot/Mode",
-      isAutonomous() ? "Auto" :
-      isTeleop() ? "Teleop" :
-      isDisabled() ? "Disabled" : "Other");
+        isAutonomous() ? "Auto" : isTeleop() ? "Teleop" : isDisabled() ? "Disabled" : "Other");
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {
-  }
+  public void disabledInit() {}
 
   @Override
-  public void disabledPeriodic() {
-  }
+  public void disabledPeriodic() {}
 
   @Override
   public void autonomousInit() {
@@ -159,8 +155,7 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {
-  }
+  public void teleopPeriodic() {}
 
   @Override
   public void testInit() {
@@ -170,16 +165,13 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {
-  }
+  public void testPeriodic() {}
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {
-  }
+  public void simulationInit() {}
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {
-  }
+  public void simulationPeriodic() {}
 }
