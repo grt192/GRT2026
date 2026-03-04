@@ -48,13 +48,23 @@ public final class Constants {
   public static class HopperConstants {
     public static final int KRAKEN_CAN_ID = 15;
 
+    public enum HOPPER_INTAKE {
+      BALLIN,
+      BALLOUT,
+      STOP
+    }
+
     // Velocity control PID
-    public static final double TARGET_RPM = 12;
-    public static final double HOPPER_KP = 0.5;
-    public static final double HOPPER_KI = 0.0;
-    public static final double HOPPER_KD = 0.0;
-    public static final double HOPPER_KS = 0.0;
-    public static final double HOPPER_KV = 0.12;
+    public static final double KP = 0.5;
+    public static final double KI = 0.0;
+    public static final double KD = 0.0;
+    public static final double KS = 0.0;
+    public static final double KV = 0.12;
+
+    // balls stuff
+    public static final double TARGET_BPS = 4.0;// frequency
+    public static final double GEAR_REDUCTION = 4.0; // dummy value -Tony 3.3.26
+    public static final double TARGET_RPS = TARGET_BPS / 4;// divided by 4 cuz 4 vains on spinner
 
     // Current limits
     public static final int SUPPLY_CURRENT_LIMIT = 80;
@@ -74,7 +84,7 @@ public final class Constants {
   public static class TowerConstants {
     public static final int KRAKEN_CAN_ID = 15;
 
-    public enum INTAKE {
+    public enum TOWER_INTAKE {
       BALLUP,
       BALLDOWN,
       STOP

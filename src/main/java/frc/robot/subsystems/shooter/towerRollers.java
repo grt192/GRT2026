@@ -24,7 +24,7 @@ import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.TowerConstants;
-import frc.robot.Constants.TowerConstants.INTAKE;
+import frc.robot.Constants.TowerConstants.TOWER_INTAKE;
 import frc.robot.util.LoggedTalon;
 
 public class towerRollers extends SubsystemBase {
@@ -48,7 +48,7 @@ public class towerRollers extends SubsystemBase {
 
     /**
      *
-      
+     * 
      * 
      * 
      * @param valueName    The name of the value in NetworkTables (ex: "P", "I",
@@ -56,8 +56,8 @@ public class towerRollers extends SubsystemBase {
      * @param configSetter A Consumer that takes the new double value and applies it
      *                     to the
      * 
-     *                     
-    s.withKP(value)).
+     * 
+     *                     s.withKP(value)).
      * @param defaultVal   The default value to publish to NetworkTables on startup.
      */
 
@@ -120,7 +120,7 @@ public class towerRollers extends SubsystemBase {
         krakenMotor.getConfigurator().apply(config);
     }
 
-    public void setTower(INTAKE state) {
+    public void setTower(TOWER_INTAKE state) {
         switch (state) {
             case BALLUP:
                 krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(TowerConstants.TARGET_RPS));
