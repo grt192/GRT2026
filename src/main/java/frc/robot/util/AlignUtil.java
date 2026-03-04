@@ -1,124 +1,104 @@
     
-// package frc.robot.util;
+package frc.robot.util;
 
-// import java.util.List;
+import java.util.List;
 
-// import com.pathplanner.lib.auto.AutoBuilder;
-// import com.pathplanner.lib.path.GoalEndState;
-// import com.pathplanner.lib.path.PathConstraints;
-// import com.pathplanner.lib.path.PathPlannerPath;
-// import com.pathplanner.lib.path.Waypoint;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 
-// import edu.wpi.first.math.geometry.Pose2d;
-// import edu.wpi.first.math.geometry.Rotation2d;
-// import edu.wpi.first.math.geometry.Translation2d;
-// import edu.wpi.first.math.kinematics.ChassisSpeeds;
-// import edu.wpi.first.math.util.Units;
-// import edu.wpi.first.units.measure.LinearVelocity;
-// import edu.wpi.first.wpilibj2.command.Command;
-// import edu.wpi.first.wpilibj2.command.Commands;
-// import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-// import edu.wpi.first.wpilibj2.command.SubsystemBase;
-// import frc.robot.subsystems.swerve.SwerveSubsystem;
-// import frc.robot.Constants.AlignConstants;
-// import frc.robot.commands.swerve.DriveBackwardsCommand;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.Constants.AlignConstants;
+import frc.robot.commands.swerve.DriveBackwardsCommand;
 
-// public class AlignUtil {
+public class AlignUtil {
 
-//     private static SwerveSubsystem swerveSubsystem;
-//     private final Pose2d currentPosition;
-//     static PathPlannerPath getAlignPath;
-//     private static PathConstraints constraints;
-//     static Command runAlignPath;
+    private static SwerveSubsystem swerveSubsystem;
+    private PathPlannerPath getAlignPath;
+    private static PathConstraints constraints;
+    static Command runAlignPath;
 
-//     public AlignUtil(SwerveSubsystem swerveSubsystem, Pose2d currentPosition){
-//         this.swerveSubsystem = swerveSubsystem;
-//         this.currentPosition = currentPosition;
+    public AlignUtil(SwerveSubsystem swerveSubsystem){
+        this.swerveSubsystem = swerveSubsystem;
+        this.constraints = new PathConstraints(
+            4.6,
+            3,
+            Units.degreesToRadians(540), 
+            Units.degreesToRadians(720)
+        );
 
-//         this.constraints = new PathConstraints(
-//             4.6,
-//             3,
-//             Units.degreesToRadians(540), 
-//             Units.degreesToRadians(720)
-//         );
-
-//     }
+    }
    
-// //     /**
-// //      * Uses getAlignPath to get the pathplanner path and follows it
-// //      * @param swerveSubsystem
-// //      * @param pathName name of the path
-// //      */
+//     /**
+//      * Uses getAlignPath to get the pathplanner path and follows it
+//      * @param swerveSubsystem
+//      * @param pathName name of the path
+//      */
 
-//     public Command runAlignPath (String pathName, Pose2d currentPose) {
-//         Translation2d currentTrans = swerveSubsystem.getRobotPosition().getTranslation();
-//         Translation2d pathStartTrans = getAlignPath(pathName).getStartingHolonomicPose().get().getTranslation();
+    public Command followPath(String pathName){
+        PathPlannerPath path = GetPath.getAlignPath(pathName);
+        if (path == null) {
+                System.out.println("NOOOOOOOOPOOOOOOO");
+                return Commands.none();
+            }
+        System.out.println("YYYYYY");
+        Command followPath = AutoBuilder.followPath(path);  
+           
+        return followPath;
+    }
 
-//         // if (Math.abs(currentTrans.getDistance(pathStartTrans)) <= AlignConstants.DISTANCE_TOLERANCE) {
-//         //     // int index = AlignConstants.reefPathList.indexOf(pathName) / 2;
-//         //     // ChassisSpeeds drivePower = AlignConstants.reefdirectionList.get(index);
+    public Command findThenFollowPath (String pathName) {
+        Translation2d currentTrans = swerveSubsystem.getRobotPosition().getTranslation();
+        Translation2d pathStartTrans = GetPath.getAlignPath(pathName).getStartingHolonomicPose().get().getTranslation();
+        PathPlannerPath path = GetPath.getAlignPath(pathName);
 
-//         //     PathPlannerPath path = getAlignPath(pathName);
-//         //     if (path == null) {
-//         //         System.out.println("NOOO00000000000000O");
-//         //         return Commands.none();
+        if (Math.abs(currentTrans.getDistance(pathStartTrans)) <= AlignConstants.DISTANCE_TOLERANCE) {
+            if (path == null) {
+                System.out.println("NOOO00000000000000O");
+                return Commands.none();
 
-//         //     }
-//         //     Command alignPath = AutoBuilder.pathfindThenFollowPath(
-//         //         path,
-//         //         constraints);
+            }
+            Command alignPath = AutoBuilder.pathfindThenFollowPath(
+                path,
+                constraints);
 
-//         //     System.out.println("XXXXXXXXXXXXXXXXXX");
-//         //     alignPath.addRequirements(swerveSubsystem);
+            System.out.println("YYYYYYYY");
+            alignPath.addRequirements(swerveSubsystem);
 
-//         //     runAlignPath = (Command) new SequentialCommandGroup(
-//         //         new DriveBackwardsCommand(swerveSubsystem, drivePower).until(
-//         //             () -> Math.abs(swerveSubsystem.getRobotPosition().getTranslation()
-//         //             .getDistance(pathStartTrans)) > AlignConstants.DISTANCE_TOLERANCE),
-//         //             alignPath
-//         //     );
+            runAlignPath = (Command) new SequentialCommandGroup(
+                new DriveBackwardsCommand(swerveSubsystem, AlignConstants.DRIVE_POWER).until(
+                    () -> Math.abs(swerveSubsystem.getRobotPosition().getTranslation()
+                    .getDistance(pathStartTrans)) > AlignConstants.DISTANCE_TOLERANCE),
+                    alignPath
+            );
 
-//         // }
-//         // else {
-//             PathPlannerPath path = getAlignPath(pathName);
-//             if (path == null) {
-//                 System.out.println("NOOOOOOOOPOOOOOOO");
-//                 return Commands.none();
-//             }
+        }
+        else {
+            if (path == null) {
+                System.out.println("NOOOOOOOOPOOOOOOO");
+                return Commands.none();
+            }
 
-//             System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAA");
-//             runAlignPath = AutoBuilder.pathfindThenFollowPath(
-//                 path,
-//                 constraints);
-//         // }
+        System.out.println("YYYYYYYY");
+        runAlignPath = AutoBuilder.pathfindThenFollowPath(
+            path,
+            constraints);  
+        }
 
-//         return runAlignPath; 
+        return runAlignPath; 
 
-//     }
-
-// //         /**
-// //      * takes the path name and returns the PathPlanner Path 
-// //      * @param pathName
-// //      * @return path file
-// //      */
-//     public static PathPlannerPath getAlignPath(String pathName) {
-//         try {
-//             getAlignPath = PathPlannerPath.fromPathFile(pathName);
-//         } catch (Exception e) {
-//             e.printStackTrace();
-//             // Handle exception as needed, maybe use default values or fallback
-//         }
-//         return getAlignPath;
-//     }
-
-//     public PathPlannerPath getAlignPath (List<Waypoint> pathWaypoints, GoalEndState goalEndState){
-
-//         PathPlannerPath getAlignPath = new PathPlannerPath (
-//             pathWaypoints,
-//             constraints,
-//             null, 
-//             goalEndState
-//         );
-//         return getAlignPath;
-//     }
-// }
+    }
+}

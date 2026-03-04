@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.9118194415118244,
+        "y": 2.675
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.1602947231190317,
+        "y": 2.64743127804524
+      },
+      "isLocked": false,
+      "linkedName": "LClimbAlign1"
+    },
+    {
+      "anchor": {
+        "x": 2.5248143871410473,
+        "y": 2.675
+      },
+      "prevControl": {
+        "x": 2.275283196447133,
+        "y": 2.659696899958592
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "LClimbAlign0"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": "Align",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -0.22324178556496
+  },
+  "useDefaultConstraints": true
+}

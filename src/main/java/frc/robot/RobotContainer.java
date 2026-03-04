@@ -5,13 +5,12 @@
 package frc.robot;
 
 import frc.robot.subsystems.Vision.VisionConstants;
-// import frc.robot.Constants.VisionConstants;
-import frc.robot.commands.allign.RotateByAngleCommand;
 // frc imports
 import frc.robot.controllers.PS5DriveController;
 import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.subsystems.shooter.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.HoodSubsystem;
+import frc.robot.subsystems.climb.StabilizingArm;
 // Subsystems
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 // import frc.robot.subsystems.Vision.VisionSubsystem;
@@ -23,10 +22,11 @@ import frc.robot.subsystems.Vision.VisionSubsystem;
 import frc.robot.subsystems.hopper.HopperSubsystem;
 import frc.robot.subsystems.FMS.FieldManagementSubsystem;
 // import frc.robot.Constants.IntakeConstants;
-
+import frc.robot.commands.aim.AimToHubCommand;
+import frc.robot.commands.aim.RotateByAngleCommand;
+import frc.robot.commands.align.AlignCommand;
 // Commands
 import frc.robot.commands.intake.ManualIntakePivotCommand;
-import frc.robot.commands.allign.AimToHubCommand;
 import frc.robot.commands.vision.GetCameraDisplacement;
 
 import com.ctre.phoenix6.CANBus;
@@ -80,6 +80,7 @@ public class RobotContainer {
   private final ClimbSubsystem m_ClimbSubsystem = new ClimbSubsystem(mechCAN);
   private final FlywheelSubsystem flywheelSubsystem = new FlywheelSubsystem(mechCAN);
   private final HoodSubsystem hoodSubsystem = new HoodSubsystem(mechCAN);
+  private final StabilizingArm stabilizingArm = new StabilizingArm(mechCAN);
 
   private final VisionSubsystem visionSubsystem1 = new VisionSubsystem(
     VisionConstants.cameraConfig11
@@ -225,9 +226,10 @@ public class RobotContainer {
       driveController.options().onTrue(Commands.runOnce(() -> swerveSubsystem.resetToStartingPosition(), swerveSubsystem));
 
       // L2 = aim to hub (with shooter offset calculation)
-      AimToHubCommand aimToHubCommand = new AimToHubCommand(swerveSubsystem, fmsSubsystem);
-      new Trigger(driveController::getLeftTrigger).onTrue(Commands.defer(() -> aimToHubCommand.createAimCommand(driverInput), java.util.Set.of(swerveSubsystem)));
+      // AimToHubCommand aimToHubCommand = new AimToHubCommand(swerveSubsystem, fmsSubsystem);
+      // new Trigger(driveController::getLeftTrigger).onTrue(Commands.defer(() -> aimToHubCommand.createAimCommand(driverInput), java.util.Set.of(swerveSubsystem)));
 
+      AlignCommand alignCommand = new AlignCommand(swerveSubsystem, stabilizingArm, fmsSubsystem);
       // D-pad steer speed limiting (scales MotionMagic cruise velocity)
       // Up = 100%, Right = 75%, Down = 50%, Left = 25%
       new Trigger(() -> driveController.getPOV() == 0)

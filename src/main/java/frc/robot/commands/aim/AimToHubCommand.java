@@ -1,4 +1,4 @@
-package frc.robot.commands.allign;
+package frc.robot.commands.aim;
 
 import java.util.function.BooleanSupplier;
 

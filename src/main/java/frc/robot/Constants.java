@@ -21,6 +21,8 @@ import edu.wpi.first.units.measure.Angle;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import frc.robot.subsystems.Vision.CameraConfig;
+import frc.robot.util.AlignUtil;
+import frc.robot.util.GetPath;
 import frc.robot.util.PolynomialRegression;
 
 
@@ -247,14 +249,41 @@ public final class Constants {
   }
 
   public static class AlignConstants {
-    public static final double DISTANCE_TOLERANCE = .1;
+    public static final double DISTANCE_TOLERANCE = .47;
+    public final static ChassisSpeeds DRIVE_POWER = new ChassisSpeeds(0.5, 0, 0);
+    // is chassispeeds alliance reltaive
     public static final Translation2d BLUE_HUB_TRANS = new Translation2d(4.625, 4);
     public static final Translation2d RED_HUB_TRANS = new Translation2d(11.9, 4);
 
-    public final static List<String> alignPaths = List.of(
-      ""
-      
+    public static final String L_CLIMB_ALIGN_1 = "LClimbAlign1";
+    public static final String L_CLIMB_ALIGN_2 = "LClimbAlign2";
+    public static final String R_CLIMB_ALIGN_1 = "RClimbAlign1";
+    public static final String R_CLIMB_ALIGN_2 = "RClimbAlign2";
+    public static final String OUTPOST_ALIGN = "OutpostAlign";
+
+    public final static List<String> ALIGN_PATHS = List.of(
+      L_CLIMB_ALIGN_1,
+      R_CLIMB_ALIGN_1,
+      OUTPOST_ALIGN
     );
+
+    public final static List<String> SECOND_CLIMB_PATHS = List.of(
+      L_CLIMB_ALIGN_2,
+      R_CLIMB_ALIGN_2
+    );
+
+    public final static List<Pose2d> BLUE_START_POSES = List.of(
+      GetPath.getAlignPath(L_CLIMB_ALIGN_1).getStartingHolonomicPose().get(),
+      GetPath.getAlignPath(R_CLIMB_ALIGN_1).getStartingHolonomicPose().get(),
+      GetPath.getAlignPath(OUTPOST_ALIGN).getStartingHolonomicPose().get()
+    );
+
+    public final static List<Pose2d> RED_START_POSES = List.of(
+      GetPath.getAlignPath(L_CLIMB_ALIGN_1).flipPath().getStartingHolonomicPose().get(),
+      GetPath.getAlignPath(R_CLIMB_ALIGN_1).flipPath().getStartingHolonomicPose().get(),
+      GetPath.getAlignPath(OUTPOST_ALIGN).flipPath().getStartingHolonomicPose().get()
+    );
+
 
   }
 
