@@ -56,8 +56,7 @@ public class LoggedTalon extends TalonFX {
     private static final TelemetryLevel DEFAULT_TELEMETRY_LEVEL = TelemetryLevel.BASIC;
     private final String logPrefix;
 
-    public TelemetryLevel dashboardTelemetryLevel = DEFAULT_TELEMETRY_LEVEL;
-    public TelemetryLevel logTelemetryLevel = DEFAULT_TELEMETRY_LEVEL;
+    public TelemetryLevel telemetryLevel = DEFAULT_TELEMETRY_LEVEL;
 
     // ===== Cached signals (refresh once, then read many) =====
 
@@ -82,11 +81,6 @@ public class LoggedTalon extends TalonFX {
     private final StatusSignal<Temperature> deviceTemp = getDeviceTemp(false);
     private final StatusSignal<Temperature> processorTemp = getProcessorTemp(false);
 
-    // --- Motor constants ---
-    private final StatusSignal<Per<TorqueUnit, CurrentUnit>> motorKt = getMotorKT(false);
-    private final StatusSignal<Per<AngularVelocityUnit, VoltageUnit>> motorKv = getMotorKV(false);
-    private final StatusSignal<Current> motorStallCurrent = getMotorStallCurrent(false);
-
     // --- Control mode / output ---
     private final StatusSignal<ControlModeValue> controlMode = getControlMode(false);
     private final StatusSignal<AppliedRotorPolarityValue> appliedRotorPolarity = getAppliedRotorPolarity(false);
@@ -94,7 +88,6 @@ public class LoggedTalon extends TalonFX {
     private final StatusSignal<DeviceEnableValue> deviceEnable = getDeviceEnable(false);
     private final StatusSignal<RobotEnableValue> robotEnable = getRobotEnable(false);
     private final StatusSignal<MotorOutputStatusValue> motorOutputStatus = getMotorOutputStatus(false);
-    private final StatusSignal<ConnectedMotorValue> connectedMotor = getConnectedMotor(false);
 
     // --- Closed loop ---
     private final StatusSignal<Double> closedLoopReference = getClosedLoopReference(false);
@@ -176,6 +169,9 @@ public class LoggedTalon extends TalonFX {
     private final StatusSignal<Boolean> stickyFaultUsingFusedCANcoderWhileUnlicensed = getStickyFault_UsingFusedCANcoderWhileUnlicensed(false);
 
     private Per<TorqueUnit, CurrentUnit> kt;
+    private Per<AngularVelocityUnit, VoltageUnit> kv;
+    private Current motorStallCurrent;
+
     private Trigger clearFaults;
 
     // if no name set set to motor[deviceID]
@@ -189,6 +185,8 @@ public class LoggedTalon extends TalonFX {
         this.logPrefix = "TalonFX/" + dashboardKey.replace("/", "_").replace(" ", "_");
 
         kt = getMotorKT().getValue();
+        kv = getMotorKV().getValue();
+        motorStallCurrent = getMotorStallCurrent().getValue();
 
         String clearFaultsKey = dashboardKey + "/clearStickyFaults";
         SmartDashboard.setDefaultBoolean(clearFaultsKey, false);
@@ -209,7 +207,6 @@ public class LoggedTalon extends TalonFX {
      * @return Status of the CAN refresh transaction.
      */
     private StatusCode refreshSignals() {
-        TelemetryLevel level = getEffectiveTelemetryLevel();
 
         // Always refresh BASIC signals
         StatusCode status = BaseStatusSignal.refreshAll(
@@ -224,7 +221,7 @@ public class LoggedTalon extends TalonFX {
                 faultHardware,
                 faultBootDuringEnable);
 
-        if (!level.includes(TelemetryLevel.STANDARD))
+        if (!telemetryLevel.includes(TelemetryLevel.STANDARD))
             return status;
         BaseStatusSignal.refreshAll(
                 acceleration,
@@ -239,7 +236,7 @@ public class LoggedTalon extends TalonFX {
                 faultStatorCurrLimit,
                 faultSupplyCurrLimit);
 
-        if (!level.includes(TelemetryLevel.DETAILED))
+        if (!telemetryLevel.includes(TelemetryLevel.DETAILED))
             return status;
         BaseStatusSignal.refreshAll(
                 statorCurrent,
@@ -260,13 +257,10 @@ public class LoggedTalon extends TalonFX {
                 faultProcTemp,
                 faultStaticBrakeDisabled);
 
-        if (!level.includes(TelemetryLevel.FULL))
+        if (!telemetryLevel.includes(TelemetryLevel.FULL))
             return status;
         BaseStatusSignal.refreshAll(
                 torqueCurrent,
-                motorKt,
-                motorKv,
-                motorStallCurrent,
                 closedLoopReference,
                 closedLoopError,
                 closedLoopReferenceSlope,
@@ -275,7 +269,6 @@ public class LoggedTalon extends TalonFX {
                 closedLoopDerivativeOutput,
                 closedLoopFeedForward,
                 robotEnable,
-                connectedMotor,
                 isProLicensed,
                 faultField,
                 stickyFaultField,
@@ -323,9 +316,6 @@ public class LoggedTalon extends TalonFX {
      */
     public void updateDashboard() {
         refreshSignals();
-
-        TelemetryLevel telemetryLevel = getEffectiveTelemetryLevel();
-
         if (telemetryLevel.includes(TelemetryLevel.BASIC)) {
             Logger.recordOutput(logPrefix + "/Position", position.getValue().in(Units.Radians));
             Logger.recordOutput(logPrefix + "/Velocity", velocity.getValue().in(Units.RadiansPerSecond));
@@ -397,15 +387,8 @@ public class LoggedTalon extends TalonFX {
             Logger.recordOutput(logPrefix + "/ClosedLoopDOutput", closedLoopDerivativeOutput.getValue());
             Logger.recordOutput(logPrefix + "/ClosedLoopFF", closedLoopFeedForward.getValue());
 
-            Logger.recordOutput(logPrefix + "/MotorStallCurrent",
-                    motorStallCurrent.getValue().in(Units.Amps));
-            Logger.recordOutput(logPrefix + "/MotorKt", motorKt.getValue().baseUnitMagnitude());
-            Logger.recordOutput(logPrefix + "/MotorKv", motorKv.getValue().baseUnitMagnitude());
-
             Logger.recordOutput(logPrefix + "/RobotEnable", robotEnable.getValue().name());
-            Logger.recordOutput(logPrefix + "/ConnectedMotor", connectedMotor.getValue().name());
             Logger.recordOutput(logPrefix + "/IsProLicensed", isProLicensed.getValue());
-
             Logger.recordOutput(logPrefix + "/FaultField", faultField.getValue());
             Logger.recordOutput(logPrefix + "/StickyFaultField", stickyFaultField.getValue());
 
@@ -482,24 +465,31 @@ public class LoggedTalon extends TalonFX {
         }
     }
 
-    private TelemetryLevel getEffectiveTelemetryLevel() {
-        return dashboardTelemetryLevel.ordinal() >= logTelemetryLevel.ordinal()
-                ? dashboardTelemetryLevel
-                : logTelemetryLevel;
-    }
-
-    private boolean isForwardLimitClosed() {
+    public boolean isForwardLimitClosed() {
         return forwardLimit.getValue() == ForwardLimitValue.ClosedToGround;
     }
 
-    private boolean isReverseLimitClosed() {
+    public boolean isReverseLimitClosed() {
         return reverseLimit.getValue() == ReverseLimitValue.ClosedToGround;
     }
 
     // torque = kt * torqueCurrent
-    private Torque getTorque() {
+    public Torque getTorque() {
         // kt = torque constant
         Current tCurrent = torqueCurrent.getValue();
         return (Torque) kt.timesDivisor(tCurrent);
     }
+
+    public Per<TorqueUnit, CurrentUnit> getMotorKtConstant() {
+        return kt;
+    }
+
+    public Per<AngularVelocityUnit, VoltageUnit> getMotorKvConstant() {
+        return kv;
+    }
+
+    public Current getMotorStallCurrentConstant() {
+        return motorStallCurrent;
+    }
+
 }
