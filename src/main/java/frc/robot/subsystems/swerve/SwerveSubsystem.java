@@ -45,13 +45,13 @@ public class SwerveSubsystem extends SubsystemBase {
 
     private final KrakenSwerveModule frontLeftModule, frontRightModule, backLeftModule, backRightModule;
     private SwerveModuleState[] states = {
-        new SwerveModuleState(),
-        new SwerveModuleState(),
-        new SwerveModuleState(),
-        new SwerveModuleState()
+            new SwerveModuleState(),
+            new SwerveModuleState(),
+            new SwerveModuleState(),
+            new SwerveModuleState()
     };
     SwerveModuleState testState = new SwerveModuleState();
-    private Pose2d estimatedPose = new Pose2d(10 , 4, new Rotation2d());
+    private Pose2d estimatedPose = new Pose2d(10, 4, new Rotation2d());
     private final SwerveDriveKinematics kinematics;
     private final SwerveDrivePoseEstimator poseEstimator;
     private Rotation2d driverHeadingOffset = new Rotation2d();
@@ -73,7 +73,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private DoubleLogEntry chassisOmegaLogEntry;
     private DoubleLogEntry steerCruiseRPMLogEntry;
 
-    //logging
+    // logging
     private NetworkTableInstance ntInstance;
     private NetworkTable swerveTable;
 
@@ -81,16 +81,16 @@ public class SwerveSubsystem extends SubsystemBase {
 
     private StructPublisher<Pose2d> estimatedPosePublisher;
     // private StructLogEntry<Pose2d> estimatedPoseLogEntry =
-    //     StructLogEntry.create(
-    //         DataLogManager.getLog(),
-    //         "estimatedPose",
-    //         Pose2d.struct
-    //     );
+    // StructLogEntry.create(
+    // DataLogManager.getLog(),
+    // "estimatedPose",
+    // Pose2d.struct
+    // );
 
     public SwerveSubsystem(CANBus canBus) {
         canivore = canBus;
         ROTATION_PID.enableContinuousInput(-Math.PI, Math.PI);
-        //initialize and reset the NavX gyro
+        // initialize and reset the NavX gyro
         pidgey = new Pigeon2(SwerveConstants.PigeonID, canivore);
         pidgey.reset();
 
@@ -99,23 +99,22 @@ public class SwerveSubsystem extends SubsystemBase {
         backLeftModule = new KrakenSwerveModule(BL_DRIVE, BL_STEER, BL_OFFSET, BL_ENCODER, canivore);
         backRightModule = new KrakenSwerveModule(BR_DRIVE, BR_STEER, BR_OFFSET, BR_ENCODER, canivore);
 
-        //sets swerve
+        // sets swerve
         kinematics = new SwerveDriveKinematics(FL_POS, FR_POS, BL_POS, BR_POS);
         poseEstimator = new SwerveDrivePoseEstimator(
-            kinematics, 
-            getGyroHeading(), 
-            getModulePositions(),
-            new Pose2d()
-            );
+                kinematics,
+                getGyroHeading(),
+                getModulePositions(),
+                new Pose2d());
 
         // buildAuton();
         initNT();
         initLogs();
 
-        if(DRIVE_DEBUG) {
+        if (DRIVE_DEBUG) {
             enableDriveDebug();
         }
-        if(STEER_DEBUG) {
+        if (STEER_DEBUG) {
             enableSteerDebug();
         }
 
@@ -132,31 +131,28 @@ public class SwerveSubsystem extends SubsystemBase {
 
         Rotation2d targetHeading = new Rotation2d(Math.atan2(dy, dx));
 
-        Rotation2d headingError =
-            targetHeading.minus(currentPose.getRotation());
+        Rotation2d headingError = targetHeading.minus(currentPose.getRotation());
 
-        double omega =
-            ROTATION_PID.calculate(headingError.getRadians(), 0.0);
+        double omega = ROTATION_PID.calculate(headingError.getRadians(), 0.0);
 
         setDrivePowers(0.0, 0.0, omega);
     }
 
     @Override
     public void periodic() {
-        //update the poseestimator with curent gyro reading
+        // update the poseestimator with curent gyro reading
         // Pigeon is flipped, so negate to match vision coordinate system
         Rotation2d gyroAngle = getGyroHeading().times(-1);
         estimatedPose = poseEstimator.update(
-            gyroAngle,
-            getModulePositions()
-        );
+                gyroAngle,
+                getModulePositions());
 
         // If all commanded velocities are 0, the system is idle (drivers / commands are
         // not supplying input).
         boolean isIdle = states[0].speedMetersPerSecond == 0.0
-            && states[1].speedMetersPerSecond == 0.0
-            && states[2].speedMetersPerSecond == 0.0
-            && states[3].speedMetersPerSecond == 0.0;
+                && states[1].speedMetersPerSecond == 0.0
+                && states[2].speedMetersPerSecond == 0.0
+                && states[3].speedMetersPerSecond == 0.0;
 
         // Start lock timer when idle
         if (isIdle) {
@@ -166,56 +162,55 @@ public class SwerveSubsystem extends SubsystemBase {
             lockTimer.reset();
         }
 
-        // Lock the swerve module if the lock timeout has elapsed, or set them to their 
+        // Lock the swerve module if the lock timeout has elapsed, or set them to their
         // setpoints if drivers are supplying non-idle input.
         if (lockTimer.hasElapsed(1)) {
             applyLock();
         } else {
-            //update the swerve modules based on the current desired states from states[]
+            // update the swerve modules based on the current desired states from states[]
             frontLeftModule.setDesiredState(states[0]);
             frontRightModule.setDesiredState(states[1]);
             backLeftModule.setDesiredState(states[2]);
             backRightModule.setDesiredState(states[3]);
         }
-        
-        //logging
+
+        // logging
         // estimatedPoseLogEntry.append(estimatedPose, GRTUtil.getFPGATime());
         SmartDashboard.putNumber("Steer/Current RPM", frontLeftModule.getSteerVelocityRPM());
         SmartDashboard.putNumber("Steer/Max RPM", currentCruiseVelocityRPM);
-        
+
         publishStats();
         logStats();
     }
 
     /**
-     * Sets the powers of the drivetrain through PIDs. Relative to the driver heading on the field.
+     * Sets the powers of the drivetrain through PIDs. Relative to the driver
+     * heading on the field.
      *
-     * @param xPower [-1, 1] The forward power.
-     * @param yPower [-1, 1] The left power.
+     * @param xPower       [-1, 1] The forward power.
+     * @param yPower       [-1, 1] The left power.
      * @param angularPower [-1, 1] The rotational power.
      */
     public void setDrivePowers(double xPower, double yPower, double angularPower) {
         ChassisSpeeds desiredSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
-            xPower * MAX_VEL,
-            yPower * MAX_VEL,
-            angularPower * MAX_OMEGA,
-            getDriverHeading()
-        );
+                xPower * MAX_VEL,
+                yPower * MAX_VEL,
+                angularPower * MAX_OMEGA,
+                getDriverHeading());
 
         // Apply acceleration limiting (only limit acceleration, not deceleration)
         ChassisSpeeds speeds = limitAcceleration(desiredSpeeds);
 
         states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(
-            states, speeds,
-            MAX_VEL, MAX_VEL, MAX_OMEGA
-        );
-
+                states, speeds,
+                MAX_VEL, MAX_VEL, MAX_OMEGA);
 
     }
 
     /**
      * Limits acceleration but allows full deceleration
+     * 
      * @param desiredSpeeds The desired chassis speeds
      * @return Limited chassis speeds
      */
@@ -269,7 +264,9 @@ public class SwerveSubsystem extends SubsystemBase {
         return limitedSpeeds;
     }
 
-        /** Executes swerve X locking, putting swerve's wheels into an X configuration to prevent motion.
+    /**
+     * Executes swerve X locking, putting swerve's wheels into an X configuration to
+     * prevent motion.
      */
     public void applyLock() {
         frontLeftModule.setDesiredState(new SwerveModuleState(0.0, new Rotation2d(Math.PI / 4.0)));
@@ -280,10 +277,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public void addVisionMeasurements(TimestampedVisionUpdate update) {
         poseEstimator.addVisionMeasurement(
-            update.pose(), 
-            update.timestamp(),
-            update.stdDevs()
-        );
+                update.pose(),
+                update.timestamp(),
+                update.stdDevs());
     }
 
     /**
@@ -294,10 +290,10 @@ public class SwerveSubsystem extends SubsystemBase {
      */
     public SwerveModulePosition[] getModulePositions() {
         return new SwerveModulePosition[] {
-            frontLeftModule.getPosition(),
-            frontRightModule.getPosition(),
-            backLeftModule.getPosition(),
-            backRightModule.getPosition()
+                frontLeftModule.getPosition(),
+                frontRightModule.getPosition(),
+                backLeftModule.getPosition(),
+                backRightModule.getPosition()
         };
     }
 
@@ -308,10 +304,10 @@ public class SwerveSubsystem extends SubsystemBase {
      */
     public SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {
-            frontLeftModule.getState(),
-            frontRightModule.getState(),
-            backLeftModule.getState(),
-            backRightModule.getState()
+                frontLeftModule.getState(),
+                frontRightModule.getState(),
+                backLeftModule.getState(),
+                backRightModule.getState()
         };
     }
 
@@ -321,7 +317,7 @@ public class SwerveSubsystem extends SubsystemBase {
      * @return The angle of the robot relative to the driver heading.
      */
     public Rotation2d getDriverHeading() {
-        Rotation2d robotHeading = getGyroHeading(); 
+        Rotation2d robotHeading = getGyroHeading();
         return robotHeading.minus(driverHeadingOffset);
     }
 
@@ -334,17 +330,21 @@ public class SwerveSubsystem extends SubsystemBase {
         driverHeadingOffset = getGyroHeading().minus(currentRotation);
     }
 
-    /** 
-     * Resets the driver heading to 0. 
+    /**
+     * Resets the driver heading to 0.
      */
     public void resetDriverHeading() {
         resetDriverHeading(new Rotation2d());
     }
 
+    public void resetDriverHeadingToField() {
+        resetDriverHeading(estimatedPose.getRotation());
+    }
 
-    /** Gets the gyro heading.*/
+    /** Gets the gyro heading. */
     private Rotation2d getGyroHeading() {
-        return Rotation2d.fromDegrees(-pidgey.getYaw().getValueAsDouble()); // Might need to flip depending on the robot setup
+        return Rotation2d.fromDegrees(-pidgey.getYaw().getValueAsDouble()); // Might need to flip depending on the robot
+                                                                            // setup
     }
 
     /**
@@ -360,14 +360,14 @@ public class SwerveSubsystem extends SubsystemBase {
         // Pigeon is flipped, so negate to match vision coordinate system
         Rotation2d gyroAngle = getGyroHeading().times(-1);
         poseEstimator.resetPosition(
-            gyroAngle,
-            getModulePositions(),
-            currentPose
-        );
+                gyroAngle,
+                getModulePositions(),
+                currentPose);
     }
 
     /**
-     * Resets the robot pose to the default starting position in front of the red hub.
+     * Resets the robot pose to the default starting position in front of the red
+     * hub.
      * Use this for testing/practice when starting in a known position.
      */
     public void resetToStartingPosition() {
@@ -379,49 +379,49 @@ public class SwerveSubsystem extends SubsystemBase {
     public ChassisSpeeds getRobotRelativeChassisSpeeds() {
         SwerveModuleState[] currentModuleStates = getModuleStates();
         ChassisSpeeds robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            kinematics.toChassisSpeeds(currentModuleStates),
-            getRobotPosition().getRotation() // Could be replaced with getGyroHeading() if desired
+                kinematics.toChassisSpeeds(currentModuleStates),
+                getRobotPosition().getRotation() // Could be replaced with getGyroHeading() if desired
         );
         return robotRelativeSpeeds;
     }
-    
+
     public void setRobotRelativeDrivePowers(ChassisSpeeds robotRelativeSpeeds) {
         ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(
-            robotRelativeSpeeds,
-            new Rotation2d(0)
-        );
+                robotRelativeSpeeds,
+                new Rotation2d(0));
 
         states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(
-            states, speeds,
-            MAX_VEL, MAX_VEL, MAX_OMEGA
-        );
+                states, speeds,
+                MAX_VEL, MAX_VEL, MAX_OMEGA);
     }
 
-        /**
-     * Sets the power of the drivetrain through PIDs. Relative to the robot with the intake in the front.
+    /**
+     * Sets the power of the drivetrain through PIDs. Relative to the robot with the
+     * intake in the front.
      *
-     * @param xPower [-1, 1] The forward power.
-     * @param yPower [-1, 1] The left power.
+     * @param xPower       [-1, 1] The forward power.
+     * @param yPower       [-1, 1] The left power.
      * @param angularPower [-1, 1] The rotational power.
      */
     public void setRobotRelativeDrivePowers(double xPower, double yPower, double angularPower) {
         ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(
-            xPower * MAX_VEL, 
-            yPower * MAX_VEL, 
-            angularPower * MAX_OMEGA, 
-            new Rotation2d(0)
-        );
- 
+                xPower * MAX_VEL,
+                yPower * MAX_VEL,
+                angularPower * MAX_OMEGA,
+                new Rotation2d(0));
+
         states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(
-            states, speeds,
-            MAX_VEL, MAX_VEL, MAX_OMEGA);
+                states, speeds,
+                MAX_VEL, MAX_VEL, MAX_OMEGA);
     }
 
     /**
      * Limits all steer motor speeds by scaling the MotionMagic cruise velocity.
-     * @param limit [0, 1] fraction of max cruise velocity. 1.0 = full speed, 0.25 = quarter speed.
+     * 
+     * @param limit [0, 1] fraction of max cruise velocity. 1.0 = full speed, 0.25 =
+     *              quarter speed.
      */
     public void setSteerSpeedLimit(double limit) {
         double velocity = STEER_CRUISE_VELOCITY * limit;
@@ -437,13 +437,11 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveTable = ntInstance.getTable(SWERVE_TABLE);
 
         swerveStatesPublisher = swerveTable.getStructArrayTopic(
-            "SwerveStates", SwerveModuleState.struct
-        ).publish(); 
+                "SwerveStates", SwerveModuleState.struct).publish();
 
         estimatedPosePublisher = swerveTable.getStructTopic(
-            "estimatedPose",
-            Pose2d.struct
-        ).publish();
+                "estimatedPose",
+                Pose2d.struct).publish();
     }
 
     /**
@@ -452,18 +450,18 @@ public class SwerveSubsystem extends SubsystemBase {
     private void publishStats() {
         estimatedPosePublisher.set(estimatedPose);
 
-        if(STATE_DEBUG || DRIVE_DEBUG || STEER_DEBUG) {
+        if (STATE_DEBUG || DRIVE_DEBUG || STEER_DEBUG) {
             swerveStatesPublisher.set(getModuleStates());
         }
 
-        if(DRIVE_DEBUG) {
+        if (DRIVE_DEBUG) {
             frontLeftModule.publishDriveStats();
             frontRightModule.publishDriveStats();
             backLeftModule.publishDriveStats();
             backRightModule.publishDriveStats();
         }
 
-        if(STEER_DEBUG) {
+        if (STEER_DEBUG) {
             frontLeftModule.publishSteerStats();
             frontRightModule.publishSteerStats();
             backLeftModule.publishSteerStats();
@@ -521,7 +519,7 @@ public class SwerveSubsystem extends SubsystemBase {
         backRightModule.steerDebug();
     }
 
-    /** 
+    /**
      * Builds the auton builder
      */
     private void buildAuton() {
@@ -534,26 +532,24 @@ public class SwerveSubsystem extends SubsystemBase {
         }
 
         AutoBuilder.configure(
-            this::getRobotPosition,
-            this::resetPose,
-            this::getRobotRelativeChassisSpeeds,
-            (speeds, feedforwards) -> setRobotRelativeDrivePowers(speeds),
-            
-            //1.25/3.25
-            new PPHolonomicDriveController(
-                new PIDConstants(1.38, 0, 0.0),
-                new PIDConstants(3.3, 0.0, 0.0)
-            ),
+                this::getRobotPosition,
+                this::resetPose,
+                this::getRobotRelativeChassisSpeeds,
+                (speeds, feedforwards) -> setRobotRelativeDrivePowers(speeds),
 
-            config,
-            ()->{
-                var alliance = DriverStation.getAlliance();
-                if (alliance.isPresent()) {
-                    return alliance.get()==DriverStation.Alliance.Red;
-                }
-                return false; 
-            },
-            this
-        );
+                // 1.25/3.25
+                new PPHolonomicDriveController(
+                        new PIDConstants(1.38, 0, 0.0),
+                        new PIDConstants(3.3, 0.0, 0.0)),
+
+                config,
+                () -> {
+                    var alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent()) {
+                        return alliance.get() == DriverStation.Alliance.Red;
+                    }
+                    return false;
+                },
+                this);
     }
 }
