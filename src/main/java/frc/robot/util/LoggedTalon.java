@@ -43,17 +43,18 @@ import org.littletonrobotics.junction.Logger;
 
 public class LoggedTalon extends TalonFX {
     enum TelemetryLevel {
-        BASIC,
+        LESS,
         STANDARD,
-        DETAILED,
-        FULL;
+        MORE,
+        DEBUG,
+        DTM;
 
         boolean includes(TelemetryLevel required) {
             return this.ordinal() >= required.ordinal();
         }
     }
 
-    private static final TelemetryLevel DEFAULT_TELEMETRY_LEVEL = TelemetryLevel.BASIC;
+    private static final TelemetryLevel DEFAULT_TELEMETRY_LEVEL = TelemetryLevel.STANDARD;
     private final String logPrefix;
 
     public TelemetryLevel telemetryLevel = DEFAULT_TELEMETRY_LEVEL;
@@ -61,87 +62,78 @@ public class LoggedTalon extends TalonFX {
     // ===== Cached signals (refresh once, then read many) =====
 
     // --- Position / Velocity / Acceleration ---
-    private final StatusSignal<Angle> position = getPosition(false);
-    private final StatusSignal<AngularVelocity> velocity = getVelocity(false);
-    private final StatusSignal<AngularAcceleration> acceleration = getAcceleration(false);
-    private final StatusSignal<Angle> rotorPosition = getRotorPosition(false);
-    private final StatusSignal<AngularVelocity> rotorVelocity = getRotorVelocity(false);
+    private final StatusSignal<Angle> position = getPosition(false); // STANDARD
+    private final StatusSignal<AngularVelocity> velocity = getVelocity(false); // STANDARD
+    private final StatusSignal<AngularAcceleration> acceleration = getAcceleration(false); // MORE
+    private final StatusSignal<Angle> rotorPosition = getRotorPosition(false); // MORE
+    private final StatusSignal<AngularVelocity> rotorVelocity = getRotorVelocity(false); // MORE
 
     // --- Duty cycle / Voltage ---
-    private final StatusSignal<Double> dutyCycle = getDutyCycle(false);
-    private final StatusSignal<Voltage> supplyVoltage = getSupplyVoltage(false);
-    private final StatusSignal<Voltage> appliedVoltage = getMotorVoltage(false);
+    private final StatusSignal<Double> dutyCycle = getDutyCycle(false); // STANDARD
+    private final StatusSignal<Voltage> supplyVoltage = getSupplyVoltage(false);// STANDARD
+    private final StatusSignal<Voltage> appliedVoltage = getMotorVoltage(false); // STANDARD
 
     // --- Current ---
-    private final StatusSignal<Current> supplyCurrent = getSupplyCurrent(false);
-    private final StatusSignal<Current> statorCurrent = getStatorCurrent(false);
-    private final StatusSignal<Current> torqueCurrent = getTorqueCurrent(false);
+    private final StatusSignal<Current> supplyCurrent = getSupplyCurrent(false); // LESS
+    private final StatusSignal<Current> statorCurrent = getStatorCurrent(false); // STANDARD
+    private final StatusSignal<Current> torqueCurrent = getTorqueCurrent(false); // STANDARD
 
     // --- Temperature ---
-    private final StatusSignal<Temperature> deviceTemp = getDeviceTemp(false);
-    private final StatusSignal<Temperature> processorTemp = getProcessorTemp(false);
+    private final StatusSignal<Temperature> deviceTemp = getDeviceTemp(false); // LESS
+    private final StatusSignal<Temperature> processorTemp = getProcessorTemp(false); // MORE
 
     // --- Control mode / output ---
-    private final StatusSignal<ControlModeValue> controlMode = getControlMode(false);
-    private final StatusSignal<AppliedRotorPolarityValue> appliedRotorPolarity = getAppliedRotorPolarity(false);
-    private final StatusSignal<BridgeOutputValue> bridgeOutput = getBridgeOutput(false);
-    private final StatusSignal<DeviceEnableValue> deviceEnable = getDeviceEnable(false);
-    private final StatusSignal<RobotEnableValue> robotEnable = getRobotEnable(false);
-    private final StatusSignal<MotorOutputStatusValue> motorOutputStatus = getMotorOutputStatus(false);
+    private final StatusSignal<ControlModeValue> controlMode = getControlMode(false); // STANDARD
+    private final StatusSignal<AppliedRotorPolarityValue> appliedRotorPolarity = getAppliedRotorPolarity(false); // DEBUG
+    private final StatusSignal<BridgeOutputValue> bridgeOutput = getBridgeOutput(false); // DTM
+    private final StatusSignal<DeviceEnableValue> deviceEnable = getDeviceEnable(false); // LESS
+    private final StatusSignal<RobotEnableValue> robotEnable = getRobotEnable(false); // STANDARD
+    private final StatusSignal<MotorOutputStatusValue> motorOutputStatus = getMotorOutputStatus(false); // MORE
 
     // --- Closed loop ---
-    private final StatusSignal<Double> closedLoopReference = getClosedLoopReference(false);
-    private final StatusSignal<Double> closedLoopError = getClosedLoopError(false);
-    private final StatusSignal<Double> closedLoopOutput = getClosedLoopOutput(false);
-    private final StatusSignal<Double> closedLoopReferenceSlope = getClosedLoopReferenceSlope(false);
-    private final StatusSignal<Double> closedLoopProportionalOutput = getClosedLoopProportionalOutput(false);
-    private final StatusSignal<Double> closedLoopIntegratedOutput = getClosedLoopIntegratedOutput(false);
-    private final StatusSignal<Double> closedLoopDerivativeOutput = getClosedLoopDerivativeOutput(false);
-    private final StatusSignal<Double> closedLoopFeedForward = getClosedLoopFeedForward(false);
-    private final StatusSignal<Integer> closedLoopSlot = getClosedLoopSlot(false);
+    private final StatusSignal<Double> closedLoopReference = getClosedLoopReference(false); // STANDARD
+    private final StatusSignal<Double> closedLoopError = getClosedLoopError(false); // MORE
+    private final StatusSignal<Double> closedLoopOutput = getClosedLoopOutput(false); // DEBUG
+    private final StatusSignal<Double> closedLoopReferenceSlope = getClosedLoopReferenceSlope(false); // DEBUG
+    private final StatusSignal<Double> closedLoopProportionalOutput = getClosedLoopProportionalOutput(false); // DTM
+    private final StatusSignal<Double> closedLoopIntegratedOutput = getClosedLoopIntegratedOutput(false); // DTM
+    private final StatusSignal<Double> closedLoopDerivativeOutput = getClosedLoopDerivativeOutput(false); // DTM
+    private final StatusSignal<Double> closedLoopFeedForward = getClosedLoopFeedForward(false); // DEBUG
+    private final StatusSignal<Integer> closedLoopSlot = getClosedLoopSlot(false); // MORE
 
     // --- Limit switches ---
-    private final StatusSignal<ForwardLimitValue> forwardLimit = getForwardLimit(false);
-    private final StatusSignal<ReverseLimitValue> reverseLimit = getReverseLimit(false);
+    private final StatusSignal<ForwardLimitValue> forwardLimit = getForwardLimit(false); // STANDARD
+    private final StatusSignal<ReverseLimitValue> reverseLimit = getReverseLimit(false); // STANDARD
 
     // --- Motion Magic ---
-    private final StatusSignal<Boolean> motionMagicIsRunning = getMotionMagicIsRunning(false);
-    private final StatusSignal<Boolean> motionMagicAtTarget = getMotionMagicAtTarget(false);
-
-    // --- Licensing ---
-    private final StatusSignal<Boolean> isProLicensed = getIsProLicensed(false);
-
-    // --- Fault fields (packed integer) ---
-    private final StatusSignal<Integer> faultField = getFaultField(false);
-    private final StatusSignal<Integer> stickyFaultField = getStickyFaultField(false);
+    private final StatusSignal<Boolean> motionMagicIsRunning = getMotionMagicIsRunning(false); // MORE
+    private final StatusSignal<Boolean> motionMagicAtTarget = getMotionMagicAtTarget(false); // MORE
 
     // --- Individual faults ---
-    private final StatusSignal<Boolean> faultBridgeBrownout = getFault_BridgeBrownout(false);
-    private final StatusSignal<Boolean> faultHardware = getFault_Hardware(false);
-    private final StatusSignal<Boolean> faultBootDuringEnable = getFault_BootDuringEnable(false);
-    private final StatusSignal<Boolean> faultDeviceTemp = getFault_DeviceTemp(false);
-    private final StatusSignal<Boolean> faultProcTemp = getFault_ProcTemp(false);
-    private final StatusSignal<Boolean> faultUndervoltage = getFault_Undervoltage(false);
-    private final StatusSignal<Boolean> faultOverSupplyV = getFault_OverSupplyV(false);
-    private final StatusSignal<Boolean> faultUnstableSupplyV = getFault_UnstableSupplyV(false);
-    private final StatusSignal<Boolean> faultStatorCurrLimit = getFault_StatorCurrLimit(false);
-    private final StatusSignal<Boolean> faultSupplyCurrLimit = getFault_SupplyCurrLimit(false);
-    private final StatusSignal<Boolean> faultForwardHardLimit = getFault_ForwardHardLimit(false);
-    private final StatusSignal<Boolean> faultReverseHardLimit = getFault_ReverseHardLimit(false);
-    private final StatusSignal<Boolean> faultForwardSoftLimit = getFault_ForwardSoftLimit(false);
-    private final StatusSignal<Boolean> faultReverseSoftLimit = getFault_ReverseSoftLimit(false);
-    private final StatusSignal<Boolean> faultStaticBrakeDisabled = getFault_StaticBrakeDisabled(false);
-    private final StatusSignal<Boolean> faultFusedSensorOutOfSync = getFault_FusedSensorOutOfSync(false);
-    private final StatusSignal<Boolean> faultRemoteSensorDataInvalid = getFault_RemoteSensorDataInvalid(false);
+    private final StatusSignal<Boolean> faultBridgeBrownout = getFault_BridgeBrownout(false); // LESS
+    private final StatusSignal<Boolean> faultHardware = getFault_Hardware(false); // LESS
+    private final StatusSignal<Boolean> faultBootDuringEnable = getFault_BootDuringEnable(false); // DEBUG
+    private final StatusSignal<Boolean> faultDeviceTemp = getFault_DeviceTemp(false); // LESS
+    private final StatusSignal<Boolean> faultProcTemp = getFault_ProcTemp(false); // LESS
+    private final StatusSignal<Boolean> faultUndervoltage = getFault_Undervoltage(false); // LESS
+    private final StatusSignal<Boolean> faultOverSupplyV = getFault_OverSupplyV(false); // LESS
+    private final StatusSignal<Boolean> faultUnstableSupplyV = getFault_UnstableSupplyV(false); // LESS
+    private final StatusSignal<Boolean> faultStatorCurrLimit = getFault_StatorCurrLimit(false); // DEBUG
+    private final StatusSignal<Boolean> faultSupplyCurrLimit = getFault_SupplyCurrLimit(false); // DEBUG
+    private final StatusSignal<Boolean> faultForwardHardLimit = getFault_ForwardHardLimit(false); // MORE
+    private final StatusSignal<Boolean> faultReverseHardLimit = getFault_ReverseHardLimit(false); // MORE
+    private final StatusSignal<Boolean> faultForwardSoftLimit = getFault_ForwardSoftLimit(false); // MORE
+    private final StatusSignal<Boolean> faultReverseSoftLimit = getFault_ReverseSoftLimit(false); // MORE
+    private final StatusSignal<Boolean> faultStaticBrakeDisabled = getFault_StaticBrakeDisabled(false); // DTM
+    private final StatusSignal<Boolean> faultFusedSensorOutOfSync = getFault_FusedSensorOutOfSync(false); // DEBUG
+    private final StatusSignal<Boolean> faultRemoteSensorDataInvalid = getFault_RemoteSensorDataInvalid(false); // DEBUG
     private final StatusSignal<Boolean> faultRemoteSensorPosOverflow = getFault_RemoteSensorPosOverflow(false);
-    private final StatusSignal<Boolean> faultRemoteSensorReset = getFault_RemoteSensorReset(false);
-    private final StatusSignal<Boolean> faultMissingDifferentialFX = getFault_MissingDifferentialFX(false);
-    private final StatusSignal<Boolean> faultMissingHardLimitRemote = getFault_MissingHardLimitRemote(false);
-    private final StatusSignal<Boolean> faultMissingSoftLimitRemote = getFault_MissingSoftLimitRemote(false);
-    private final StatusSignal<Boolean> faultUnlicensedFeatureInUse = getFault_UnlicensedFeatureInUse(false);
-    private final StatusSignal<Boolean> faultUsingFusedCANcoderWhileUnlicensed = getFault_UsingFusedCANcoderWhileUnlicensed(
-            false);
-
+    private final StatusSignal<Boolean> faultRemoteSensorReset = getFault_RemoteSensorReset(false); // DEBUG
+    private final StatusSignal<Boolean> faultMissingHardLimitRemote = getFault_MissingHardLimitRemote(false); // DEBUG
+    private final StatusSignal<Boolean> faultMissingSoftLimitRemote = getFault_MissingSoftLimitRemote(false); // DEBUG
+    private final StatusSignal<Boolean> faultUnlicensedFeatureInUse = getFault_UnlicensedFeatureInUse(false); // DEBUG
+    private final StatusSignal<Boolean> faultUsingFusedCANcoderWhileUnlicensed = getFault_UsingFusedCANcoderWhileUnlicensed(false); // DEBUG
+    // DEBUG
     // --- Sticky faults ---
     private final StatusSignal<Boolean> stickyFaultBridgeBrownout = getStickyFault_BridgeBrownout(false);
     private final StatusSignal<Boolean> stickyFaultHardware = getStickyFault_Hardware(false);
@@ -171,6 +163,7 @@ public class LoggedTalon extends TalonFX {
     private Per<TorqueUnit, CurrentUnit> kt;
     private Per<AngularVelocityUnit, VoltageUnit> kv;
     private Current motorStallCurrent;
+    private boolean isProLicensed;
 
     private Trigger clearFaults;
 
@@ -187,7 +180,7 @@ public class LoggedTalon extends TalonFX {
         kt = getMotorKT().getValue();
         kv = getMotorKV().getValue();
         motorStallCurrent = getMotorStallCurrent().getValue();
-
+        isProLicensed = getIsProLicensed().getValue();
         String clearFaultsKey = dashboardKey + "/clearStickyFaults";
         SmartDashboard.setDefaultBoolean(clearFaultsKey, false);
         clearFaults = new Trigger(() -> SmartDashboard.getBoolean(clearFaultsKey, false));
@@ -490,6 +483,10 @@ public class LoggedTalon extends TalonFX {
 
     public Current getMotorStallCurrentConstant() {
         return motorStallCurrent;
+    }
+
+    public boolean getIsProLicensedConstant() {
+        return isProLicensed;
     }
 
 }
