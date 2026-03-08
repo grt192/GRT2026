@@ -61,18 +61,17 @@ public class RobotContainer {
   private PS5DriveController driveController;
   private CommandPS5Controller mechController;
   private final CANBus swerveCAN = new CANBus(Constants.Swerve_CAN_BUS);
-  private final CANBus mechCAN = new CANBus(Constants.Mech_CAN_BUS);
 
   private SwerveSubsystem swerveSubsystem = Constants.SWERVE_ENABLED ? new SwerveSubsystem(swerveCAN) : null;
   private final FieldManagementSubsystem fmsSubsystem = new FieldManagementSubsystem();
 
-  private final RollerIntakeSubsystem intakeSubsystem = new RollerIntakeSubsystem(mechCAN);
-  //private final PivotIntakeSubsystem pivotIntake = new PivotIntakeSubsystem(mechCAN);
-  private final HopperSubsystem HopperSubsystem = new HopperSubsystem(mechCAN);
+  //private final RollerIntakeSubsystem intakeSubsystem = new RollerIntakeSubsystem(swerveCAN);
+  //private final PivotIntakeSubsystem pivotIntake = new PivotIntakeSubsystem(swerveCAN);
+  private final HopperSubsystem HopperSubsystem = new HopperSubsystem(swerveCAN);
   private final Field2d m_field = new Field2d();
-  private final ClimbSubsystem m_ClimbSubsystem = new ClimbSubsystem(mechCAN);
-  private final FlywheelSubsystem flywheelSubsystem = new FlywheelSubsystem(mechCAN);
-  private final HoodSubsystem hoodSubsystem = new HoodSubsystem(mechCAN);
+  private final ClimbSubsystem m_ClimbSubsystem = new ClimbSubsystem(swerveCAN);
+  private final FlywheelSubsystem flywheelSubsystem = new FlywheelSubsystem(swerveCAN);
+  private final HoodSubsystem hoodSubsystem = new HoodSubsystem(swerveCAN);
 
   // private final VisionSubsystem visionSubsystem1 = new VisionSubsystem(
   //   VisionConstants.cameraConfigs[0]
@@ -168,8 +167,8 @@ public class RobotContainer {
 
     // ==================== INTAKE ROLLER ====================
     // R1 = intake in
-    mechController.R1().whileTrue(Commands.run(() -> intakeSubsystem.runIn(), intakeSubsystem));
-    intakeSubsystem.setDefaultCommand(Commands.run(() -> intakeSubsystem.stop(), intakeSubsystem));
+    // mechController.R1().whileTrue(Commands.run(() -> intakeSubsystem.runIn(), intakeSubsystem));
+    // intakeSubsystem.setDefaultCommand(Commands.run(() -> intakeSubsystem.stop(), intakeSubsystem));
 
     // ==================== INTAKE PIVOT ====================
     // Right stick Y controls pivot manually

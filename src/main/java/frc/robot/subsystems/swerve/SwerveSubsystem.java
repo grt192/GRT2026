@@ -1,7 +1,6 @@
 package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -37,7 +36,6 @@ import static frc.robot.Constants.SwerveConstants.MAX_LINEAR_ACCELERATION;
 import static frc.robot.Constants.SwerveConstants.MAX_ANGULAR_ACCELERATION;
 
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.Vision.TimestampedVisionUpdate;
 import frc.robot.util.GRTUtil;
 
@@ -56,7 +54,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private final SwerveDrivePoseEstimator poseEstimator;
     private Rotation2d driverHeadingOffset = new Rotation2d();
 
-    private final Pigeon2 pidgey;
+    private final AHRS navx;
     private final CANBus canivore;
     private Timer lockTimer;
     private double currentCruiseVelocityRPM = STEER_CRUISE_VELOCITY * STEER_GEAR_REDUCTION * 60.0;
@@ -91,8 +89,8 @@ public class SwerveSubsystem extends SubsystemBase {
         canivore = canBus;
         ROTATION_PID.enableContinuousInput(-Math.PI, Math.PI);
         //initialize and reset the NavX gyro
-        pidgey = new Pigeon2(SwerveConstants.PigeonID, canivore);
-        pidgey.reset();
+        navx = new AHRS(NavXComType.kMXP_SPI);
+        navx.reset();
 
         frontLeftModule = new KrakenSwerveModule(FL_DRIVE, FL_STEER, FL_OFFSET, FL_ENCODER, canivore);
         frontRightModule = new KrakenSwerveModule(FR_DRIVE, FR_STEER, FR_OFFSET, FR_ENCODER, canivore);
@@ -181,6 +179,8 @@ public class SwerveSubsystem extends SubsystemBase {
         // estimatedPoseLogEntry.append(estimatedPose, GRTUtil.getFPGATime());
         SmartDashboard.putNumber("Steer/Current RPM", frontLeftModule.getSteerVelocityRPM());
         SmartDashboard.putNumber("Steer/Max RPM", currentCruiseVelocityRPM);
+        SmartDashboard.putNumber("NavX/Yaw", navx.getYaw());
+        SmartDashboard.putBoolean("NavX/Connected", navx.isConnected());
         
         publishStats();
         logStats();
@@ -343,7 +343,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Gets the gyro heading.*/
     private Rotation2d getGyroHeading() {
-        return Rotation2d.fromDegrees(-pidgey.getYaw().getValueAsDouble()); // Might need to flip depending on the robot setup
+        return Rotation2d.fromDegrees(-navx.getYaw()); // Might need to flip depending on the robot setup
     }
 
     /**
