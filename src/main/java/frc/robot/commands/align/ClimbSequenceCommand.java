@@ -10,33 +10,22 @@ import frc.robot.subsystems.climb.StabilizingArm;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 import frc.robot.util.AlignUtil;
 
-public class ClimbSequenceCommand extends Command {
+public class ClimbSequenceCommand extends SequentialCommandGroup {
     private final AlignUtil alignUtil; 
-    private final SwerveSubsystem swerveSubsystem;
-    private final StabilizingArm stabilizingArm;
-    private final String pathName;
-    private static int index;
     private  String pathName2;
     static Command climbSequence;
         
     public ClimbSequenceCommand(SwerveSubsystem swerveSubsystem, StabilizingArm stabilizingArm, String pathName, int index){
-        this.swerveSubsystem = swerveSubsystem;
-        this.stabilizingArm = stabilizingArm;
-        this.alignUtil = new AlignUtil(swerveSubsystem);
-        this.pathName = pathName;
-        this.index = index;
+        alignUtil = new AlignUtil (swerveSubsystem);
         addRequirements(swerveSubsystem, stabilizingArm);
-    }
-    
-    public Command climbSequence(){
+ 
         pathName2 = AlignConstants.SECOND_CLIMB_PATHS.get(index);
-        climbSequence = (Command) new SequentialCommandGroup(
+        addCommands(
             alignUtil.findThenFollowPath(pathName)
             .andThen(stabilizingArm.deployArm(()-> swerveSubsystem.getCurrentCommand()!= null))
             .andThen(alignUtil.followPath(pathName2))
             .andThen(stabilizingArm.retractArm(()->swerveSubsystem.getCurrentCommand()!= null))
         );
-        return climbSequence;
     }
 
 }

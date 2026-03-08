@@ -242,7 +242,7 @@ public class RobotContainer {
         // aimToHubCommand.createAimCommand(driverInput),
         // java.util.Set.of(swerveSubsystem)));
 
-        AlignCommand alignCommand = new AlignCommand(swerveSubsystem, stabilizingArm, fmsSubsystem);
+        new Trigger(driveController::getLeftBumper).onTrue(new AlignCommand(swerveSubsystem, stabilizingArm, fmsSubsystem));
         // D-pad steer speed limiting (scales MotionMagic cruise velocity)
         // Up = 100%, Right = 75%, Down = 50%, Left = 25%
         new Trigger(() -> driveController.getPOV() == 0)

@@ -26,9 +26,9 @@ import frc.robot.commands.swerve.DriveBackwardsCommand;
 
 public class AlignUtil {
 
-    private static SwerveSubsystem swerveSubsystem;
+    private SwerveSubsystem swerveSubsystem;
     private PathPlannerPath getAlignPath;
-    private static PathConstraints constraints;
+    private PathConstraints constraints;
     static Command runAlignPath;
 
     public AlignUtil(SwerveSubsystem swerveSubsystem){

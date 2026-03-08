@@ -107,7 +107,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 getModulePositions(),
                 new Pose2d());
 
-        // buildAuton();
+        buildAuton();
         initNT();
         initLogs();
 
@@ -142,7 +142,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic() {
         // update the poseestimator with curent gyro reading
         // Pigeon is flipped, so negate to match vision coordinate system
-        Rotation2d gyroAngle = getGyroHeading().times(-1);
+        Rotation2d gyroAngle = getGyroHeading();
         estimatedPose = poseEstimator.update(
                 gyroAngle,
                 getModulePositions());
@@ -344,7 +344,7 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Gets the gyro heading. */
     private Rotation2d getGyroHeading() {
         return Rotation2d.fromDegrees(-pidgey.getYaw().getValueAsDouble()); // Might need to flip depending on the robot
-                                                                            // setup
+                                                                      // setup
     }
 
     /**
@@ -358,7 +358,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public void resetPose(Pose2d currentPose) {
         // Pigeon is flipped, so negate to match vision coordinate system
-        Rotation2d gyroAngle = getGyroHeading().times(-1);
+        Rotation2d gyroAngle = getGyroHeading();
         poseEstimator.resetPosition(
                 gyroAngle,
                 getModulePositions(),
@@ -383,6 +383,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 getRobotPosition().getRotation() // Could be replaced with getGyroHeading() if desired
         );
         return robotRelativeSpeeds;
+        // return kinematics.toChassisSpeeds(currentModuleStates);
     }
 
     public void setRobotRelativeDrivePowers(ChassisSpeeds robotRelativeSpeeds) {
@@ -519,6 +520,14 @@ public class SwerveSubsystem extends SubsystemBase {
         backRightModule.steerDebug();
     }
 
+    private Pose2d autoPose(){
+        return new Pose2d(
+            estimatedPose.getX(),
+            estimatedPose.getY(),
+            getGyroHeading()
+        );
+    }
+
     /**
      * Builds the auton builder
      */
@@ -532,15 +541,15 @@ public class SwerveSubsystem extends SubsystemBase {
         }
 
         AutoBuilder.configure(
-                this::getRobotPosition,
+                this::autoPose,
                 this::resetPose,
                 this::getRobotRelativeChassisSpeeds,
                 (speeds, feedforwards) -> setRobotRelativeDrivePowers(speeds),
 
                 // 1.25/3.25
                 new PPHolonomicDriveController(
-                        new PIDConstants(1.38, 0, 0.0),
-                        new PIDConstants(3.3, 0.0, 0.0)),
+                        new PIDConstants(1, 0, 0.0),
+                        new PIDConstants(1, 0.0, 0.0)),
 
                 config,
                 () -> {
