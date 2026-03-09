@@ -73,7 +73,7 @@ public class LoggedTalon extends TalonFX {
   // --- Duty cycle / Voltage ---
   public final LeveledSignal<Double> dutyCycle = new LeveledSignal<>(getDutyCycle(false), TelemetryLevel.STANDARD, nullConsumer);
   public final LeveledSignal<Voltage> supplyVoltage = new LeveledSignal<>(getSupplyVoltage(false), TelemetryLevel.STANDARD, nullConsumer);
-  public final LeveledSignal<Voltage> appliedVoltage = new LeveledSignal<>(getMotorVoltage(false), TelemetryLevel.STANDARD, nullConsumer);
+  public final LeveledSignal<Voltage> motorVoltage = new LeveledSignal<>(getMotorVoltage(false), TelemetryLevel.STANDARD, nullConsumer);
 
   // --- Current ---
   public final LeveledSignal<Current> supplyCurrent = new LeveledSignal<>(getSupplyCurrent(false), TelemetryLevel.LESS, nullConsumer);
@@ -175,7 +175,7 @@ public class LoggedTalon extends TalonFX {
 
     dutyCycle.logger = p -> Logger.recordOutput(p + "/DutyCycle", dutyCycle.getValue());
     supplyVoltage.logger = p -> Logger.recordOutput(p + "/SupplyVoltage", supplyVoltage.getValue().in(Units.Volts));
-    appliedVoltage.logger = p -> Logger.recordOutput(p + "/AppliedVoltage", appliedVoltage.getValue().in(Units.Volts));
+    motorVoltage.logger = p -> Logger.recordOutput(p + "/MotorVoltage", motorVoltage.getValue().in(Units.Volts));
 
     supplyCurrent.logger = p -> Logger.recordOutput(p + "/SupplyCurrent", supplyCurrent.getValue().in(Units.Amps));
     statorCurrent.logger = p -> Logger.recordOutput(p + "/StatorCurrent", statorCurrent.getValue().in(Units.Amps));
@@ -261,7 +261,7 @@ public class LoggedTalon extends TalonFX {
     // Populate allSignals list
     allSignals.addAll(List.of(
         position, velocity, acceleration, rotorPosition, rotorVelocity,
-        dutyCycle, supplyVoltage, appliedVoltage,
+        dutyCycle, supplyVoltage, motorVoltage,
         supplyCurrent, statorCurrent, torqueCurrent,
         deviceTemp, processorTemp,
         controlMode, appliedRotorPolarity, bridgeOutput, deviceEnable, robotEnable, motorOutputStatus,
