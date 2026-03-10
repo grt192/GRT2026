@@ -148,6 +148,10 @@ public class towerRollers extends SubsystemBase {
         krakenMotor.setControl(dutyCycleControl.withOutput(percentOutput));
     }
 
+    public void setControl(double rp) {
+        krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(rp));
+    }
+
     @Override
     public void periodic() {
         krakenMotor.updateDashboard();

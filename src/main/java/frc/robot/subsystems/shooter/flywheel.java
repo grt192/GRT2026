@@ -16,7 +16,7 @@ import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -31,7 +31,7 @@ public class flywheel extends SubsystemBase {
 
     private final LoggedTalon upperMotor;
     private final LoggedTalon secondMotor;
-    private MotionMagicVelocityVoltage spinner = new MotionMagicVelocityVoltage(0);
+    private MotionMagicVelocityTorqueCurrentFOC spinner = new MotionMagicVelocityTorqueCurrentFOC(0);
     private DutyCycleOut dutyCycl = new DutyCycleOut(0);
     private TalonFXConfiguration cfg = new TalonFXConfiguration();
     private Slot0Configs pidSlots = new Slot0Configs();
