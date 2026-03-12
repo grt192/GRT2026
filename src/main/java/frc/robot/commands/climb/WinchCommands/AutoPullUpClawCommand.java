@@ -7,26 +7,26 @@ import frc.robot.Constants.ClimbConstants;
 import frc.robot.subsystems.climb.ClimbSubsystem;
 
 public class AutoPullUpClawCommand extends SequentialCommandGroup {
-  private Command setWinchPositionSetpoint;
-  private Command waitForHardstop;
-  private Command runIntoHardstop;
+    private Command setWinchPositionSetpoint;
+    private Command waitForHardstop;
+    private Command runIntoHardstop;
 
-  public AutoPullUpClawCommand(ClimbSubsystem climbSubsystem) {
-    setWinchPositionSetpoint = Commands.runOnce(
-        () -> climbSubsystem.setWinchPositionSetpoint(
-            ClimbConstants.WINCH_HOME_POS),
-        climbSubsystem);
-    waitForHardstop = Commands.waitUntil(climbSubsystem::isWinchHardstopPressed)
-        .withTimeout(ClimbConstants.WINCH_POS_TIMEOUT);
-    runIntoHardstop = new RunClawIntoLimitCommand(climbSubsystem,
-        -ClimbConstants.WINCH_MAX_SAFETY_DUTY_CYCLE);
+    public AutoPullUpClawCommand(ClimbSubsystem climbSubsystem) {
+        setWinchPositionSetpoint = Commands.runOnce(
+            () -> climbSubsystem.setWinchPositionSetpoint(
+                ClimbConstants.WINCH_HOME_POS),
+            climbSubsystem);
+        waitForHardstop = Commands.waitUntil(climbSubsystem::isWinchHardstopPressed)
+            .withTimeout(ClimbConstants.WINCH_POS_TIMEOUT);
+        runIntoHardstop = new RunClawIntoLimitCommand(climbSubsystem,
+            -ClimbConstants.WINCH_MAX_SAFETY_DUTY_CYCLE);
 
-    addCommands(
-        setWinchPositionSetpoint,
-        waitForHardstop,
-        Commands.either(
-            Commands.none(),
-            runIntoHardstop,
-            climbSubsystem::isWinchHardstopPressed));
-  }
+        addCommands(
+            setWinchPositionSetpoint,
+            waitForHardstop,
+            Commands.either(
+                Commands.none(),
+                runIntoHardstop,
+                climbSubsystem::isWinchHardstopPressed));
+    }
 }
