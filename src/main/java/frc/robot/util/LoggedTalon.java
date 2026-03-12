@@ -250,9 +250,9 @@ public class LoggedTalon extends TalonFX {
     public final LoggableSignal loggedFaultHardware = logged(faultHardware, TelemetryLevel.LESS,
         () -> Logger.recordOutput(logPrefix + "/Fault/Hardware", faultHardware.getValue()));
 
-    private final StatusSignal<Boolean> faultBootDuringEnable = getFault_BootDuringEnable(false); // DEBUG
+    private final StatusSignal<Boolean> faultBootDuringEnable = getFault_BootDuringEnable(false); // LESS
     public final LoggableSignal loggedFaultBootDuringEnable = logged(faultBootDuringEnable,
-        TelemetryLevel.DEBUG,
+        TelemetryLevel.LESS,
         () -> Logger.recordOutput(logPrefix + "/Fault/BootDuringEnable", faultBootDuringEnable.getValue()));
 
     private final StatusSignal<Boolean> faultDeviceTemp = getFault_DeviceTemp(false); // LESS
