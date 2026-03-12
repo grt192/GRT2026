@@ -1,7 +1,8 @@
 package frc.robot.subsystems.hopper;
 
 import static edu.wpi.first.units.Units.Amps;
-
+import static frc.robot.Constants.DebugConstants.LOG_TO_FILE;
+import static frc.robot.Constants.DebugConstants.LOG_TO_NT;
 import java.util.EnumSet;
 import java.util.function.Consumer;
 
@@ -34,7 +35,6 @@ public class HopperSubsystem extends SubsystemBase {
     private final DutyCycleOut dutyCycleControl;
     private NetworkTableInstance NTinst;
     private NetworkTable NTtable;
-    private DoubleSubscriber sub;
     private TalonFXConfiguration config = new TalonFXConfiguration();
     private Slot0Configs pidSlots = new Slot0Configs();
 
@@ -43,7 +43,9 @@ public class HopperSubsystem extends SubsystemBase {
         velocityControl = new MotionMagicVelocityTorqueCurrentFOC(0);
         dutyCycleControl = new DutyCycleOut(0);
         configureMotor();
-        configThruNT();
+        if (LOG_TO_NT) {
+            configThruNT();
+        }
     }
 
     /**

@@ -93,6 +93,12 @@ public class RobotContainer {
 
     private final VisionSubsystem visionSubsystem1 = new VisionSubsystem(
         VisionConstants.cameraConfig11);
+    private final VisionSubsystem visionSubsystem2 = new VisionSubsystem(
+        VisionConstants.cameraConfig11);
+    private final VisionSubsystem visionSubsystem3 = new VisionSubsystem(
+        VisionConstants.cameraConfig11);
+    private final VisionSubsystem visionSubsystem4 = new VisionSubsystem(
+        VisionConstants.cameraConfig11);
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -319,13 +325,13 @@ public class RobotContainer {
     public void visionStuff() {
         visionSubsystem1.setInterface(swerveSubsystem::addVisionMeasurements);
 
-        CommandScheduler.getInstance().schedule(
-            new GetCameraDisplacement(visionSubsystem1,
-                new Transform3d(
-                    Units.inchesToMeters(0),
-                    Units.inchesToMeters(-43 - 15),
-                    Units.inchesToMeters(44.25),
-                    new Rotation3d(0, 0, Math.PI / 2))));
+        // CommandScheduler.getInstance().schedule(
+        // new GetCameraDisplacement(visionSubsystem1,
+        // new Transform3d(
+        // Units.inchesToMeters(0),
+        // Units.inchesToMeters(-43 - 15),
+        // Units.inchesToMeters(44.25),
+        // new Rotation3d(0, 0, Math.PI / 2))));
 
     }
 

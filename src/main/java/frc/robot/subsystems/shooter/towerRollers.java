@@ -1,7 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Amps;
-
+import static frc.robot.Constants.DebugConstants.LOG_TO_NT;
 import java.util.EnumSet;
 import java.util.function.Consumer;
 
@@ -42,7 +42,10 @@ public class towerRollers extends SubsystemBase {
         velocityControl = new MotionMagicVelocityTorqueCurrentFOC(0);
         dutyCycleControl = new DutyCycleOut(0);
         configureMotor();
-        configThruNT();
+
+        if (LOG_TO_NT) {
+            configThruNT();
+        }
     }
 
     /**
@@ -150,6 +153,7 @@ public class towerRollers extends SubsystemBase {
 
     @Override
     public void periodic() {
+
         krakenMotor.updateDashboard();
     }
 }

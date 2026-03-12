@@ -19,7 +19,7 @@ import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-
+import static frc.robot.Constants.DebugConstants.LOG_TO_NT;
 import java.util.EnumSet;
 import java.util.function.Consumer;
 
@@ -75,7 +75,9 @@ public class flywheel extends SubsystemBase {
         secondMotor = new LoggedTalon(ShooterConstants.Flywheel.SECOND_MOTOR_ID, cn);
 
         config();
-        configThruNT();
+        if (LOG_TO_NT) {
+            configThruNT();
+        }
     }
 
     public void config() {

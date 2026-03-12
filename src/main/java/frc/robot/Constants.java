@@ -61,6 +61,17 @@ public final class Constants {
     public static final boolean SWERVE_ENABLED = true;
     public static final boolean MECH_ENABLED = true;
 
+    public static class DebugConstants {
+
+        public static final boolean LOG_TO_NT = true;// controls if logged talon or tuneThisYo
+        public static final boolean LOG_TO_FILE = true;// controls if logged talon or tuneThisYo
+
+        public static final boolean MASTER_DEBUG = true;// controls if logged talon or tuneThisYo
+        public static final boolean DRIVE_DEBUG = false;// nitty gritty of drive motors
+        public static final boolean STEER_DEBUG = false;// nitty gritty of steer motors
+        public static final boolean STATE_DEBUG = true;
+    }
+
     public static class TowerConstants {
         public static final int KRAKEN_CAN_ID = 26;
 
@@ -384,12 +395,6 @@ public final class Constants {
         public static final String SENSOR_TABLE = "Sensors";
     }
 
-    public static class DebugConstants {
-        public static final boolean MASTER_DEBUG = true;
-        public static final boolean DRIVE_DEBUG = true;
-        public static final boolean STEER_DEBUG = true;
-        public static final boolean STATE_DEBUG = true;
-    }
 
     public static final class ClimbConstants {
         // CAN IDs (Arm/Doornob=19, Winch=21, CANrange=22)
