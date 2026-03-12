@@ -33,12 +33,11 @@ public class towerRollers extends SubsystemBase {
     private final MotionMagicVelocityTorqueCurrentFOC velocityControl;
     private final DutyCycleOut dutyCycleControl;
     private NetworkTable NTtable;
-    private DoubleSubscriber sub;
     private TalonFXConfiguration config = new TalonFXConfiguration();
     private Slot0Configs pidSlots = new Slot0Configs();
 
     public towerRollers(CANBus canBus) {
-        krakenMotor = new LoggedTalon(TowerConstants.KRAKEN_CAN_ID, canBus);
+        krakenMotor = new LoggedTalon(TowerConstants.KRAKEN_CAN_ID, canBus, "TowerRollers");
         velocityControl = new MotionMagicVelocityTorqueCurrentFOC(0);
         dutyCycleControl = new DutyCycleOut(0);
         configureMotor();

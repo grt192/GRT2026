@@ -71,8 +71,8 @@ public class flywheel extends SubsystemBase {
     }
 
     public flywheel(CANBus cn) {
-        upperMotor = new LoggedTalon(ShooterConstants.Flywheel.UPPER_MOTOR_ID, cn);
-        secondMotor = new LoggedTalon(ShooterConstants.Flywheel.SECOND_MOTOR_ID, cn);
+        upperMotor = new LoggedTalon(ShooterConstants.Flywheel.UPPER_MOTOR_ID, cn, "FlywheelUpperMotor");
+        secondMotor = new LoggedTalon(ShooterConstants.Flywheel.SECOND_MOTOR_ID, cn, "FlywheelLowerMotor");
 
         config();
         if (LOG_TO_NT) {

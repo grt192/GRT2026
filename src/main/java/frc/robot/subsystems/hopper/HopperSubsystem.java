@@ -39,7 +39,7 @@ public class HopperSubsystem extends SubsystemBase {
     private Slot0Configs pidSlots = new Slot0Configs();
 
     public HopperSubsystem(CANBus canBus) {
-        krakenMotor = new LoggedTalon(HopperConstants.KRAKEN_CAN_ID, canBus);
+        krakenMotor = new LoggedTalon(HopperConstants.KRAKEN_CAN_ID, canBus, "SpindexerMotor");
         velocityControl = new MotionMagicVelocityTorqueCurrentFOC(0);
         dutyCycleControl = new DutyCycleOut(0);
         configureMotor();

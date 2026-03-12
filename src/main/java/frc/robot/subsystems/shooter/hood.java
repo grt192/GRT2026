@@ -30,7 +30,7 @@ public class hood extends SubsystemBase {
     private static final String LOG_PREFIX = "Hood/";
 
     public hood(CANBus cn) {
-        hoodMotor = new LoggedTalon(ShooterConstants.Hood.MOTOR_ID, cn);
+        hoodMotor = new LoggedTalon(ShooterConstants.Hood.MOTOR_ID, cn, "HoodMotor");
         hoodCoder = new CANcoder(ShooterConstants.Hood.ENCODER_ID, cn);
         config();
     }
