@@ -133,6 +133,10 @@ public class LoggedTalon extends TalonFX {
             Logger.recordOutput(logPrefix + "/Fault/Brownout", faultBridgeBrownout.getValue());
             Logger.recordOutput(logPrefix + "/Fault/Hardware", faultHardware.getValue());
             Logger.recordOutput(logPrefix + "/Fault/BootDuringEnable", faultBootDuringEnable.getValue());
+
+            Logger.recordOutput(logPrefix + "/ClosedLoopRef", closedLoopReference.getValue());
+            Logger.recordOutput(logPrefix + "/TempC", deviceTemp.getValue().in(Units.Celsius));
+
         }
 
         if (telemetryLevel.includes(TelemetryLevel.STANDARD)) {
@@ -143,14 +147,12 @@ public class LoggedTalon extends TalonFX {
 
         if (telemetryLevel.includes(TelemetryLevel.DETAILED)) {
             Logger.recordOutput(logPrefix + "/StatorCurrent", statorCurrent.getValue().in(Units.Amps));
-            Logger.recordOutput(logPrefix + "/TempC", deviceTemp.getValue().in(Units.Celsius));
         }
 
         if (telemetryLevel.includes(TelemetryLevel.FULL)) {
             Logger.recordOutput(logPrefix + "/TorqueCurrent", torqueCurrent.getValue().in(Units.Amps));
             Logger.recordOutput(logPrefix + "/TorqueNm", getTorque().in(NewtonMeters));
             Logger.recordOutput(logPrefix + "/MotorKtNmPerAmp", getMotorKtNmPerAmp());
-            Logger.recordOutput(logPrefix + "/ClosedLoopRef", closedLoopReference.getValue());
             Logger.recordOutput(logPrefix + "/ClosedLoopError", closedLoopError.getValue());
         }
     }
