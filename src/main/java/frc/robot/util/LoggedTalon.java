@@ -28,7 +28,6 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Torque;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -68,13 +67,16 @@ public class LoggedTalon extends TalonFX {
     private static final TelemetryLevel DEFAULT_TELEMETRY_LEVEL = TelemetryLevel.STANDARD;
     private String logPrefix;
 
-    public TelemetryLevel telemetryLevel = DEFAULT_TELEMETRY_LEVEL;
+    private TelemetryLevel telemetryLevel = DEFAULT_TELEMETRY_LEVEL;
 
     /** All LoggableSignals, populated during field initialization via {@link #logged}. */
     private final List<LoggableSignal> allSignals = new ArrayList<>();
 
     /** Curated set of signals to refresh and log, filtered by telemetry level. */
     private final Set<LoggableSignal> signalsToLog = new LinkedHashSet<>();
+
+    /** Cached array of signals for {@link #refreshSignals()}, rebuilt when signalsToLog changes. */
+    private BaseStatusSignal[] cachedSignalArray = new BaseStatusSignal[0];
 
     /** Creates a LoggableSignal, registers it in {@link #allSignals}, and returns it. */
     private LoggableSignal logged(BaseStatusSignal signal, TelemetryLevel level, Runnable logger) {
@@ -86,11 +88,24 @@ public class LoggedTalon extends TalonFX {
     /** Add a LoggableSignal to the active logging set. */
     public void addToLogging(LoggableSignal ls) {
         signalsToLog.add(ls);
+        rebuildCachedSignalArray();
     }
 
     /** Remove a LoggableSignal from the active logging set. */
     public void removeFromLogging(LoggableSignal ls) {
         signalsToLog.remove(ls);
+        rebuildCachedSignalArray();
+    }
+
+    private void rebuildCachedSignalArray() {
+        cachedSignalArray = signalsToLog.stream()
+            .map(ls -> ls.signal)
+            .toArray(BaseStatusSignal[]::new);
+    }
+
+    public void setTelemetryLevel(TelemetryLevel level) {
+        telemetryLevel = level;
+        populateSignalsToLog();
     }
 
     // ===== Cached signals (refresh once, then read many) =====
@@ -516,41 +531,39 @@ public class LoggedTalon extends TalonFX {
         motorStallCurrent = getMotorStallCurrent().getValue();
         isProLicensed = getIsProLicensed().getValue();
 
-        initSignalsToLog();
+        populateSignalsToLog();
 
         String clearFaultsKey = dashboardKey + "/clearStickyFaults";
         SmartDashboard.setDefaultBoolean(clearFaultsKey, false);
         clearFaults = new Trigger(() -> SmartDashboard.getBoolean(clearFaultsKey, false));
-        Command clearFaultsCommand = Commands.runOnce(() -> {
+        clearFaults.onTrue(Commands.runOnce(() -> {
             clearStickyFaults();
             SmartDashboard.putBoolean(clearFaultsKey, false);
-        });
-        clearFaultsCommand.ignoringDisable(true);
-        clearFaults.onTrue(clearFaultsCommand);
+        }).ignoringDisable(true));
     }
 
     /** Populate signalsToLog from allSignals, filtered by the current telemetry level. */
-    private void initSignalsToLog() {
+    private void populateSignalsToLog() {
+        signalsToLog.clear();
+
         for (LoggableSignal ls : allSignals) {
             if (telemetryLevel.includes(ls.level)) {
                 signalsToLog.add(ls);
             }
         }
+        rebuildCachedSignalArray();
     }
 
     /**
      * Refresh all signals in {@link #signalsToLog} from CAN.
-     * The set is pre-filtered by telemetry level in {@link #initSignalsToLog()}.
+     * The set is pre-filtered by telemetry level in {@link #populateSignalsToLog()}.
      *
      * @return Status of the CAN refresh transaction.
      */
     private StatusCode refreshSignals() {
-        if (signalsToLog.isEmpty())
+        if (cachedSignalArray.length == 0)
             return StatusCode.OK;
-        BaseStatusSignal[] signals = signalsToLog.stream()
-            .map(ls -> ls.signal)
-            .toArray(BaseStatusSignal[]::new);
-        return BaseStatusSignal.refreshAll(signals);
+        return BaseStatusSignal.refreshAll(cachedSignalArray);
     }
 
     /**
