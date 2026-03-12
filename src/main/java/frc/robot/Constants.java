@@ -71,25 +71,24 @@ public final class Constants {
         }
 
         // maths
-        public static final double GEAR_REDUCTION = 4.0;
+        public static final double GEAR_REDUCTION = 10.0;
 
         public static final double TARGET_BPS = 4.0;// frequency
         public static final double WHEEL_RADIUS = 1.0;// distance
         public static final double BALL_DIAMETER = 6.0;// distance
-        public static final double TARGET_RPS = 30;// TARGET_BPS * BALL_DIAMETER / WHEEL_RADIUS;
+        public static final double TARGET_RPS = TARGET_BPS * BALL_DIAMETER / WHEEL_RADIUS;
 
         // Velocity control PID
-        public static final double KP = 0.5;
-        public static final double KI = 0.0;
+        public static final double KP = 30;
+        public static final double KI = 1.0;
         public static final double KD = 0.0;
-        public static final double KS = 0.0;
-        public static final double KV = 0.12;
+        public static final double KS = 0.19;
+        public static final double KV = 3.0;
 
         // motion magic
-        public static final double MM_ACCEL = 1000;// distance
-        public static final double MM_JERK = 100;// distance
-        public static final double MM_MAXVELO = 100;// distance
-
+        public static final double MM_ACCEL = 200.0;// distance
+        public static final double MM_JERK = 0.0;// distance
+        public static final double MM_MAXVELO = 30;// distance
         // Current limits
         public static final int SUPPLY_CURRENT_LIMIT = 80;
         public static final int STATOR_CURRENT_LIMIT = 60;

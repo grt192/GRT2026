@@ -134,36 +134,5 @@ public class flywheel extends SubsystemBase {
     public void periodic() {
         upperMotor.updateDashboard();
         secondMotor.updateDashboard();
-        sendData();
     }
-
-    public void sendData() {
-        Logger.recordOutput(LOG_PREFIX + "PositionRotations",
-            upperMotor.getPosition().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "VelocityRPS",
-            upperMotor.getVelocity().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "AppliedVolts",
-            upperMotor.getMotorVoltage().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "SupplyVoltage",
-            upperMotor.getSupplyVoltage().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "StatorCurrentAmps",
-            upperMotor.getStatorCurrent().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "SupplyCurrentAmps",
-            upperMotor.getSupplyCurrent().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "TemperatureC",
-            upperMotor.getDeviceTemp().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "CommandedDutyCycle",
-            commandedDutyCycle);
-
-        Logger.recordOutput(LOG_PREFIX + "Connected",
-            upperMotor.isConnected());
-    }
-
 }
