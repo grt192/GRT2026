@@ -146,7 +146,7 @@ public class WinchSubsystem extends SubsystemBase {
         return motor.getTorqueCurrent(false).getValue();
     }
 
-    public boolean isForwardLimitActive() {
+    public boolean isAtHome() {
         return homeTrigger.getAsBoolean();
     }
 
