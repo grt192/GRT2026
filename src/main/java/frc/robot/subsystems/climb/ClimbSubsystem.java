@@ -88,7 +88,4 @@ public class ClimbSubsystem extends SubsystemBase {
     public CLIMB_MECH_STATE getWinchState() {
         return m_Winch.getWinchState();
     }
-
-    @Override
-    public void periodic() {}
 }
