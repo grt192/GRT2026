@@ -15,7 +15,7 @@ public class hoodCommand extends Command {
     private final hood hd;
     private final SwerveSubsystem swerve;
     private final FieldManagementSubsystem fms;
-    private final Intertable tableThing = Intertable.getInstance();
+    private final Intertable referenceTable = Intertable.getInstance();
 
     public hoodCommand(hood h, SwerveSubsystem swerve, FieldManagementSubsystem fms) {
         this.hd = h;
@@ -35,23 +35,23 @@ public class hoodCommand extends Command {
 
         if (redTeam) {
             if (pose.getX() > AlignConstants.RED_WALL_X) {
-                ang = tableThing.getAngle(pose.getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
+                ang = referenceTable.getAngle(pose.getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
             } else {
                 if (pose.getY() > AlignConstants.HUB_Y) {
-                    ang = tableThing.getAngle(pose.getTranslation().getDistance(AlignConstants.RED_AIM_TOP));
+                    ang = referenceTable.getAngle(pose.getTranslation().getDistance(AlignConstants.RED_AIM_TOP));
                 } else {
-                    ang = tableThing.getAngle(pose.getTranslation().getDistance(AlignConstants.RED_AIM_BOTTOM));
+                    ang = referenceTable.getAngle(pose.getTranslation().getDistance(AlignConstants.RED_AIM_BOTTOM));
                 }
             }
 
         } else {
             if (pose.getX() < AlignConstants.BLUE_WALL_X) {
-                ang = tableThing.getAngle(pose.getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
+                ang = referenceTable.getAngle(pose.getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
             } else {
                 if (pose.getY() > AlignConstants.HUB_Y) {
-                    ang = tableThing.getAngle(pose.getTranslation().getDistance(AlignConstants.BLUE_AIM_TOP));
+                    ang = referenceTable.getAngle(pose.getTranslation().getDistance(AlignConstants.BLUE_AIM_TOP));
                 } else {
-                    ang = tableThing.getAngle(pose.getTranslation().getDistance(AlignConstants.BLUE_AIM_BOTTOM));
+                    ang = referenceTable.getAngle(pose.getTranslation().getDistance(AlignConstants.BLUE_AIM_BOTTOM));
                 }
             }
         }

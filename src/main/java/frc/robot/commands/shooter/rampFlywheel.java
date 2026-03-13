@@ -5,29 +5,29 @@ import frc.robot.subsystems.FMS.FieldManagementSubsystem;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.LoggingConstants;
 import frc.robot.subsystems.shooter.Intertable;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
 
-import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructSubscriber;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.math.geometry.Pose2d;
+
 
 public class rampFlywheel extends Command {
 
-    private final FieldManagementSubsystem fms;
     private final flywheel fly;
-    private final Intertable tableThing = Intertable.getInstance();
-    private final NetworkTable table = NetworkTableInstance.getDefault().getTable(LoggingConstants.SWERVE_TABLE);
-    private final StructSubscriber<Pose2d> poseSub;
-    private final NetworkTableEntry offsetEntry;
+    private final SwerveSubsystem swerve;
+    private final FieldManagementSubsystem fms;
+    private final Intertable referenceTable = Intertable.getInstance();
 
     public rampFlywheel(flywheel h, FieldManagementSubsystem fms) {
-        this.fms = fms;
         this.fly = h;
+        this.swerve = swerve;
+        this.fms = fms;
         addRequirements(fly);
 
-        poseSub = table.getStructTopic("estimatedPose", Pose2d.struct).subscribe(new Pose2d());
         NetworkTable learnerTable = NetworkTableInstance.getDefault().getTable("ShooterLearner");
         offsetEntry = learnerTable.getEntry("offset");
     }
@@ -39,26 +39,27 @@ public class rampFlywheel extends Command {
     public void execute() {
         double RPS = 0;
         boolean redTeam = fms.isRedAlliance();
+        Pose2d pose = swerve.getRobotPosition();
 
         if (redTeam) {
-            if (poseSub.get().getX() > AlignConstants.RED_WALL_X) {
-                RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
+            if (pose.getX() > AlignConstants.RED_WALL_X) {
+                RPS = referenceTable.getRPS(pose.getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
             } else {
-                if (poseSub.get().getY() > AlignConstants.HUB_Y) {
-                    RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_AIM_TOP));
+                if (pose.getY() > AlignConstants.HUB_Y) {
+                    RPS = referenceTable.getRPS(pose.getTranslation().getDistance(AlignConstants.RED_AIM_TOP));
                 } else {
-                    RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_AIM_BOTTOM));
+                    RPS = referenceTable.getRPS(pose.getTranslation().getDistance(AlignConstants.RED_AIM_BOTTOM));
                 }
             }
 
         } else {
-            if (poseSub.get().getX() < AlignConstants.BLUE_WALL_X) {
-                RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
+            if (pose.getX() < AlignConstants.BLUE_WALL_X) {
+                RPS = referenceTable.getRPS(pose.getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
             } else {
-                if (poseSub.get().getY() > AlignConstants.HUB_Y) {
-                    RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_AIM_TOP));
+                if (pose.get().getY() > AlignConstants.HUB_Y) {
+                    RPS = referenceTable.getRPS(pose.getTranslation().getDistance(AlignConstants.BLUE_AIM_TOP));
                 } else {
-                    RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_AIM_BOTTOM));
+                    RPS = referenceTable.getRPS(pose.getTranslation().getDistance(AlignConstants.BLUE_AIM_BOTTOM));
                 }
             }
         }
