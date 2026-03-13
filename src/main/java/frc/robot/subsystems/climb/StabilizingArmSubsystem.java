@@ -42,7 +42,7 @@ public class StabilizingArmSubsystem extends SubsystemBase {
     private final StatusSignal<Boolean> reverseLimitSignal;
 
     public StabilizingArmSubsystem(CANBus canBusObj) {
-        motor = new LoggedTalon(ClimbConstants.ARM_MOTOR_CAN_ID, canBusObj, "doorknob");
+        motor = new LoggedTalon(ClimbConstants.ARM_MOTOR_CAN_ID, canBusObj, "Arm");
         configureMotor();
 
         forwardLimitSignal = motor.getFault_ForwardSoftLimit();
