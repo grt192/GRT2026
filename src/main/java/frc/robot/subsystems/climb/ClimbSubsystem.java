@@ -1,10 +1,12 @@
 package frc.robot.subsystems.climb;
 
+import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.CANBus;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ClimbConstants.CLIMB_MECH_STATE;
 
 public class ClimbSubsystem extends SubsystemBase {
@@ -67,9 +69,39 @@ public class ClimbSubsystem extends SubsystemBase {
         return m_StabilizingArm.isReverseLimitActive();
     }
 
-    public CLIMB_MECH_STATE getClimbState() {
+    public void updateArmState() {
         armState = m_StabilizingArm.getArmState();
+    }
+
+    public void updateWinchState() {
         winchState = m_Winch.getWinchState();
+    }
+
+    public CLIMB_MECH_STATE getArmState(boolean refresh) {
+        if (refresh) {
+            updateArmState();
+        }
+        return armState;
+    }
+
+    public CLIMB_MECH_STATE getArmState() {
+        return getArmState(true);
+    }
+
+    public CLIMB_MECH_STATE getWinchState(boolean refresh) {
+        if (refresh) {
+            updateWinchState();
+        }
+        return winchState;
+    }
+
+    public CLIMB_MECH_STATE getWinchState() {
+        return getWinchState(true);
+    }
+
+    public void updateClimbStates() {
+        updateArmState();
+        updateWinchState();
 
         if (armState == CLIMB_MECH_STATE.HOME && winchState == CLIMB_MECH_STATE.HOME) {
             climbState = CLIMB_MECH_STATE.HOME;
@@ -78,14 +110,26 @@ public class ClimbSubsystem extends SubsystemBase {
         } else {
             climbState = CLIMB_MECH_STATE.FLOATING;
         }
+    }
+
+    public CLIMB_MECH_STATE getClimbState(boolean refresh) {
+        if (refresh) {
+            updateClimbStates();
+        }
         return climbState;
     }
 
-    public CLIMB_MECH_STATE getArmState() {
-        return m_StabilizingArm.getArmState();
+    public CLIMB_MECH_STATE getClimbState() {
+        return getClimbState(true);
     }
 
-    public CLIMB_MECH_STATE getWinchState() {
-        return m_Winch.getWinchState();
+
+    @Override
+    public void periodic() {
+        updateClimbStates();
+        Logger.recordOutput(ClimbConstants.CLIMB_BASE_TABLE + "/climbState", getClimbState(false));
+        Logger.recordOutput(ClimbConstants.CLIMB_BASE_TABLE + "/armState", getArmState(false));
+        Logger.recordOutput(ClimbConstants.CLIMB_BASE_TABLE + "/winchState", getWinchState(false));
     }
 }
+
