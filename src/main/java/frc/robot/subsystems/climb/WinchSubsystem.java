@@ -100,8 +100,8 @@ public class WinchSubsystem extends SubsystemBase {
 
         Logger.recordOutput(ClimbConstants.WINCH_TABLE + "/distance(mm)", getDistance().in(Millimeters));
 
-        Logger.recordOutput(ClimbConstants.WINCH_TABLE + "/forwardSoftStop", isForwardLimitActive());
-        Logger.recordOutput(ClimbConstants.WINCH_TABLE + "/reverseSoftStop", isReverseLimitActive());
+        Logger.recordOutput(ClimbConstants.WINCH_TABLE + "/forwardSoftStop", isAtHome());
+        Logger.recordOutput(ClimbConstants.WINCH_TABLE + "/reverseSoftStop", isAtDeployed());
     }
 
     public void setMotorDutyCycle(double dutyCycle) {
@@ -153,7 +153,7 @@ public class WinchSubsystem extends SubsystemBase {
         return homeTrigger.getAsBoolean();
     }
 
-    public boolean isReverseLimitActive() {
+    public boolean isAtDeployed() {
         return deployedTrigger.getAsBoolean();
     }
 
