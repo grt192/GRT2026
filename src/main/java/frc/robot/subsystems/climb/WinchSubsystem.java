@@ -128,6 +128,9 @@ public class WinchSubsystem extends SubsystemBase {
     }
 
     public void setTorqueCurrent(double amps) {
+        amps = (isAtHome() && amps > 0) ? 0 : amps;
+        amps = (isAtDeployed() && amps < 0) ? 0 : amps;
+
         torqueCurrentControl.withOutput(amps);
         motor.setControl(torqueCurrentControl);
     }
