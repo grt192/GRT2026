@@ -36,10 +36,10 @@ public class ShooterSequence extends ParallelCommandGroup {
         // - Tower feeds balls only when flywheel is at speed
         // - Indexer feeds balls only when flywheel is at speed
         addCommands(
-            new AimWhileDrivingCommand(swerve, fms, xSpeed, ySpeed),
+            // new AimWhileDrivingCommand(swerve, fms, xSpeed, ySpeed),
             new rampFlywheel(fly, fms),
-            new hoodCommand(hood, swerve, fms),
-            new towerRoll(b, fly, hood),
-            new indexerRun(hopper).onlyIf(() -> fly.wantedVel() && hood.wantedAngl()));
+            new hoodCommand(hood, fms),
+            new towerRoll(b),
+            new indexerRun(hopper));
     }
 }
