@@ -148,16 +148,28 @@ public class StabilizingArmSubsystem extends SubsystemBase {
         return absError.lte(ClimbConstants.ARM_POSITION_TOLERANCE);
     }
 
-    public void homeEncoder() {
-        setEncoder(ClimbConstants.ARM_HOME_POS);
-    }
-
     public void setEncoder(Angle pos) {
         motor.setPosition(pos);
     }
 
+    public void homeEncoder() {
+        setEncoder(ClimbConstants.ARM_HOME_POS);
+    }
+
     public Angle getMotorPosition() {
         return motor.getPosition(false).getValue();
+    }
+
+    public Current getSupplyCurrent() {
+        return motor.getSupplyCurrent(false).getValue();
+    }
+
+    public Current getTorqueCurrent() {
+        return motor.getTorqueCurrent(false).getValue();
+    }
+
+    public String getControlMode() {
+        return motor.getControlMode(false).toString();
     }
 
     public Optional<Boolean> getForwardLimit() {
@@ -200,18 +212,6 @@ public class StabilizingArmSubsystem extends SubsystemBase {
 
         Logger.recordOutput(ClimbConstants.ARM_TABLE + "/forwardSoftStop", isForwardLimitActive());
         Logger.recordOutput(ClimbConstants.ARM_TABLE + "/reverseSoftStop", isReverseLimitActive());
-    }
-
-    public Current getSupplyCurrent() {
-        return motor.getSupplyCurrent(false).getValue();
-    }
-
-    public Current getTorqueCurrent() {
-        return motor.getTorqueCurrent(false).getValue();
-    }
-
-    public String getControlMode() {
-        return motor.getControlMode(false).toString();
     }
 
     @Override
