@@ -120,6 +120,7 @@ public class LoggedTalon extends TalonFX {
 
         TelemetryLevel telemetryLevel = getEffectiveTelemetryLevel();
         if (telemetryLevel.includes(TelemetryLevel.BASIC)) {
+            Logger.recordOutput(logPrefix + "/IsConnected", isConnected());
 
             Logger.recordOutput(logPrefix + "/Position", position.getValue().in(Units.Radians));
             Logger.recordOutput(logPrefix + "/Velocity", velocity.getValue().in(Units.RadiansPerSecond));
