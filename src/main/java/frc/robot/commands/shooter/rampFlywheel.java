@@ -41,7 +41,7 @@ public class rampFlywheel extends Command {
         boolean redTeam = fms.isRedAlliance();
 
         if (redTeam) {
-            if (poseSub.get().getX() > AlignConstants.RED_WALL_X) {
+            if (poseSub.get().getX() > AlignConstants.RED_WALL_X) {// in alliance zone
                 RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
             } else {
                 if (poseSub.get().getY() > AlignConstants.HUB_Y) {
@@ -52,9 +52,9 @@ public class rampFlywheel extends Command {
             }
 
         } else {
-            if (poseSub.get().getX() < AlignConstants.BLUE_WALL_X) {
+            if (poseSub.get().getX() < AlignConstants.BLUE_WALL_X) {// in alliance zone
                 RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
-            } else {
+            } else {// in neutral or enemy zone
                 if (poseSub.get().getY() > AlignConstants.HUB_Y) {
                     RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_AIM_TOP));
                 } else {

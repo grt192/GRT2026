@@ -63,7 +63,7 @@ public final class Constants {
 
     public static class DebugConstants {
 
-        public static final boolean LOG_TO_NT = true;// controls if logged talon or tuneThisYo
+        public static final boolean LOG_TO_NT = false;// controls if logged talon or tuneThisYo
         public static final boolean LOG_TO_FILE = true;// controls if logged talon or tuneThisYo
 
         public static final boolean MASTER_DEBUG = true;// controls if logged talon or tuneThisYo

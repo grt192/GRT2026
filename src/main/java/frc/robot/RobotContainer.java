@@ -196,7 +196,7 @@ public class RobotContainer {
                     winchDutyCycle++;
                 }
                 m_ClimbSubsystem.setArmDutyCycle(armDutyCycle);
-                // m_ClimbSubsystem.setWinchDutyCycle(winchDutyCycle);
+                m_ClimbSubsystem.setWinchDutyCycle(winchDutyCycle);
             }, m_ClimbSubsystem));
 
             // ==================== INTAKE ROLLER ====================
