@@ -135,7 +135,7 @@ public class StabilizingArmSubsystem extends SubsystemBase {
 
         // checks if closed loop error is within tolerance
         return (Rotations.of(Math.abs(motor.getClosedLoopError(false).getValue())))
-            .lte(ClimbConstants.ARM_ACCEPTABLE_POSITION_ERROR);
+            .lte(ClimbConstants.ARM_POSITION_TOLERANCE);
     }
 
     // Checks if arm is at given position
@@ -145,7 +145,7 @@ public class StabilizingArmSubsystem extends SubsystemBase {
         Angle absError = Radians.of(Math.abs(error.in(Radians)));
 
         // checks if difference is within tolerance
-        return absError.lte(ClimbConstants.ARM_ACCEPTABLE_POSITION_ERROR);
+        return absError.lte(ClimbConstants.ARM_POSITION_TOLERANCE);
     }
 
     public void homeEncoder() {

@@ -6,8 +6,6 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -34,13 +32,10 @@ public class WinchSubsystem extends SubsystemBase {
     private TorqueCurrentFOC torqueCurrentControl = new TorqueCurrentFOC(0);
     private CoastOut coast = new CoastOut();
 
-    private final StatusSignal<Boolean> forwardLimitSignal;
-    private final StatusSignal<Boolean> reverseLimitSignal;
-
     private CANrange canRange;
     private CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
-    private Trigger homeTrigger;
-    private Trigger deployedTrigger;
+    private Trigger forwardSoftLimit;
+    private Trigger reverseSoftLimit;
 
     public WinchSubsystem(CANBus canBusObj) {
         motor = new LoggedTalon(ClimbConstants.WINCH_MOTOR_CAN_ID, canBusObj, "Winch");
@@ -49,15 +44,11 @@ public class WinchSubsystem extends SubsystemBase {
         configureCANrange();
         configureMotor();
 
-        forwardLimitSignal = motor.getFault_ForwardSoftLimit();
-        reverseLimitSignal = motor.getFault_ReverseSoftLimit();
-        BaseStatusSignal.setUpdateFrequencyForAll(50, forwardLimitSignal, reverseLimitSignal);
+        forwardSoftLimit = new Trigger(() -> isAtDistance(ClimbConstants.WINCH_FORWARD_LIMIT));
+        reverseSoftLimit = new Trigger(() -> isAtDistance(ClimbConstants.WINCH_REVERSE_LIMIT));
 
-        homeTrigger = new Trigger(() -> isAtDistance(ClimbConstants.WINCH_HOME_DISTANCE));
-        deployedTrigger = new Trigger(() -> isAtDistance(ClimbConstants.WINCH_DEPLOYED_DISTANCE));
-
-        homeTrigger.onTrue(this.runOnce(() -> motor.setControl(coast)));
-        deployedTrigger.onTrue(this.runOnce(() -> motor.setControl(coast)));
+        forwardSoftLimit.onTrue(this.runOnce(() -> motor.setControl(coast)));
+        reverseSoftLimit.onTrue(this.runOnce(() -> motor.setControl(coast)));
     }
 
     private void configureMotor() {
@@ -100,13 +91,13 @@ public class WinchSubsystem extends SubsystemBase {
 
         Logger.recordOutput(ClimbConstants.WINCH_TABLE + "/distance(mm)", getDistance().in(Millimeters));
 
-        Logger.recordOutput(ClimbConstants.WINCH_TABLE + "/forwardSoftStop", isAtHome());
-        Logger.recordOutput(ClimbConstants.WINCH_TABLE + "/reverseSoftStop", isAtDeployed());
+        Logger.recordOutput(ClimbConstants.WINCH_TABLE + "/forwardSoftStop", isAtForwardLimit());
+        Logger.recordOutput(ClimbConstants.WINCH_TABLE + "/reverseSoftStop", isAtReverseLimit());
     }
 
     public void setMotorDutyCycle(double dutyCycle) {
-        dutyCycle = (isAtHome() && dutyCycle > 0) ? 0 : dutyCycle;
-        dutyCycle = (isAtDeployed() && dutyCycle < 0) ? 0 : dutyCycle;
+        dutyCycle = (isAtForwardLimit() && dutyCycle > 0) ? 0 : dutyCycle;
+        dutyCycle = (isAtReverseLimit() && dutyCycle < 0) ? 0 : dutyCycle;
 
         dutyCycle = Math.max(-1.0, Math.min(dutyCycle, 1.0));
         dutyCycle *= ClimbConstants.WINCH_MAX_OUTPUT;
@@ -128,8 +119,8 @@ public class WinchSubsystem extends SubsystemBase {
     }
 
     public void setTorqueCurrent(double amps) {
-        amps = (isAtHome() && amps > 0) ? 0 : amps;
-        amps = (isAtDeployed() && amps < 0) ? 0 : amps;
+        amps = (isAtForwardLimit() && amps > 0) ? 0 : amps;
+        amps = (isAtReverseLimit() && amps < 0) ? 0 : amps;
 
         torqueCurrentControl.withOutput(amps);
         motor.setControl(torqueCurrentControl);
@@ -152,12 +143,12 @@ public class WinchSubsystem extends SubsystemBase {
         return motor.getTorqueCurrent(false).getValue();
     }
 
-    public boolean isAtHome() {
-        return homeTrigger.getAsBoolean();
+    public boolean isAtForwardLimit() {
+        return forwardSoftLimit.getAsBoolean();
     }
 
-    public boolean isAtDeployed() {
-        return deployedTrigger.getAsBoolean();
+    public boolean isAtReverseLimit() {
+        return reverseSoftLimit.getAsBoolean();
     }
 
     public CLIMB_MECH_STATE getWinchState() {
