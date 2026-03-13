@@ -14,6 +14,7 @@ public class rampDownFlywheel extends Command {
     public rampDownFlywheel(flywheel h) {
         this.fly = h;
         addRequirements(fly);
+
     }
 
     @Override

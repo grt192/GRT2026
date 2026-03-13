@@ -4,6 +4,7 @@ import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.subsystems.FMS.FieldManagementSubsystem;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.LoggingConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.shooter.Intertable;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -40,29 +41,29 @@ public class rampFlywheel extends Command {
         double RPS = 0;
         boolean redTeam = fms.isRedAlliance();
 
-        if (redTeam) {
-            if (poseSub.get().getX() > AlignConstants.RED_WALL_X) {// in alliance zone
-                RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
-            } else {
-                if (poseSub.get().getY() > AlignConstants.HUB_Y) {
-                    RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_AIM_TOP));
-                } else {
-                    RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_AIM_BOTTOM));
-                }
-            }
+        // if (redTeam) {
+        // if (poseSub.get().getX() > AlignConstants.RED_WALL_X) {// in alliance zone
+        // RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
+        // } else {
+        // if (poseSub.get().getY() > AlignConstants.HUB_Y) {
+        // RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_AIM_TOP));
+        // } else {
+        // RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_AIM_BOTTOM));
+        // }
+        // }
 
-        } else {
-            if (poseSub.get().getX() < AlignConstants.BLUE_WALL_X) {// in alliance zone
-                RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
-            } else {// in neutral or enemy zone
-                if (poseSub.get().getY() > AlignConstants.HUB_Y) {
-                    RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_AIM_TOP));
-                } else {
-                    RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_AIM_BOTTOM));
-                }
-            }
-        }
-
+        // } else {
+        // if (poseSub.get().getX() < AlignConstants.BLUE_WALL_X) {// in alliance zone
+        // RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
+        // } else {// in neutral or enemy zone
+        // if (poseSub.get().getY() > AlignConstants.HUB_Y) {
+        // RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_AIM_TOP));
+        // } else {
+        // RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_AIM_BOTTOM));
+        // }
+        // }
+        // }
+        RPS = ShooterConstants.Flywheel.TARGET_RPS_AGAINST_HUB;
         fly.shoot(RPS + offsetEntry.getDouble(0.0));
     }
 
