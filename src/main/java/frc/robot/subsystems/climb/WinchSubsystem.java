@@ -105,6 +105,9 @@ public class WinchSubsystem extends SubsystemBase {
     }
 
     public void setMotorDutyCycle(double dutyCycle) {
+        dutyCycle = (isAtHome() && dutyCycle > 0) ? 0 : dutyCycle;
+        dutyCycle = (isAtDeployed() && dutyCycle < 0) ? 0 : dutyCycle;
+
         dutyCycle = Math.max(-1.0, Math.min(dutyCycle, 1.0));
         dutyCycle *= ClimbConstants.WINCH_MAX_OUTPUT;
         dutyCycleControl.withOutput(dutyCycle);
