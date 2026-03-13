@@ -177,10 +177,6 @@ public class RobotContainer {
                 swerveSubsystem);
         }
         if (Constants.MECH_ENABLED) {
-            // bind semi auto commands
-            var crossTrigger = mechController.cross();
-            crossTrigger.onTrue(new SemiAutoClimbDownCommand(m_ClimbSubsystem, crossTrigger::getAsBoolean));
-
             // Triangle (drive) = auto climb (TODO: implement)
             driveController.triangle().onTrue(Commands.none());
 
@@ -196,6 +192,10 @@ public class RobotContainer {
                 m_ClimbSubsystem.setWinchDutyCycle(winchDutyCycle);
 
             }, m_ClimbSubsystem));
+
+            // bind semi auto commands
+            var crossTrigger = mechController.cross();
+            crossTrigger.onTrue(new SemiAutoClimbDownCommand(m_ClimbSubsystem, crossTrigger::getAsBoolean));
 
             // ==================== INTAKE ROLLER ====================
             // R1 (mech) = intake in, L1 (mech) = intake out
