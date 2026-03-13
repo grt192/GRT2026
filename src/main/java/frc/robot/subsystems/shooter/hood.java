@@ -68,7 +68,7 @@ public class hood extends SubsystemBase {
     }
 
     public void setHoodAngle(double rotationAngle) {
-        if (rotationAngle >= ShooterConstants.Hood.LOWER_ANGLE_LIMIT && rotationAngle <= ShooterConstants.Hood.UPPER_ANGLE_LIMIT) {
+        if (rotationAngle >= ShooterConstants.Hood.LOWER_ANGLE_LIMIT && rotationAngle <= ShooterConstants.Hood.UPPER_ANGLE_LIMIT) {// angle clamp
             hoodMotor.setControl(focThing.withPosition(rotationAngle));
             System.out.println("HoodControl" + rotationAngle);
             wantedAngle = rotationAngle;
@@ -93,42 +93,17 @@ public class hood extends SubsystemBase {
     }
 
     public double getPos() {
-        return hoodMotor.getPosition().getValueAsDouble();
+        return hoodMotor.getPosition(false).getValueAsDouble();
     }
 
     @Override
     public void periodic() {
         hoodMotor.updateDashboard();
-        sendData();
     }
 
     public void sendData() {
-        Logger.recordOutput(LOG_PREFIX + "PositionRotations",
-            hoodMotor.getPosition().getValueAsDouble());
 
-        Logger.recordOutput(LOG_PREFIX + "VelocityRPS",
-            hoodMotor.getVelocity().getValueAsDouble());
 
-        Logger.recordOutput(LOG_PREFIX + "AppliedVolts",
-            hoodMotor.getMotorVoltage().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "SupplyVoltage",
-            hoodMotor.getSupplyVoltage().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "StatorCurrentAmps",
-            hoodMotor.getStatorCurrent().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "SupplyCurrentAmps",
-            hoodMotor.getSupplyCurrent().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "TemperatureC",
-            hoodMotor.getDeviceTemp().getValueAsDouble());
-
-        Logger.recordOutput(LOG_PREFIX + "CommandedDutyCycle",
-            commandedDutyCycle);
-
-        Logger.recordOutput(LOG_PREFIX + "Connected",
-            hoodMotor.isConnected());
     }
 
 
