@@ -4,7 +4,6 @@ import com.ctre.phoenix6.CANBus;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimbConstants.CLIMB_MECH_STATE;
 
@@ -91,9 +90,5 @@ public class ClimbSubsystem extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {
-        SmartDashboard.putString("wstat", m_Winch.getWinchState().toString());
-        SmartDashboard.putString("astat", m_StabilizingArm.getArmState().toString());
-        SmartDashboard.putString("cstat", getClimbState().toString());
-    }
+    public void periodic() {}
 }
