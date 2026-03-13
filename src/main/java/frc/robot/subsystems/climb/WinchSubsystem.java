@@ -2,7 +2,6 @@ package frc.robot.subsystems.climb;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Millimeters;
-import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
@@ -14,6 +13,7 @@ import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANrange;
@@ -32,6 +32,7 @@ public class WinchSubsystem extends SubsystemBase {
     private TalonFXConfiguration motorConfig = new TalonFXConfiguration();
     private DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
     private TorqueCurrentFOC torqueCurrentControl = new TorqueCurrentFOC(0);
+    private CoastOut coast = new CoastOut();
 
     private final StatusSignal<Boolean> forwardLimitSignal;
     private final StatusSignal<Boolean> reverseLimitSignal;
@@ -39,6 +40,7 @@ public class WinchSubsystem extends SubsystemBase {
     private CANrange canRange;
     private CANrangeConfiguration canRangeConfig = new CANrangeConfiguration();
     private Trigger homeTrigger;
+    private Trigger deployedTrigger;
 
     public WinchSubsystem(CANBus canBusObj) {
         motor = new LoggedTalon(ClimbConstants.WINCH_MOTOR_CAN_ID, canBusObj, "Winch");
@@ -52,9 +54,10 @@ public class WinchSubsystem extends SubsystemBase {
         BaseStatusSignal.setUpdateFrequencyForAll(50, forwardLimitSignal, reverseLimitSignal);
 
         homeTrigger = new Trigger(() -> isAtDistance(ClimbConstants.WINCH_HOME_DISTANCE));
-        homeTrigger.onTrue(this.runOnce(this::homeEncoder).ignoringDisable(true));
+        deployedTrigger = new Trigger(() -> isAtDistance(ClimbConstants.WINCH_DEPLOYED_DISTANCE));
 
-        homeEncoder();
+        homeTrigger.onTrue(this.runOnce(() -> motor.setControl(coast)));
+        deployedTrigger.onTrue(this.runOnce(() -> motor.setControl(coast)));
     }
 
     private void configureMotor() {
@@ -143,32 +146,12 @@ public class WinchSubsystem extends SubsystemBase {
         return motor.getTorqueCurrent(false).getValue();
     }
 
-    public void homeEncoder() {
-        motor.setPosition(ClimbConstants.WINCH_HOME_POS);
-    }
-
-    public Optional<Boolean> getForwardLimit() {
-        boolean forwardLimit = forwardLimitSignal.refresh().getValue();
-        if (!forwardLimitSignal.hasUpdated() || forwardLimitSignal.getStatus() != StatusCode.OK) {
-            return Optional.empty();
-        }
-        return Optional.of(forwardLimit);
-    }
-
-    public Optional<Boolean> getReverseLimit() {
-        boolean reverseLimit = reverseLimitSignal.refresh().getValue();
-        if (!reverseLimitSignal.hasUpdated() || reverseLimitSignal.getStatus() != StatusCode.OK) {
-            return Optional.empty();
-        }
-        return Optional.of(reverseLimit);
-    }
-
     public boolean isForwardLimitActive() {
-        return getForwardLimit().orElse(false);
+        return homeTrigger.getAsBoolean();
     }
 
     public boolean isReverseLimitActive() {
-        return getReverseLimit().orElse(false);
+        return deployedTrigger.getAsBoolean();
     }
 
     public CLIMB_MECH_STATE getWinchState() {
@@ -183,6 +166,7 @@ public class WinchSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        motor.updateDashboard();
         logToDashboard();
     }
 }
