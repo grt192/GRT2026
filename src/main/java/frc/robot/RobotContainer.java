@@ -186,17 +186,15 @@ public class RobotContainer {
 
             // Manual control with d-pad for winch and left stick for arm
             m_ClimbSubsystem.setDefaultCommand(Commands.run(() -> {
-                var armDutyCycle = mechController.getLeftY();
-                double winchDutyCycle = 0;
+                var armDutyCycle = -mechController.getLeftY();
 
-                if (mechController.povUp().getAsBoolean()) {
-                    winchDutyCycle--;
-                }
-                if (mechController.povDown().getAsBoolean()) {
-                    winchDutyCycle++;
-                }
+                double dUp = mechController.povUp().getAsBoolean() ? 1 : 0;
+                double dDown = mechController.povDown().getAsBoolean() ? -1 : 0;
+                double winchDutyCycle = dUp + dDown;
+
                 m_ClimbSubsystem.setArmDutyCycle(armDutyCycle);
-                // m_ClimbSubsystem.setWinchDutyCycle(winchDutyCycle);
+                m_ClimbSubsystem.setWinchDutyCycle(winchDutyCycle);
+
             }, m_ClimbSubsystem));
 
             // ==================== INTAKE ROLLER ====================
