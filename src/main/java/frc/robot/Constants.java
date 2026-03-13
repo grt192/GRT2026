@@ -120,6 +120,7 @@ public final class Constants {
 
         // ---- Flywheel ----
         public static class Flywheel {
+            public static final double TARGET_RPS_AGAINST_HUB = 70;
             public static final int UPPER_MOTOR_ID = 17;
             public static final int SECOND_MOTOR_ID = 25;
 
@@ -133,7 +134,7 @@ public final class Constants {
             public static final double KV = 0.12;
 
             // Motion Magic
-            public static final double MM_ACCEL = 30.0;
+            public static final double MM_ACCEL = 100.0;
             public static final double MM_JERK = 150.0;
             public static final double MM_CRUISE_VELOCITY = 500.0;
 
@@ -143,6 +144,8 @@ public final class Constants {
 
         // ---- Hood ----
         public static class Hood {
+            public static final double TARGET_ANGLE_AGAINST_HUB = 0.2;
+
             public static final int MOTOR_ID = 16;
             public static final int ENCODER_ID = 18;
 
@@ -336,6 +339,10 @@ public final class Constants {
 
     public static class HopperConstants {
         public static final int KRAKEN_CAN_ID = 15;
+
+        // time it takes roughly for flywheel to get to right velocity
+        // hood to get to right position
+        public static final double RAMP_UP_TIME = 3.0;
 
         public enum HOPPER_INTAKE {
             BALLIN,
