@@ -126,7 +126,8 @@ public class WinchSubsystem extends SubsystemBase {
         return motor.getControlMode().toString();
     }
 
-    public void setTorqueCurrent(double amps) {
+    public void setTorqueCurrent(Current current) {
+        double amps = current.in(Amps);
         amps = (isAtForwardLimit() && amps > 0) ? 0 : amps;
         amps = (isAtReverseLimit() && amps < 0) ? 0 : amps;
 

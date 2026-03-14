@@ -74,8 +74,8 @@ public class ClimbSubsystem extends SubsystemBase {
         m_StabilizingArm.setPositionSetpoint(setpoint);
     }
 
-    public void setWinchTorqueCurrent(double amps) {
-        m_Winch.setTorqueCurrent(amps);
+    public void setWinchTorqueCurrent(Current current) {
+        m_Winch.setTorqueCurrent(current);
     }
 
     public Distance getWinchDistance() {

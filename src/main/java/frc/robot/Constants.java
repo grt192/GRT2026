@@ -434,7 +434,7 @@ public final class Constants {
         public static final Time ARM_POS_TIMEOUT = Seconds.of(5);
         public static final Time WINCH_POS_TIMEOUT = Seconds.of(10);
 
-        public static final double WINCH_TORQUE_CURRENT = 10.0; // amps, placeholder to tune
+        public static final Current WINCH_TORQUE_CURRENT = Amps.of(10.0); // placeholder to tune
         public static final Current ARM_TORQUE_CURRENT = Amps.of(10.0); // placeholder to tune
 
         public static final double ARM_kP = 15;
