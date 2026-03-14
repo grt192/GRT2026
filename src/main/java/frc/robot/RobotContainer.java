@@ -177,27 +177,24 @@ public class RobotContainer {
                 swerveSubsystem);
         }
         if (Constants.MECH_ENABLED) {
-            // bind semi auto commands
-            var crossTrigger = mechController.cross();
-            crossTrigger.onTrue(new SemiAutoClimbDownCommand(m_ClimbSubsystem, crossTrigger::getAsBoolean));
-
             // Triangle (drive) = auto climb (TODO: implement)
             driveController.triangle().onTrue(Commands.none());
 
             // Manual control with d-pad for winch and left stick for arm
             m_ClimbSubsystem.setDefaultCommand(Commands.run(() -> {
-                var armDutyCycle = mechController.getLeftY();
-                double winchDutyCycle = 0;
+                var armDutyCycle = -mechController.getLeftY();
 
-                if (mechController.povUp().getAsBoolean()) {
-                    winchDutyCycle--;
-                }
-                if (mechController.povDown().getAsBoolean()) {
-                    winchDutyCycle++;
-                }
+                double dUp = mechController.povUp().getAsBoolean() ? 1 : 0;
+                double dDown = mechController.povDown().getAsBoolean() ? -1 : 0;
+                double winchDutyCycle = dUp + dDown;
+
                 m_ClimbSubsystem.setArmDutyCycle(armDutyCycle);
                 m_ClimbSubsystem.setWinchDutyCycle(winchDutyCycle);
             }, m_ClimbSubsystem));
+
+            // bind semi auto commands
+            var crossTrigger = mechController.cross();
+            crossTrigger.onTrue(new SemiAutoClimbDownCommand(m_ClimbSubsystem, crossTrigger::getAsBoolean));
 
             // ==================== INTAKE ROLLER ====================
             // R1 (mech) = intake in, L1 (mech) = intake out

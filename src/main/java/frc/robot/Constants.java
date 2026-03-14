@@ -424,30 +424,22 @@ public final class Constants {
         public static final double ARM_MAX_OUTPUT = 0.05;
         public static final double WINCH_MAX_OUTPUT = 1;
 
-        public static final Angle ARM_ACCEPTABLE_POSITION_ERROR = Degrees.of(5);
-
         public static final Angle ARM_REVERSE_LIMIT = Rotations.of(-0.05);
         public static final Angle ARM_FORWARD_LIMIT = Rotations.of(0.25);
-        public static final Angle WINCH_REVERSE_LIMIT = Rotations.of(-0.25);
-        public static final Angle WINCH_FORWARD_LIMIT = Rotations.of(0.25);
-
         public static final Angle ARM_HOME_POS = Rotations.of(0.25);
-        public static final Angle WINCH_HOME_POS = Rotations.of(-0.25);
         public static final Angle ARM_DEPLOYED_POS = Rotations.of(0);
+        public static final Angle ARM_POSITION_TOLERANCE = Degrees.of(5);
 
-        public static final Time ARM_POS_TIMEOUT = Seconds.of(5);
-        public static final Time WINCH_POS_TIMEOUT = Seconds.of(5);
-
-        public static final Angle ENCODER_OFFSET = Rotations.of(0);
-        public static final Angle ENCODER_DISCONTINUITY_POINT = ((ARM_HOME_POS.plus(ARM_DEPLOYED_POS)).div(2))
-            .plus(Rotations.of(0.5)); // docs for less than one rotation of travel: mean(lowerLimit,upperLimit) +
-                                      // 0.5
-
-        // Winch CANrange + torque current control
-        public static final double WINCH_TORQUE_CURRENT = 10.0; // amps, placeholder to tune
         public static final Distance WINCH_HOME_DISTANCE = Millimeters.of(50); // placeholder to tune
         public static final Distance WINCH_DEPLOYED_DISTANCE = Millimeters.of(300); // placeholder to tune
+        public static final Distance WINCH_REVERSE_LIMIT = WINCH_DEPLOYED_DISTANCE;
+        public static final Distance WINCH_FORWARD_LIMIT = WINCH_HOME_DISTANCE;
         public static final Distance WINCH_DISTANCE_TOLERANCE = Millimeters.of(15); // placeholder to tune
+
+        public static final Time ARM_POS_TIMEOUT = Seconds.of(5);
+        public static final Time WINCH_POS_TIMEOUT = Seconds.of(10);
+
+        public static final double WINCH_TORQUE_CURRENT = 10.0; // amps, placeholder to tune
 
         public static final double ARM_kP = 15;
         public static final double ARM_kI = 0.0;

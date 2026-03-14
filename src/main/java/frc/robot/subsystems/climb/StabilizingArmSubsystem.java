@@ -5,7 +5,7 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 
 import java.util.Optional;
-
+import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusCode;
@@ -17,7 +17,6 @@ import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
-import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -27,14 +26,14 @@ import com.ctre.phoenix6.StatusSignal;
 
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ClimbConstants.CLIMB_MECH_STATE;
+import frc.robot.util.LoggedTalon;
 
 public class StabilizingArmSubsystem extends SubsystemBase {
 
-    private TalonFX motor;
+    private LoggedTalon motor;
     private TalonFXConfiguration motorConfig = new TalonFXConfiguration();
     private DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
     private PositionTorqueCurrentFOC posControl = new PositionTorqueCurrentFOC(0).withSlot(0);
@@ -43,7 +42,7 @@ public class StabilizingArmSubsystem extends SubsystemBase {
     private final StatusSignal<Boolean> reverseLimitSignal;
 
     public StabilizingArmSubsystem(CANBus canBusObj) {
-        motor = new TalonFX(ClimbConstants.ARM_MOTOR_CAN_ID, canBusObj);
+        motor = new LoggedTalon(ClimbConstants.ARM_MOTOR_CAN_ID, canBusObj, "Arm");
         configureMotor();
 
         forwardLimitSignal = motor.getFault_ForwardSoftLimit();
@@ -66,11 +65,11 @@ public class StabilizingArmSubsystem extends SubsystemBase {
             .withFeedback(new FeedbackConfigs()
                 .withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
                 .withSensorToMechanismRatio(ClimbConstants.ARM_GR))
-            // .withSoftwareLimitSwitch(new SoftwareLimitSwitchConfigs()
-            // .withForwardSoftLimitEnable(true)
-            // .withForwardSoftLimitThreshold(ClimbConstants.ARM_FORWARD_LIMIT)
-            // .withReverseSoftLimitEnable(true)
-            // .withReverseSoftLimitThreshold(ClimbConstants.ARM_REVERSE_LIMIT))
+            .withSoftwareLimitSwitch(new SoftwareLimitSwitchConfigs()
+                .withForwardSoftLimitEnable(true)
+                .withForwardSoftLimitThreshold(ClimbConstants.ARM_FORWARD_LIMIT)
+                .withReverseSoftLimitEnable(true)
+                .withReverseSoftLimitThreshold(ClimbConstants.ARM_REVERSE_LIMIT))
             .withSlot0(new Slot0Configs()
                 .withGravityType(GravityTypeValue.Arm_Cosine)
                 .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign)
@@ -121,22 +120,22 @@ public class StabilizingArmSubsystem extends SubsystemBase {
     }
 
     public Optional<Angle> getPositionSetpoint() {
-        if (motor.getControlMode().getValue() != ControlModeValue.PositionTorqueCurrentFOC) {
+        if (motor.getControlMode(false).getValue() != ControlModeValue.PositionTorqueCurrentFOC) {
             return Optional.empty();
         }
-        return Optional.of(Rotations.of(motor.getClosedLoopReference().getValue()));
+        return Optional.of(Rotations.of(motor.getClosedLoopReference(false).getValue()));
     }
 
     // Checks if arm is at position set by PID control with a tolerance
     public boolean atSetPosition() {
         // if not in position control return false
-        if (motor.getControlMode().getValue() != ControlModeValue.PositionTorqueCurrentFOC) {
+        if (motor.getControlMode(false).getValue() != ControlModeValue.PositionTorqueCurrentFOC) {
             return false;
         }
 
         // checks if closed loop error is within tolerance
-        return (Rotations.of(Math.abs(motor.getClosedLoopError().getValue())))
-            .lte(ClimbConstants.ARM_ACCEPTABLE_POSITION_ERROR);
+        return (Rotations.of(Math.abs(motor.getClosedLoopError(false).getValue())))
+            .lte(ClimbConstants.ARM_POSITION_TOLERANCE);
     }
 
     // Checks if arm is at given position
@@ -146,23 +145,31 @@ public class StabilizingArmSubsystem extends SubsystemBase {
         Angle absError = Radians.of(Math.abs(error.in(Radians)));
 
         // checks if difference is within tolerance
-        return absError.lte(ClimbConstants.ARM_ACCEPTABLE_POSITION_ERROR);
-    }
-
-    public void homeEncoder() {
-        setEncoder(ClimbConstants.ARM_HOME_POS);
-    }
-
-    public void zeroEncoder() {
-        setEncoder(Rotations.of(0));
+        return absError.lte(ClimbConstants.ARM_POSITION_TOLERANCE);
     }
 
     public void setEncoder(Angle pos) {
         motor.setPosition(pos);
     }
 
+    public void homeEncoder() {
+        setEncoder(ClimbConstants.ARM_HOME_POS);
+    }
+
     public Angle getMotorPosition() {
-        return motor.getPosition().getValue();
+        return motor.getPosition(false).getValue();
+    }
+
+    public Current getSupplyCurrent() {
+        return motor.getSupplyCurrent(false).getValue();
+    }
+
+    public Current getTorqueCurrent() {
+        return motor.getTorqueCurrent(false).getValue();
+    }
+
+    public String getControlMode() {
+        return motor.getControlMode(false).toString();
     }
 
     public Optional<Boolean> getForwardLimit() {
@@ -200,42 +207,16 @@ public class StabilizingArmSubsystem extends SubsystemBase {
     }
 
     private void logToDashboard() {
-        SmartDashboard.putString(ClimbConstants.ARM_TABLE + "/state", getArmState().toString());
+        Logger.recordOutput(ClimbConstants.ARM_TABLE + "/state", getArmState().toString());
 
-        SmartDashboard.putNumber(ClimbConstants.ARM_TABLE + "/rotations", getMotorPosition().in(Rotations));
-        SmartDashboard.putNumber(
-            ClimbConstants.ARM_TABLE + "/setRotations",
-            getPositionSetpoint().orElse(Rotations.of(0)).in(Rotations));
-        SmartDashboard.putBoolean(ClimbConstants.ARM_TABLE + "/atSetpoint", atSetPosition());
 
-        SmartDashboard.putNumber(ClimbConstants.ARM_TABLE + "/dutyCycle", getDutyCycleSetpoint());
-        SmartDashboard.putString(ClimbConstants.ARM_TABLE + "/controlMode", getControlMode());
-
-        SmartDashboard.putNumber(ClimbConstants.ARM_TABLE + "/supplyCurrent(Amps)", getSupplyCurrent().in(Amps));
-        SmartDashboard.putNumber(ClimbConstants.ARM_TABLE + "/torqueCurrent(Amps)", getTorqueCurrent().in(Amps));
-
-        SmartDashboard.putBoolean(
-            ClimbConstants.ARM_TABLE + "/forwardSoftStop",
-            isForwardLimitActive());
-        SmartDashboard.putBoolean(
-            ClimbConstants.ARM_TABLE + "/reverseSoftStop",
-            isReverseLimitActive());
-    }
-
-    public Current getSupplyCurrent() {
-        return motor.getSupplyCurrent().getValue();
-    }
-
-    public Current getTorqueCurrent() {
-        return motor.getTorqueCurrent().getValue();
-    }
-
-    public String getControlMode() {
-        return motor.getControlMode().toString();
+        Logger.recordOutput(ClimbConstants.ARM_TABLE + "/forwardSoftStop", isForwardLimitActive());
+        Logger.recordOutput(ClimbConstants.ARM_TABLE + "/reverseSoftStop", isReverseLimitActive());
     }
 
     @Override
     public void periodic() {
+        motor.updateDashboard();
         logToDashboard();
     }
 }
