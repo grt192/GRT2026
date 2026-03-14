@@ -16,38 +16,33 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class ManualShooterSequence extends Command {
 
     private final flywheel fly;
-    private final hood hd;
     private final towerRollers tower;
     private final HopperSubsystem hopper;
 
     public ManualShooterSequence(
         flywheel fly,
-        hood hood,
         towerRollers tower,
         HopperSubsystem hopper) {
         this.fly = fly;
-        this.hd = hood;
         this.tower = tower;
         this.hopper = hopper;
 
-        addRequirements(fly, hood, tower, hopper);
+        addRequirements(fly, tower, hopper);
     }
 
     @Override
     public void initialize() {
         // Start ramping flywheel and moving hood to position
         fly.shoot(SmashAndShootConstants.FLYWHEEL_RPS);
-        hd.setHoodAngle(SmashAndShootConstants.HOOD_POSITION);
     }
 
     @Override
     public void execute() {
         // Keep commanding flywheel and hood targets
         fly.shoot(SmashAndShootConstants.FLYWHEEL_RPS);
-        hd.setHoodAngle(SmashAndShootConstants.HOOD_POSITION);
 
         // Only feed balls when flywheel is at speed AND hood is at position
-        if (fly.wantedVel() && hd.wantedAngl()) {
+        if (fly.wantedVel()) {
             tower.setManualControl(SmashAndShootConstants.TOWER_DUTY_CYCLE);
             hopper.setManualControl(SmashAndShootConstants.INDEXER_DUTY_CYCLE);
         } else {
