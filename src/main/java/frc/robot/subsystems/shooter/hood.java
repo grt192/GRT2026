@@ -1,11 +1,14 @@
 package frc.robot.subsystems.shooter;
 
 import frc.robot.Constants.ShooterConstants;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -17,11 +20,18 @@ import frc.robot.util.LoggedTalon;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.configs.*;
 
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.Seconds;
+
 public class hood extends SubsystemBase {
 
     private final LoggedTalon hoodMotor;
     private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
     private PositionVoltage focThing = new PositionVoltage(0);
+    private final VoltageOut sysIdVoltage = new VoltageOut(0);
+    private final SysIdRoutine sysIdRoutine;
     private final CANcoder hoodCoder;
 
     private double wantedAngle = 0.1;
@@ -33,6 +43,22 @@ public class hood extends SubsystemBase {
         hoodMotor = new LoggedTalon(ShooterConstants.Hood.MOTOR_ID, cn, "HoodMotor");
         hoodCoder = new CANcoder(ShooterConstants.Hood.ENCODER_ID, cn);
         config();
+
+        sysIdRoutine = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                Volts.of(0.5).per(Seconds), // ramp rate: 0.5 V/s (slow for limited range)
+                Volts.of(4), // step voltage
+                Seconds.of(5) // timeout
+            ),
+            new SysIdRoutine.Mechanism(
+                voltage -> hoodMotor.setControl(sysIdVoltage.withOutput(voltage.in(Volts))),
+                log -> {
+                    log.motor("hood")
+                        .voltage(Volts.of(hoodMotor.getMotorVoltage().getValueAsDouble()))
+                        .angularPosition(Rotations.of(hoodMotor.getPosition().getValueAsDouble()))
+                        .angularVelocity(RotationsPerSecond.of(hoodMotor.getVelocity().getValueAsDouble()));
+                },
+                this));
     }
 
     public void config() {
@@ -94,6 +120,14 @@ public class hood extends SubsystemBase {
 
     public double getPos() {
         return hoodMotor.getPosition(false).getValueAsDouble();
+    }
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.dynamic(direction);
     }
 
     @Override
