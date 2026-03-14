@@ -105,17 +105,25 @@ public class WinchSubsystem extends SubsystemBase {
         motor.setControl(dutyCycleControl);
     }
 
+    public void manualDeployWinch() {
+        setMotorDutyCycle(-1);
+    }
+
+    public void manualHomeWinch() {
+        setMotorDutyCycle(1);
+    }
+
+    public void stop() {
+        dutyCycleControl.withOutput(0);
+        motor.setControl(dutyCycleControl);
+    }
+
     public double getDutyCycleSetpoint() {
         return dutyCycleControl.Output;
     }
 
     public String getControlMode() {
         return motor.getControlMode().toString();
-    }
-
-    public void stop() {
-        dutyCycleControl.withOutput(0);
-        motor.setControl(dutyCycleControl);
     }
 
     public void setTorqueCurrent(double amps) {

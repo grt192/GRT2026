@@ -15,6 +15,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.CoastOut;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.signals.ControlModeValue;
@@ -37,6 +38,7 @@ public class StabilizingArmSubsystem extends SubsystemBase {
     private TalonFXConfiguration motorConfig = new TalonFXConfiguration();
     private DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
     private PositionTorqueCurrentFOC posControl = new PositionTorqueCurrentFOC(0).withSlot(0);
+    private CoastOut coast = new CoastOut();
 
     private final StatusSignal<Boolean> forwardLimitSignal;
     private final StatusSignal<Boolean> reverseLimitSignal;
@@ -97,6 +99,14 @@ public class StabilizingArmSubsystem extends SubsystemBase {
         dutyCycle *= ClimbConstants.ARM_MAX_OUTPUT;
         dutyCycleControl.withOutput(dutyCycle);
         motor.setControl(dutyCycleControl);
+    }
+
+    public void manualDeployArm() {
+        setMotorDutyCycle(1);
+    }
+
+    public void manualRetractArm() {
+        motor.setControl(coast);
     }
 
     public void stop() {

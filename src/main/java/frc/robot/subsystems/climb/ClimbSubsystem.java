@@ -33,8 +33,24 @@ public class ClimbSubsystem extends SubsystemBase {
         m_Winch.setMotorDutyCycle(dutyCycle);
     }
 
+    public void manualDeployArm() {
+        m_StabilizingArm.manualDeployArm();
+    }
+
+    public void manualRetractArm() {
+        m_StabilizingArm.manualRetractArm();
+    }
+
     public void stopArm() {
         m_StabilizingArm.stop();
+    }
+
+    public void manualDeployWinch() {
+        m_Winch.manualDeployWinch();
+    }
+
+    public void manualHomeWinch() {
+        m_Winch.manualHomeWinch();
     }
 
     public void stopWinch() {
