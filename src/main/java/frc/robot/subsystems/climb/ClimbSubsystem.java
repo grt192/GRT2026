@@ -46,10 +46,6 @@ public class ClimbSubsystem extends SubsystemBase {
         m_StabilizingArm.semiAutoDeployArm();
     }
 
-    public void semiAutoRetractArm() {
-        m_StabilizingArm.semiAutoRetractArm();
-    }
-
     public void stopArm() {
         m_StabilizingArm.stop();
     }

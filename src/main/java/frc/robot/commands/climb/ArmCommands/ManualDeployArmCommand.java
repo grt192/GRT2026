@@ -17,7 +17,7 @@ public class ManualDeployArmCommand extends Command {
 
     @Override
     public void execute() {
-        m_climbSubsystem.manualDeployArm();
+        m_climbSubsystem.semiAutoDeployArm();
     }
 
     @Override

@@ -40,7 +40,6 @@ public class StabilizingArmSubsystem extends SubsystemBase {
     private DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
     private PositionTorqueCurrentFOC posControl = new PositionTorqueCurrentFOC(0).withSlot(0);
     private TorqueCurrentFOC torqueCurrentControl = new TorqueCurrentFOC(0);
-    private CoastOut coast = new CoastOut();
 
     private final StatusSignal<Boolean> forwardLimitSignal;
     private final StatusSignal<Boolean> reverseLimitSignal;
@@ -113,15 +112,12 @@ public class StabilizingArmSubsystem extends SubsystemBase {
     }
 
     public void manualRetractArm() {
-        motor.setControl(coast);
+        dutyCycleControl.withOutput(0);
+        motor.setControl(dutyCycleControl);
     }
 
     public void semiAutoDeployArm() {
         setTorqueCurrent(ClimbConstants.ARM_TORQUE_CURRENT);
-    }
-
-    public void semiAutoRetractArm() {
-        setTorqueCurrent(ClimbConstants.ARM_TORQUE_CURRENT.unaryMinus());
     }
 
     public void stop() {

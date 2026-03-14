@@ -13,8 +13,8 @@ public class AutoPullUpClawCommand extends Command {
     }
 
     @Override
-    public void initialize() {
-        climbSubsystem.setWinchTorqueCurrent(-ClimbConstants.WINCH_TORQUE_CURRENT);
+    public void execute() {
+        climbSubsystem.setWinchTorqueCurrent(ClimbConstants.WINCH_TORQUE_CURRENT.unaryMinus());
     }
 
     @Override
