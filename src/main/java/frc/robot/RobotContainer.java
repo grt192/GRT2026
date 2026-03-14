@@ -278,6 +278,8 @@ public class RobotContainer {
             // ==================== SHOOTER ====================
             // R2 = flywheel (analog speed control)
             // Left stick Y = hood manual control
+
+            /*
             flywheelSubsystem.setDefaultCommand(Commands.run(() -> {
                 if (DriverStation.isJoystickConnected(1)) {
                     flywheelSubsystem.flySpeed((mechController.getR2Axis() + 1) / 2);
@@ -285,6 +287,7 @@ public class RobotContainer {
                     flywheelSubsystem.flySpeed(0);
                 }
             }, flywheelSubsystem));
+            
 
             tower.setDefaultCommand(Commands.run(() -> {
                 tower.setManualControl(0); // Stop tower by default
@@ -300,6 +303,7 @@ public class RobotContainer {
                     hoodSubsystem.hoodSpeed(0);
                 }
             }, hoodSubsystem));
+            */
 
             // Swerve-dependent drive controller commands
             if (Constants.SWERVE_ENABLED && swerveSubsystem != null) {
