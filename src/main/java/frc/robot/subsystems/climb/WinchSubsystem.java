@@ -47,8 +47,14 @@ public class WinchSubsystem extends SubsystemBase {
         forwardSoftLimit = new Trigger(() -> isAtDistance(ClimbConstants.WINCH_FORWARD_LIMIT));
         reverseSoftLimit = new Trigger(() -> isAtDistance(ClimbConstants.WINCH_REVERSE_LIMIT));
 
-        forwardSoftLimit.onTrue(this.runOnce(() -> motor.setControl(coast)));
-        reverseSoftLimit.onTrue(this.runOnce(() -> motor.setControl(coast)));
+        forwardSoftLimit.whileTrue(this.run(() -> {
+            motor.setControl(coast);
+            System.out.println("forward");
+        }));
+        reverseSoftLimit.whileTrue(this.run(() -> {
+            motor.setControl(coast);
+            System.out.println("reverse");
+        }));
     }
 
     private void configureMotor() {
@@ -136,7 +142,7 @@ public class WinchSubsystem extends SubsystemBase {
     }
 
     public Distance getDistance() {
-        return canRange.getDistance(false).getValue();
+        return canRange.getDistance().getValue();
     }
 
     public boolean isAtDistance(Distance target) {

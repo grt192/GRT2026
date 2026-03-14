@@ -425,11 +425,11 @@ public final class Constants {
         public static final Angle ARM_DEPLOYED_POS = Rotations.of(0);
         public static final Angle ARM_POSITION_TOLERANCE = Degrees.of(5);
 
-        public static final Distance WINCH_HOME_DISTANCE = Millimeters.of(50); // placeholder to tune
-        public static final Distance WINCH_DEPLOYED_DISTANCE = Millimeters.of(300); // placeholder to tune
+        public static final Distance WINCH_HOME_DISTANCE = Millimeters.of(0.145);
+        public static final Distance WINCH_DEPLOYED_DISTANCE = Meters.of(0.07); // placeholder to tune
         public static final Distance WINCH_REVERSE_LIMIT = WINCH_DEPLOYED_DISTANCE;
         public static final Distance WINCH_FORWARD_LIMIT = WINCH_HOME_DISTANCE;
-        public static final Distance WINCH_DISTANCE_TOLERANCE = Millimeters.of(15); // placeholder to tune
+        public static final Distance WINCH_DISTANCE_TOLERANCE = Millimeters.of(15); // based on error in measurement (13 mm)
 
         public static final Time ARM_POS_TIMEOUT = Seconds.of(5);
         public static final Time WINCH_POS_TIMEOUT = Seconds.of(10);
