@@ -44,16 +44,14 @@ public class WinchSubsystem extends SubsystemBase {
         configureCANrange();
         configureMotor();
 
-        forwardSoftLimit = new Trigger(() -> isAtDistance(ClimbConstants.WINCH_FORWARD_LIMIT));
-        reverseSoftLimit = new Trigger(() -> isAtDistance(ClimbConstants.WINCH_REVERSE_LIMIT));
+        forwardSoftLimit = new Trigger(() -> getDistance().gte(ClimbConstants.WINCH_FORWARD_LIMIT));
+        reverseSoftLimit = new Trigger(() -> getDistance().lte(ClimbConstants.WINCH_REVERSE_LIMIT));
 
         forwardSoftLimit.whileTrue(this.run(() -> {
-            motor.setControl(coast);
-            System.out.println("forward");
+            System.out.println("for");
         }));
         reverseSoftLimit.whileTrue(this.run(() -> {
-            motor.setControl(coast);
-            System.out.println("reverse");
+            System.out.println("rev");
         }));
     }
 
@@ -102,8 +100,8 @@ public class WinchSubsystem extends SubsystemBase {
     }
 
     public void setMotorDutyCycle(double dutyCycle) {
-        dutyCycle = (isAtForwardLimit() && dutyCycle > 0) ? 0 : dutyCycle;
-        dutyCycle = (isAtReverseLimit() && dutyCycle < 0) ? 0 : dutyCycle;
+        // dutyCycle = (isAtForwardLimit() && dutyCycle > 0) ? 0 : dutyCycle;
+        // dutyCycle = (isAtReverseLimit() && dutyCycle < 0) ? 0 : dutyCycle;
 
         dutyCycle = Math.max(-1.0, Math.min(dutyCycle, 1.0));
         dutyCycle *= ClimbConstants.WINCH_MAX_OUTPUT;
