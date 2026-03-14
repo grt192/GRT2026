@@ -16,7 +16,7 @@ public class ManualPullUpClawCommand extends Command {
 
     @Override
     public void execute() {
-        m_climbSubsystem.setWinchDutyCycle(1);
+        m_climbSubsystem.manualHomeWinch();
     }
 
     @Override

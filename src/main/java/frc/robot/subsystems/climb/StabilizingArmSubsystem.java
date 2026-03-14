@@ -17,6 +17,7 @@ import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.signals.ControlModeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -37,6 +38,7 @@ public class StabilizingArmSubsystem extends SubsystemBase {
     private TalonFXConfiguration motorConfig = new TalonFXConfiguration();
     private DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
     private PositionTorqueCurrentFOC posControl = new PositionTorqueCurrentFOC(0).withSlot(0);
+    private TorqueCurrentFOC torqueCurrentControl = new TorqueCurrentFOC(0);
 
     private final StatusSignal<Boolean> forwardLimitSignal;
     private final StatusSignal<Boolean> reverseLimitSignal;
@@ -97,6 +99,24 @@ public class StabilizingArmSubsystem extends SubsystemBase {
         dutyCycle *= ClimbConstants.ARM_MAX_OUTPUT;
         dutyCycleControl.withOutput(dutyCycle);
         motor.setControl(dutyCycleControl);
+    }
+
+    public void setTorqueCurrent(Current current) {
+        torqueCurrentControl.withOutput(current);
+        motor.setControl(torqueCurrentControl);
+    }
+
+    public void manualDeployArm() {
+        setMotorDutyCycle(1);
+    }
+
+    public void manualRetractArm() {
+        dutyCycleControl.withOutput(0);
+        motor.setControl(dutyCycleControl);
+    }
+
+    public void semiAutoDeployArm() {
+        setTorqueCurrent(ClimbConstants.ARM_TORQUE_CURRENT);
     }
 
     public void stop() {

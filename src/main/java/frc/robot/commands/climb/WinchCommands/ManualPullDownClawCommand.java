@@ -16,7 +16,7 @@ public class ManualPullDownClawCommand extends Command {
 
     @Override
     public void execute() {
-        m_climbSubsystem.setWinchDutyCycle(-1);
+        m_climbSubsystem.manualDeployWinch();
     }
 
     @Override

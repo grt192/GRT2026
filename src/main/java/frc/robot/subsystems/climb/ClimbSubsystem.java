@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.CANBus;
 
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimbConstants;
@@ -33,20 +34,44 @@ public class ClimbSubsystem extends SubsystemBase {
         m_Winch.setMotorDutyCycle(dutyCycle);
     }
 
+    public void manualDeployArm() {
+        m_StabilizingArm.manualDeployArm();
+    }
+
+    public void manualRetractArm() {
+        m_StabilizingArm.manualRetractArm();
+    }
+
+    public void semiAutoDeployArm() {
+        m_StabilizingArm.semiAutoDeployArm();
+    }
+
     public void stopArm() {
         m_StabilizingArm.stop();
+    }
+
+    public void manualDeployWinch() {
+        m_Winch.manualDeployWinch();
+    }
+
+    public void manualHomeWinch() {
+        m_Winch.manualHomeWinch();
     }
 
     public void stopWinch() {
         m_Winch.stop();
     }
 
+    public void setArmTorqueCurrent(Current current) {
+        m_StabilizingArm.setTorqueCurrent(current);
+    }
+
     public void setArmPositionSetpoint(Angle setpoint) {
         m_StabilizingArm.setPositionSetpoint(setpoint);
     }
 
-    public void setWinchTorqueCurrent(double amps) {
-        m_Winch.setTorqueCurrent(amps);
+    public void setWinchTorqueCurrent(Current current) {
+        m_Winch.setTorqueCurrent(current);
     }
 
     public Distance getWinchDistance() {

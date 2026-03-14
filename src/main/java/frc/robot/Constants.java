@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
@@ -18,6 +19,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 
 // Units library:
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Time;
 
@@ -439,7 +441,8 @@ public final class Constants {
         public static final Time ARM_POS_TIMEOUT = Seconds.of(5);
         public static final Time WINCH_POS_TIMEOUT = Seconds.of(10);
 
-        public static final double WINCH_TORQUE_CURRENT = 10.0; // amps, placeholder to tune
+        public static final Current WINCH_TORQUE_CURRENT = Amps.of(10.0); // placeholder to tune
+        public static final Current ARM_TORQUE_CURRENT = Amps.of(10.0); // placeholder to tune
 
         public static final double ARM_kP = 15;
         public static final double ARM_kI = 0.0;

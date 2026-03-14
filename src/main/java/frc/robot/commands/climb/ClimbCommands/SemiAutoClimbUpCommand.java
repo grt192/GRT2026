@@ -1,28 +1,34 @@
 package frc.robot.commands.climb.ClimbCommands;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.ClimbConstants;
-import frc.robot.commands.climb.ArmCommands.ManualDeployArmCommand;
-import frc.robot.commands.climb.WinchCommands.ManualPullDownClawCommand;
 import frc.robot.subsystems.climb.ClimbSubsystem;
 
 public class SemiAutoClimbUpCommand extends SequentialCommandGroup {
-    private ManualDeployArmCommand deployArm;
-    private ManualPullDownClawCommand pullDownClaw;
 
     public SemiAutoClimbUpCommand(ClimbSubsystem climbSubsystem, BooleanSupplier stepSupplier) {
-        deployArm = new ManualDeployArmCommand(climbSubsystem, stepSupplier);
-        pullDownClaw = new ManualPullDownClawCommand(climbSubsystem, stepSupplier);
+        AtomicBoolean retractArm = new AtomicBoolean(false);
+
+        Command deployArmUntilStop = Commands.run(() -> climbSubsystem.semiAutoDeployArm())
+            .until(() -> retractArm.get())
+            .finallyDo((boolean interrupted) -> climbSubsystem.stopArm());
+
+        Command runWinchDownThenRetractArm = Commands.run(() -> climbSubsystem.manualDeployWinch())
+            .until(() -> stepSupplier.getAsBoolean() || climbSubsystem.isWinchAtDistance(ClimbConstants.WINCH_DEPLOYED_DISTANCE))
+            .finallyDo(() -> climbSubsystem.stopWinch())
+            .andThen(waitForNextStep(stepSupplier))
+            .andThen(Commands.runOnce(() -> retractArm.set(true)));
 
         addCommands(
             waitForButtonRelease(stepSupplier),
-            deployArm.raceWith(Commands.waitUntil(climbSubsystem::isArmReverseLimitActive)),
-            waitForNextStep(stepSupplier),
-            pullDownClaw.raceWith(Commands.waitUntil(() -> climbSubsystem.isWinchAtDistance(ClimbConstants.WINCH_DEPLOYED_DISTANCE))));
+            deployArmUntilStop.alongWith(runWinchDownThenRetractArm));
+
+        addRequirements(climbSubsystem);
     }
 
     private static Command waitForButtonRelease(BooleanSupplier supplier) {
