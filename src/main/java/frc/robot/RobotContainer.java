@@ -30,7 +30,7 @@ import frc.robot.commands.vision.GetCameraDisplacement;
 import frc.robot.Constants.TowerConstants.TOWER_INTAKE;
 import frc.robot.Constants.HopperConstants.HOPPER_INTAKE;
 import frc.robot.commands.ManualShooterSequence;
-
+import frc.robot.commands.auton.ShootAndLeaveAuton;
 import com.ctre.phoenix6.CANBus;
 
 import frc.robot.commands.intake.pivot.*;
@@ -280,6 +280,8 @@ public class RobotContainer {
             // ==================== SHOOTER ====================
             // R2 = flywheel (analog speed control)
             // Left stick Y = hood manual control
+
+            
             flywheelSubsystem.setDefaultCommand(Commands.run(() -> {
                 if (DriverStation.isJoystickConnected(1)) {
                     flywheelSubsystem.flySpeed((mechController.getR2Axis() + 1) / 2);
@@ -287,6 +289,7 @@ public class RobotContainer {
                     flywheelSubsystem.flySpeed(0);
                 }
             }, flywheelSubsystem));
+            
 
             tower.setDefaultCommand(Commands.run(() -> {
                 tower.setManualControl(0); // Stop tower by default
@@ -295,13 +298,14 @@ public class RobotContainer {
 
             hoodSubsystem.setDefaultCommand(Commands.run(() -> {
                 if (mechController.L3().getAsBoolean()) {
-                    hoodSubsystem.hoodSpeed(0.5);
+                    hoodSubsystem.hoodSpeed(0.15);
                 } else if (mechController.R3().getAsBoolean()) {
-                    hoodSubsystem.hoodSpeed(-0.5);
+                    hoodSubsystem.hoodSpeed(-0.15);
                 } else {
                     hoodSubsystem.hoodSpeed(0);
                 }
             }, hoodSubsystem));
+            
 
             // Swerve-dependent drive controller commands
             if (Constants.SWERVE_ENABLED && swerveSubsystem != null) {
@@ -334,7 +338,7 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        return new ShootAndLeaveAuton(swerveSubsystem, flywheelSubsystem, hoodSubsystem, HopperSubsystem);
     }
 
     // vision shit

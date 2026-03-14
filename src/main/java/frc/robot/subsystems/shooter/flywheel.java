@@ -5,6 +5,7 @@ import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTable;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -79,7 +80,7 @@ public class flywheel extends SubsystemBase {
     }
 
     public void config() {
-        cfg.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        cfg.MotorOutput.Inverted = ShooterConstants.Flywheel.F_INVERTED_VALUE;
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         cfg.MotionMagic.MotionMagicCruiseVelocity = ShooterConstants.Flywheel.MM_CRUISE_VELOCITY;
         cfg.MotionMagic.MotionMagicAcceleration = ShooterConstants.Flywheel.MM_ACCEL;
@@ -121,23 +122,27 @@ public class flywheel extends SubsystemBase {
     double commandedDutyCycle = 0;
 
     public void flySpeed(double speed) {
-        if (speed > 0.75) {
-            commandedDutyCycle = 0.65;
-            upperMotor.setControl(dutyCycl.withOutput(commandedDutyCycle));
-        } else {
-            commandedDutyCycle = 0.0;
-            upperMotor.setControl(dutyCycl.withOutput(0.0));
-        }
+        upperMotor.setControl(dutyCycl.withOutput(speed));
+
+        // if (speed > 0.75) {
+        // commandedDutyCycle = 0.65;
+        // upperMotor.setControl(dutyCycl.withOutput(commandedDutyCycle));
+        // } else {
+        // commandedDutyCycle = 0.0;
+        // upperMotor.setControl(dutyCycl.withOutput(0.0));
+        // }
     }
 
     @Override
     public void periodic() {
+        SmartDashboard.putNumber("Shooter/Flywheel/FlywheelVelo:", upperMotor.getVelocity(false).getValueAsDouble());
         upperMotor.updateDashboard();
         secondMotor.updateDashboard();
         sendData();
     }
 
     public void sendData() {
+
         Logger.recordOutput(LOG_PREFIX + "PositionRotations",
             upperMotor.getPosition().getValueAsDouble());
 
