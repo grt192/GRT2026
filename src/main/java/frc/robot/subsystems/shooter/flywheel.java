@@ -5,7 +5,9 @@ import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTable;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -17,8 +19,13 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Constants.DebugConstants.LOG_TO_NT;
 import java.util.EnumSet;
 import java.util.function.Consumer;
@@ -34,6 +41,9 @@ public class flywheel extends SubsystemBase {
     private DutyCycleOut dutyCycl = new DutyCycleOut(0);
     private TalonFXConfiguration cfg = new TalonFXConfiguration();
     private Slot0Configs pidSlots = new Slot0Configs();
+
+    private final VoltageOut sysIdVoltage = new VoltageOut(0);
+    private final SysIdRoutine sysIdRoutine;
 
     private double wantedVe = 0;
 
@@ -78,6 +88,22 @@ public class flywheel extends SubsystemBase {
         if (LOG_TO_NT) {
             configThruNT();
         }
+
+        sysIdRoutine = new SysIdRoutine(
+            new SysIdRoutine.Config(
+                Volts.of(1).per(Seconds), // ramp rate: 1 V/s
+                Volts.of(7), // step voltage
+                Seconds.of(10) // timeout
+            ),
+            new SysIdRoutine.Mechanism(
+                voltage -> upperMotor.setControl(sysIdVoltage.withOutput(voltage.in(Volts))),
+                log -> {
+                    log.motor("flywheel")
+                        .voltage(Volts.of(upperMotor.getMotorVoltage().getValueAsDouble()))
+                        .angularPosition(Rotations.of(upperMotor.getPosition().getValueAsDouble()))
+                        .angularVelocity(RotationsPerSecond.of(upperMotor.getVelocity().getValueAsDouble()));
+                },
+                this));
     }
 
     public void config() {
@@ -130,6 +156,14 @@ public class flywheel extends SubsystemBase {
             commandedDutyCycle = 0.0;
             upperMotor.setControl(dutyCycl.withOutput(0.0));
         }
+    }
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.dynamic(direction);
     }
 
     @Override
