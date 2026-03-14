@@ -115,6 +115,8 @@ public class RobotContainer {
         // switchable cameras
         camera1 = CameraServer.startAutomaticCapture(0);
         camera2 = CameraServer.startAutomaticCapture(1);
+        camera1.setResolution(320, 240);
+        camera2.setResolution(320, 240);
         cameraServer = CameraServer.getServer();
 
         SmartDashboard.putData("Field", m_field);
