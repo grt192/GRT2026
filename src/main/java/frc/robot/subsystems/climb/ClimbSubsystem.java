@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.CANBus;
 
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimbConstants;
@@ -41,6 +42,14 @@ public class ClimbSubsystem extends SubsystemBase {
         m_StabilizingArm.manualRetractArm();
     }
 
+    public void semiAutoDeployArm() {
+        m_StabilizingArm.semiAutoDeployArm();
+    }
+
+    public void semiAutoRetractArm() {
+        m_StabilizingArm.semiAutoRetractArm();
+    }
+
     public void stopArm() {
         m_StabilizingArm.stop();
     }
@@ -55,6 +64,10 @@ public class ClimbSubsystem extends SubsystemBase {
 
     public void stopWinch() {
         m_Winch.stop();
+    }
+
+    public void setArmTorqueCurrent(Current current) {
+        m_StabilizingArm.setTorqueCurrent(current);
     }
 
     public void setArmPositionSetpoint(Angle setpoint) {
