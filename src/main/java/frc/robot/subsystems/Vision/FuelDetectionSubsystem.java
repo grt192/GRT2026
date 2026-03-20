@@ -10,7 +10,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import frc.robot.util.RollingAverage;
 
 import org.photonvision.PhotonCamera;
@@ -68,7 +67,6 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     private final boolean canCalculateDistance;
 
     private final String dashboardPrefix;
-    private final Function<String, String> dashboardKey;
 
     private List<Detection> latestDetections = List.of();
     private Optional<Detection> bestDetection = Optional.empty();
@@ -98,7 +96,6 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         camera.setPipelineIndex(pipelineIndex);
 
         dashboardPrefix = "FuelDetection/" + config.cameraName() + "/";
-        dashboardKey = (suffix) -> (dashboardPrefix + suffix);
     }
 
     public void setPipelineIndex(int newPipelineIndex) {
@@ -268,14 +265,18 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         return filteredDistance;
     }
 
+    private String getDashboardKey(String suffix) {
+        return dashboardPrefix + suffix;
+    }
+
     private void publishTelemetry() {
-        SmartDashboard.putNumber(dashboardKey.apply("count"), latestDetections.size());
+        SmartDashboard.putNumber(getDashboardKey("count"), latestDetections.size());
 
         double[] yawSamples = latestDetections.stream().mapToDouble(Detection::yawDegrees).toArray();
         double[] pitchSamples = latestDetections.stream().mapToDouble(Detection::pitchDegrees).toArray();
 
-        SmartDashboard.putNumberArray(dashboardKey.apply("yawSamples"), yawSamples);
-        SmartDashboard.putNumberArray(dashboardKey.apply("pitchSamples"), pitchSamples);
+        SmartDashboard.putNumberArray(getDashboardKey("yawSamples"), yawSamples);
+        SmartDashboard.putNumberArray(getDashboardKey("pitchSamples"), pitchSamples);
 
         double[] distanceSamples = latestDetections.stream()
             .map(Detection::distanceMeters)
@@ -283,14 +284,14 @@ public class FuelDetectionSubsystem extends SubsystemBase {
             .map(Optional::get)
             .mapToDouble(distance -> distance.in(Meters))
             .toArray();
-        SmartDashboard.putNumberArray(dashboardKey.apply("distanceSamples"), distanceSamples);
+        SmartDashboard.putNumberArray(getDashboardKey("distanceSamples"), distanceSamples);
 
-        SmartDashboard.putNumber(dashboardKey.apply("bestYawDeg"), bestDetection.orElse(EMPTY_DETECTION).yawDegrees());
-        SmartDashboard.putNumber(dashboardKey.apply("bestPitchDeg"), bestDetection.orElse(EMPTY_DETECTION).pitchDegrees());
-        SmartDashboard.putNumber(dashboardKey.apply("bestDistanceMeters"), filteredDistance.orElse(Meters.of(Double.NaN)).in(Meters));
-        SmartDashboard.putNumber(dashboardKey.apply("minDistanceMeters"), filteredMinDistance.orElse(Meters.of(Double.NaN)).in(Meters));
-        SmartDashboard.putNumber(dashboardKey.apply("maxDistanceMeters"), filteredMaxDistance.orElse(Meters.of(Double.NaN)).in(Meters));
-        SmartDashboard.putNumber(dashboardKey.apply("timestampSeconds"), latestTimestamp.orElse(Seconds.of(Double.NaN)).in(Seconds));
+        SmartDashboard.putNumber(getDashboardKey("bestYawDeg"), bestDetection.orElse(EMPTY_DETECTION).yawDegrees());
+        SmartDashboard.putNumber(getDashboardKey("bestPitchDeg"), bestDetection.orElse(EMPTY_DETECTION).pitchDegrees());
+        SmartDashboard.putNumber(getDashboardKey("bestDistanceMeters"), filteredDistance.orElse(Meters.of(Double.NaN)).in(Meters));
+        SmartDashboard.putNumber(getDashboardKey("minDistanceMeters"), filteredMinDistance.orElse(Meters.of(Double.NaN)).in(Meters));
+        SmartDashboard.putNumber(getDashboardKey("maxDistanceMeters"), filteredMaxDistance.orElse(Meters.of(Double.NaN)).in(Meters));
+        SmartDashboard.putNumber(getDashboardKey("timestampSeconds"), latestTimestamp.orElse(Seconds.of(Double.NaN)).in(Seconds));
     }
 
     // Basically run handleResult() on pipeline results or run applyDecayToFilteredValues
