@@ -5,14 +5,14 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Value;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+
+import frc.robot.util.RollingAverage;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
@@ -61,31 +61,16 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     private List<Detection> latestDetections = List.of();
     private Optional<Detection> bestDetection = Optional.empty();
 
-    private final Deque<Integer> countWindow = new ArrayDeque<>();
-    private int countWindowSum = 0;
-    private int filteredCount = 0;
-
-    private final Deque<Distance> distanceWindow = new ArrayDeque<>();
-    private Distance distanceWindowSum = Meters.of(0.0);
-
-    private final Deque<Distance> minDistanceWindow = new ArrayDeque<>();
-    private Distance minDistanceWindowSum = Meters.of(0.0);
-
-    private final Deque<Distance> maxDistanceWindow = new ArrayDeque<>();
-    private Distance maxDistanceWindowSum = Meters.of(0.0);
+    private final RollingAverage countAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
+    private final RollingAverage distanceAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
+    private final RollingAverage minDistanceAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
+    private final RollingAverage maxDistanceAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
 
     private Optional<Distance> filteredDistance = Optional.empty();
     private Optional<Distance> filteredMinDistance = Optional.empty();
     private Optional<Distance> filteredMaxDistance = Optional.empty();
     private Optional<Time> latestTimestamp = Optional.empty();
     private Optional<Time> startDecayTime = Optional.empty();
-
-    private enum DistanceSampleType {
-        BEST,
-        MIN,
-        MAX
-    }
-
 
     /**
      * Creates the subsystem with a custom configuration.
@@ -167,7 +152,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     }
 
     public int getFuelCount() {
-        return filteredCount;
+        return countAverage.getRoundedAverage();
     }
 
     private void handleResult(PhotonPipelineResult result, Time robotTimestamp) {
@@ -180,7 +165,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         }
 
         latestDetections = List.copyOf(processed);
-        updateSmoothedCount(processed.size());
+        countAverage.addSample(processed.size());
         if (processed.isEmpty()) {
             bestDetection = Optional.empty();
             applyDecayToFilteredValues(robotTimestamp);
@@ -221,9 +206,18 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         Optional<Distance> minDistance,
         Optional<Distance> maxDistance,
         Time robotTimestamp) {
-        detection.distanceMeters().ifPresent(detectionDistance -> updateSmoothedDistance(DistanceSampleType.BEST, detectionDistance));
-        minDistance.ifPresent(distance -> updateSmoothedDistance(DistanceSampleType.MIN, distance));
-        maxDistance.ifPresent(distance -> updateSmoothedDistance(DistanceSampleType.MAX, distance));
+        detection.distanceMeters().ifPresent(d -> {
+            distanceAverage.addSample(d.in(Meters));
+            filteredDistance = Optional.of(Meters.of(distanceAverage.getAverage()));
+        });
+        minDistance.ifPresent(d -> {
+            minDistanceAverage.addSample(d.in(Meters));
+            filteredMinDistance = Optional.of(Meters.of(minDistanceAverage.getAverage()));
+        });
+        maxDistance.ifPresent(d -> {
+            maxDistanceAverage.addSample(d.in(Meters));
+            filteredMaxDistance = Optional.of(Meters.of(maxDistanceAverage.getAverage()));
+        });
         latestTimestamp = Optional.of(Seconds.of(detection.timestampSeconds()));
         startDecayTime = Optional.of(robotTimestamp.plus(VisionConstants.FUEL_DECAY_HOLD_TIME_SECONDS));
     }
@@ -260,53 +254,10 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         filteredMinDistance = Optional.empty();
         filteredMaxDistance = Optional.empty();
         latestTimestamp = Optional.empty();
-        countWindow.clear();
-        countWindowSum = 0;
-        filteredCount = 0;
-        distanceWindow.clear();
-        distanceWindowSum = Meters.of(0.0);
-        minDistanceWindow.clear();
-        minDistanceWindowSum = Meters.of(0.0);
-        maxDistanceWindow.clear();
-        maxDistanceWindowSum = Meters.of(0.0);
-    }
-
-    private Distance appendSample(Deque<Distance> window, Distance value, Distance currentSum) {
-        window.addLast(value);
-        double sumMeters = currentSum.in(Meters) + value.in(Meters);
-        if (window.size() > VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE) {
-            sumMeters -= window.removeFirst().in(Meters);
-        }
-        return Meters.of(sumMeters);
-    }
-
-    private void updateSmoothedCount(int count) {
-        countWindow.addLast(count);
-        countWindowSum += count;
-        if (countWindow.size() > VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE) {
-            countWindowSum -= countWindow.removeFirst();
-        }
-        filteredCount = (int) Math.round((double) countWindowSum / countWindow.size());
-    }
-
-    private void updateSmoothedDistance(DistanceSampleType sampleType, Distance distance) {
-        switch (sampleType) {
-            case BEST -> {
-                distanceWindowSum = appendSample(distanceWindow, distance, distanceWindowSum);
-                double averageMeters = distanceWindowSum.in(Meters) / distanceWindow.size();
-                filteredDistance = Optional.of(Meters.of(averageMeters));
-            }
-            case MIN -> {
-                minDistanceWindowSum = appendSample(minDistanceWindow, distance, minDistanceWindowSum);
-                double averageMeters = minDistanceWindowSum.in(Meters) / minDistanceWindow.size();
-                filteredMinDistance = Optional.of(Meters.of(averageMeters));
-            }
-            case MAX -> {
-                maxDistanceWindowSum = appendSample(maxDistanceWindow, distance, maxDistanceWindowSum);
-                double averageMeters = maxDistanceWindowSum.in(Meters) / maxDistanceWindow.size();
-                filteredMaxDistance = Optional.of(Meters.of(averageMeters));
-            }
-        }
+        countAverage.clear();
+        distanceAverage.clear();
+        minDistanceAverage.clear();
+        maxDistanceAverage.clear();
     }
 
     private Optional<Distance> findDistanceExtreme(List<Detection> detections, boolean findMin) {
