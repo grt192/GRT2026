@@ -29,17 +29,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class FuelDetectionSubsystem extends SubsystemBase {
 
-    private static final Detection EMPTY_DETECTION = new Detection(
-        Double.NaN,
-        Double.NaN,
-        Double.NaN,
-        Double.NaN,
-        Optional.empty());
-
-    private static final Consumer<Detection> NO_OP_CONSUMER = detection -> {
-    };
-
-
     public record Detection(
         double timestampSeconds,
         double yawDegrees,
@@ -47,6 +36,36 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         double area,
         Optional<Distance> distanceMeters) {
     }
+
+    public static record FuelDetectionConfig(
+        String cameraName,
+        Distance cameraHeight,
+        Distance targetHeight,
+        Angle cameraPitch,
+        int pipelineIndex) {
+        public FuelDetectionConfig {
+            Objects.requireNonNull(cameraName, "cameraName is required");
+            Objects.requireNonNull(pipelineIndex, "pipelineIndex is required");
+
+            if (!Double.isFinite(cameraHeight.in(Meters))) {
+                System.out.println("cameraHeight not supplied — distance detection will not work!");
+            }
+            if (!Double.isFinite(targetHeight.in(Meters))) {
+                System.out.println("targetHeight not supplied — distance detection will not work!");
+            }
+            if (!Double.isFinite(cameraPitch.in(Radians))) {
+                System.out.println("cameraPitch not supplied — distance detection will not work!");
+            }
+        }
+    }
+
+    private static final Detection EMPTY_DETECTION = new Detection(
+        Double.NaN,
+        Double.NaN,
+        Double.NaN,
+        Double.NaN,
+        Optional.empty());
+
 
     private final PhotonCamera camera;
     private int pipelineIndex;
@@ -56,7 +75,6 @@ public class FuelDetectionSubsystem extends SubsystemBase {
 
     private final String dashboardPrefix;
 
-    private Consumer<Detection> detectionConsumer = NO_OP_CONSUMER;
 
     private List<Detection> latestDetections = List.of();
     private Optional<Detection> bestDetection = Optional.empty();
@@ -104,14 +122,6 @@ public class FuelDetectionSubsystem extends SubsystemBase {
             handleResult(result, timeNow);
         }
         publishTelemetry();
-    }
-
-    /**
-     * Assigns the consumer that should be notified whenever a new best detection is
-     * produced. Passing {@code null} clears the consumer.
-     */
-    public void setBestDetectionConsumer(Consumer<Detection> consumer) {
-        detectionConsumer = consumer != null ? consumer : NO_OP_CONSUMER;
     }
 
     /**
@@ -177,7 +187,6 @@ public class FuelDetectionSubsystem extends SubsystemBase {
             bestDetection.ifPresentOrElse(
                 detection -> {
                     recordDetectionForSmoothing(detection, minDistance, maxDistance, robotTimestamp);
-                    detectionConsumer.accept(detection);
                 },
                 () -> applyDecayToFilteredValues(robotTimestamp));
         }
@@ -315,25 +324,4 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     }
 
 
-    public static record FuelDetectionConfig(
-        String cameraName,
-        Distance cameraHeight,
-        Distance targetHeight,
-        Angle cameraPitch,
-        int pipelineIndex) {
-        public FuelDetectionConfig {
-            Objects.requireNonNull(cameraName, "cameraName is required");
-            Objects.requireNonNull(pipelineIndex, "pipelineIndex is required");
-
-            if (!Double.isFinite(cameraHeight.in(Meters))) {
-                System.out.println("cameraHeight not supplied — distance detection will not work!");
-            }
-            if (!Double.isFinite(targetHeight.in(Meters))) {
-                System.out.println("targetHeight not supplied — distance detection will not work!");
-            }
-            if (!Double.isFinite(cameraPitch.in(Radians))) {
-                System.out.println("cameraPitch not supplied — distance detection will not work!");
-            }
-        }
-    }
 }
