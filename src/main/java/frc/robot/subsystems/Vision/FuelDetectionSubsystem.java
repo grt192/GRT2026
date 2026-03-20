@@ -10,7 +10,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import frc.robot.util.RollingAverage;
 
@@ -66,7 +65,6 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         Double.NaN,
         Optional.empty());
 
-
     private final PhotonCamera camera;
     private int pipelineIndex;
     private final Distance cameraHeight;
@@ -74,7 +72,6 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     private final Angle cameraPitch;
 
     private final String dashboardPrefix;
-
 
     private List<Detection> latestDetections = List.of();
     private Optional<Detection> bestDetection = Optional.empty();
@@ -87,14 +84,11 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     private Optional<Distance> filteredDistance = Optional.empty();
     private Optional<Distance> filteredMinDistance = Optional.empty();
     private Optional<Distance> filteredMaxDistance = Optional.empty();
+    private Optional<Distance> filteredCount = Optional.empty();
+
     private Optional<Time> latestTimestamp = Optional.empty();
     private Optional<Time> startDecayTime = Optional.empty();
 
-    /**
-     * Creates the subsystem with a custom configuration.
-     * 
-     * @param config user supplied configuration
-     */
     public FuelDetectionSubsystem(FuelDetectionConfig config) {
         Objects.requireNonNull(config, "FuelDetectionConfig cannot be null");
 
@@ -124,9 +118,6 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         publishTelemetry();
     }
 
-    /**
-     * Updates which PhotonVision pipeline index should run.
-     */
     public void setPipelineIndex(int newPipelineIndex) {
         if (newPipelineIndex == pipelineIndex) {
             return;
@@ -135,30 +126,20 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         camera.setPipelineIndex(pipelineIndex);
     }
 
-    /**
-     * Gets the active pipeline index used by the camera.
-     */
     public int getPipelineIndex() {
         return pipelineIndex;
     }
 
-    /**
-     * Returns an immutable view of the detections from the most recent pipeline
-     * result processed by the subsystem.
-     */
     public List<Detection> getDetections() {
         return List.copyOf(latestDetections);
     }
 
-    /**
-     * Returns the best detection (if any) from the latest processed result.
-     */
     public Optional<Detection> getBestDetection() {
         return bestDetection;
     }
 
     public boolean isFuelDetected() {
-        return getClosestDistance().isPresent();
+        return getBestDistance().isPresent();
     }
 
     public int getFuelCount() {
@@ -292,6 +273,14 @@ public class FuelDetectionSubsystem extends SubsystemBase {
 
     public Optional<Distance> getClosestDistance() {
         return filteredMinDistance;
+    }
+
+    public Optional<Distance> getFurthestDistance() {
+        return filteredMaxDistance;
+    }
+
+    public Optional<Distance> getBestDistance() {
+        return filteredDistance;
     }
 
     private void publishTelemetry() {
