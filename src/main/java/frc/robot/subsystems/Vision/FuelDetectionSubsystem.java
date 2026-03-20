@@ -286,13 +286,13 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     }
 
     private void publishTelemetry() {
-        SmartDashboard.putNumber(key("count"), latestDetections.size());
+        SmartDashboard.putNumber(getDashboardKey("count"), latestDetections.size());
 
         double[] yawSamples = latestDetections.stream().mapToDouble(Detection::yawDegrees).toArray();
         double[] pitchSamples = latestDetections.stream().mapToDouble(Detection::pitchDegrees).toArray();
 
-        SmartDashboard.putNumberArray(key("yawSamples"), yawSamples);
-        SmartDashboard.putNumberArray(key("pitchSamples"), pitchSamples);
+        SmartDashboard.putNumberArray(getDashboardKey("yawSamples"), yawSamples);
+        SmartDashboard.putNumberArray(getDashboardKey("pitchSamples"), pitchSamples);
 
         double[] distanceSamples = latestDetections.stream()
             .map(Detection::distanceMeters)
@@ -300,28 +300,21 @@ public class FuelDetectionSubsystem extends SubsystemBase {
             .map(Optional::get)
             .mapToDouble(distance -> distance.in(Meters))
             .toArray();
-        SmartDashboard.putNumberArray(key("distanceSamples"), distanceSamples);
+        SmartDashboard.putNumberArray(getDashboardKey("distanceSamples"), distanceSamples);
 
-        SmartDashboard.putNumber(key("bestYawDeg"), bestDetection.orElse(EMPTY_DETECTION).yawDegrees());
-        SmartDashboard.putNumber(key("bestPitchDeg"), bestDetection.orElse(EMPTY_DETECTION).pitchDegrees());
-        SmartDashboard.putNumber(key("bestDistanceMeters"),
-            filteredDistance.orElse(Meters.of(Double.NaN)).in(Meters));
-        SmartDashboard.putNumber(key("minDistanceMeters"),
-            filteredMinDistance.orElse(Meters.of(Double.NaN)).in(Meters));
-        SmartDashboard.putNumber(key("maxDistanceMeters"),
-            filteredMaxDistance.orElse(Meters.of(Double.NaN)).in(Meters));
-        SmartDashboard.putNumber(key("timestampSeconds"),
-            latestTimestamp.orElse(Seconds.of(Double.NaN)).in(Seconds));
+        SmartDashboard.putNumber(getDashboardKey("bestYawDeg"), bestDetection.orElse(EMPTY_DETECTION).yawDegrees());
+        SmartDashboard.putNumber(getDashboardKey("bestPitchDeg"), bestDetection.orElse(EMPTY_DETECTION).pitchDegrees());
+        SmartDashboard.putNumber(getDashboardKey("bestDistanceMeters"), filteredDistance.orElse(Meters.of(Double.NaN)).in(Meters));
+        SmartDashboard.putNumber(getDashboardKey("minDistanceMeters"), filteredMinDistance.orElse(Meters.of(Double.NaN)).in(Meters));
+        SmartDashboard.putNumber(getDashboardKey("maxDistanceMeters"), filteredMaxDistance.orElse(Meters.of(Double.NaN)).in(Meters));
+        SmartDashboard.putNumber(getDashboardKey("timestampSeconds"), latestTimestamp.orElse(Seconds.of(Double.NaN)).in(Seconds));
     }
 
-    private String key(String suffix) {
+    private String getDashboardKey(String suffix) {
         return dashboardPrefix + suffix;
     }
 
-    /**
-     * Configuration record used to describe the colored-shape pipeline setup.
-     * Values must be finite. Shoutout Codex for ts code
-     */
+
     public static record FuelDetectionConfig(
         String cameraName,
         Distance cameraHeight,
@@ -330,70 +323,17 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         int pipelineIndex) {
         public FuelDetectionConfig {
             Objects.requireNonNull(cameraName, "cameraName is required");
-            Objects.requireNonNull(cameraHeight, "cameraHeight is required");
-            Objects.requireNonNull(targetHeight, "targetHeight is required");
-            Objects.requireNonNull(cameraPitch, "cameraPitch is required");
+            Objects.requireNonNull(pipelineIndex, "pipelineIndex is required");
+
             if (!Double.isFinite(cameraHeight.in(Meters))) {
-                throw new IllegalArgumentException("cameraHeight must be finite");
+                System.out.println("cameraHeight not supplied — distance detection will not work!");
             }
             if (!Double.isFinite(targetHeight.in(Meters))) {
-                throw new IllegalArgumentException("targetHeight must be finite");
+                System.out.println("targetHeight not supplied — distance detection will not work!");
             }
             if (!Double.isFinite(cameraPitch.in(Radians))) {
-                throw new IllegalArgumentException("cameraPitch must be finite");
+                System.out.println("cameraPitch not supplied — distance detection will not work!");
             }
-        }
-
-        /**
-         * Creates a default configuration for the supplied camera.
-         */
-        public static FuelDetectionConfig defaultConfig(
-            String cameraName,
-            Distance cameraHeight,
-            Distance targetHeight,
-            Angle cameraPitch) {
-            return new FuelDetectionConfig(
-                cameraName,
-                cameraHeight,
-                targetHeight,
-                cameraPitch,
-                0);
-        }
-
-        public FuelDetectionConfig withCameraHeight(Distance newCameraHeight) {
-            return new FuelDetectionConfig(
-                cameraName,
-                newCameraHeight,
-                targetHeight,
-                cameraPitch,
-                pipelineIndex);
-        }
-
-        public FuelDetectionConfig withTargetHeight(Distance newTargetHeight) {
-            return new FuelDetectionConfig(
-                cameraName,
-                cameraHeight,
-                newTargetHeight,
-                cameraPitch,
-                pipelineIndex);
-        }
-
-        public FuelDetectionConfig withCameraPitch(Angle newCameraPitch) {
-            return new FuelDetectionConfig(
-                cameraName,
-                cameraHeight,
-                targetHeight,
-                newCameraPitch,
-                pipelineIndex);
-        }
-
-        public FuelDetectionConfig withPipelineIndex(int newPipelineIndex) {
-            return new FuelDetectionConfig(
-                cameraName,
-                cameraHeight,
-                targetHeight,
-                cameraPitch,
-                newPipelineIndex);
         }
     }
 }
