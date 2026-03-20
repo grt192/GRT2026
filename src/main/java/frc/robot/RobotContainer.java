@@ -103,6 +103,10 @@ public class RobotContainer {
     private VideoSink cameraServer;
     private boolean isCamera1Active = true;
 
+    double rps = 0;
+    double hoodAng = 0;
+    double towerSpeed = 0;
+
     // private final VisionSubsystem visionSubsystem1 = new VisionSubsystem(
     // VisionConstants.cameraConfig11);
 
@@ -275,6 +279,22 @@ public class RobotContainer {
             // joystickMoved.onTrue(Commands.runOnce(() -> manualShooterCmd.cancel()));
 
             // ==================== SHOOTER ====================
+
+            flywheelSubsystem.setDefaultCommand(Commands.run(() -> {
+                rps =  SmartDashboard.getNumber("Shooter RPS", rps);
+                flywheelSubsystem.shoot(rps);
+            }, flywheelSubsystem));
+
+            tower.setDefaultCommand(Commands.run(() -> {
+                towerSpeed =  SmartDashboard.getNumber("Tower Speed", towerSpeed);
+            }, tower));
+
+
+            hoodSubsystem.setDefaultCommand(Commands.run(() -> {
+                hoodAng =  SmartDashboard.getNumber("Hood Angle", hoodAng);
+                hoodSubsystem.setHoodAngle(hoodAng);
+            }, hoodSubsystem));
+            
             // R2 = flywheel (analog speed control)
             // Left stick Y = hood manual control
             // flywheelSubsystem.setDefaultCommand(Commands.run(() -> {
