@@ -21,7 +21,7 @@ public class RunHopperUntilNoBallCommand extends Command {
     @Override
     public void initialize() {
         finished = false;
-        if (!fuelDetection.isBallDetected()) {
+        if (!fuelDetection.isFuelDetected()) {
             finished = true;
         }
     }
@@ -38,6 +38,6 @@ public class RunHopperUntilNoBallCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        return finished || !fuelDetection.isBallDetected();
+        return finished || (fuelDetection.getFuelCount() <= 3);
     }
 }

@@ -61,6 +61,10 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     private List<Detection> latestDetections = List.of();
     private Optional<Detection> bestDetection = Optional.empty();
 
+    private final Deque<Integer> countWindow = new ArrayDeque<>();
+    private int countWindowSum = 0;
+    private int filteredCount = 0;
+
     private final Deque<Distance> distanceWindow = new ArrayDeque<>();
     private Distance distanceWindowSum = Meters.of(0.0);
 
@@ -158,8 +162,12 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         return bestDetection;
     }
 
-    public boolean isBallDetected() {
+    public boolean isFuelDetected() {
         return getClosestDistance().isPresent();
+    }
+
+    public int getFuelCount() {
+        return filteredCount;
     }
 
     private void handleResult(PhotonPipelineResult result, Time robotTimestamp) {
@@ -172,6 +180,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         }
 
         latestDetections = List.copyOf(processed);
+        updateSmoothedCount(processed.size());
         if (processed.isEmpty()) {
             bestDetection = Optional.empty();
             applyDecayToFilteredValues(robotTimestamp);
@@ -251,6 +260,9 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         filteredMinDistance = Optional.empty();
         filteredMaxDistance = Optional.empty();
         latestTimestamp = Optional.empty();
+        countWindow.clear();
+        countWindowSum = 0;
+        filteredCount = 0;
         distanceWindow.clear();
         distanceWindowSum = Meters.of(0.0);
         minDistanceWindow.clear();
@@ -266,6 +278,15 @@ public class FuelDetectionSubsystem extends SubsystemBase {
             sumMeters -= window.removeFirst().in(Meters);
         }
         return Meters.of(sumMeters);
+    }
+
+    private void updateSmoothedCount(int count) {
+        countWindow.addLast(count);
+        countWindowSum += count;
+        if (countWindow.size() > VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE) {
+            countWindowSum -= countWindow.removeFirst();
+        }
+        filteredCount = (int) Math.round((double) countWindowSum / countWindow.size());
     }
 
     private void updateSmoothedDistance(DistanceSampleType sampleType, Distance distance) {
