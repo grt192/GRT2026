@@ -52,10 +52,9 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         }
     }
 
-    private record distanceExtremes(
+    private record DistanceExtremes(
         Optional<Distance> minDistance,
-        Optional<Distance> maxDistance,
-        Optional<Distance> bestDistance) {
+        Optional<Distance> maxDistance) {
     }
 
     private static final Detection EMPTY_DETECTION = new Detection(
@@ -149,11 +148,10 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         } else {
             bestDetection = processed.stream()
                 .max(Comparator.comparingDouble(Detection::area));
-            Optional<Distance> minDistance = getDistanceExtremes(processed, true);
-            Optional<Distance> maxDistance = getDistanceExtremes(processed, false);
+            DistanceExtremes extremes = getDistanceExtremes(processed);
             bestDetection.ifPresentOrElse(
                 detection -> {
-                    recordDetectionForSmoothing(detection, minDistance, maxDistance, robotTimestamp);
+                    recordDetectionForSmoothing(detection, extremes.minDistance(), extremes.maxDistance(), robotTimestamp);
                 },
                 () -> applyDecayToFilteredValues(robotTimestamp));
         }
@@ -200,10 +198,9 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         startDecayTime = Optional.of(robotTimestamp.plus(VisionConstants.FUEL_DECAY_HOLD_TIME_SECONDS));
     }
 
-    private distanceExtremes getDistanceExtremes(List<Detection> detections) {
-        Optional<Distance> minDistance = null;
-        Optional<Distance> maxDistance = null;
-        Optional<Distance> bestDistance = null;
+    private DistanceExtremes getDistanceExtremes(List<Detection> detections) {
+        Optional<Distance> minDistance = Optional.empty();
+        Optional<Distance> maxDistance = Optional.empty();
 
         for (Detection detection : detections) {
             Optional<Distance> distance = detection.distanceMeters();
@@ -211,17 +208,16 @@ public class FuelDetectionSubsystem extends SubsystemBase {
                 continue;
             }
             Distance candidate = distance.get();
-            if (bestDistance == null) {
-                bestDistance = candidate;
-                continue;
+
+            if (minDistance.isEmpty() || candidate.lt(minDistance.get())) {
+                minDistance = Optional.of(candidate);
             }
-            double candidateMeters = candidate.in(Meters);
-            double bestMeters = bestDistance.in(Meters);
-            if (findMin ? candidateMeters < bestMeters : candidateMeters > bestMeters) {
-                bestDistance = candidate;
+            if (maxDistance.isEmpty() || candidate.gt(maxDistance.get())) {
+                maxDistance = Optional.of(candidate);
             }
         }
-        return Optional.ofNullable(bestDistance);
+
+        return new DistanceExtremes(minDistance, maxDistance);
     }
 
     private void applyDecayToFilteredValues(Time timeNow) {
