@@ -52,6 +52,12 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         }
     }
 
+    private record distanceExtremes(
+        Optional<Distance> minDistance,
+        Optional<Distance> maxDistance,
+        Optional<Distance> bestDistance) {
+    }
+
     private static final Detection EMPTY_DETECTION = new Detection(
         Double.NaN,
         Double.NaN,
@@ -143,8 +149,8 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         } else {
             bestDetection = processed.stream()
                 .max(Comparator.comparingDouble(Detection::area));
-            Optional<Distance> minDistance = findDistanceExtreme(processed, true);
-            Optional<Distance> maxDistance = findDistanceExtreme(processed, false);
+            Optional<Distance> minDistance = getDistanceExtremes(processed, true);
+            Optional<Distance> maxDistance = getDistanceExtremes(processed, false);
             bestDetection.ifPresentOrElse(
                 detection -> {
                     recordDetectionForSmoothing(detection, minDistance, maxDistance, robotTimestamp);
@@ -194,6 +200,30 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         startDecayTime = Optional.of(robotTimestamp.plus(VisionConstants.FUEL_DECAY_HOLD_TIME_SECONDS));
     }
 
+    private distanceExtremes getDistanceExtremes(List<Detection> detections) {
+        Optional<Distance> minDistance = null;
+        Optional<Distance> maxDistance = null;
+        Optional<Distance> bestDistance = null;
+
+        for (Detection detection : detections) {
+            Optional<Distance> distance = detection.distanceMeters();
+            if (distance.isEmpty()) {
+                continue;
+            }
+            Distance candidate = distance.get();
+            if (bestDistance == null) {
+                bestDistance = candidate;
+                continue;
+            }
+            double candidateMeters = candidate.in(Meters);
+            double bestMeters = bestDistance.in(Meters);
+            if (findMin ? candidateMeters < bestMeters : candidateMeters > bestMeters) {
+                bestDistance = candidate;
+            }
+        }
+        return Optional.ofNullable(bestDistance);
+    }
+
     private void applyDecayToFilteredValues(Time timeNow) {
         if (startDecayTime.isEmpty()) {
             resetFilteredState();
@@ -232,26 +262,6 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         maxDistanceAverage.clear();
     }
 
-    private Optional<Distance> findDistanceExtreme(List<Detection> detections, boolean findMin) {
-        Distance bestDistance = null;
-        for (Detection detection : detections) {
-            Optional<Distance> distance = detection.distanceMeters();
-            if (distance.isEmpty()) {
-                continue;
-            }
-            Distance candidate = distance.get();
-            if (bestDistance == null) {
-                bestDistance = candidate;
-                continue;
-            }
-            double candidateMeters = candidate.in(Meters);
-            double bestMeters = bestDistance.in(Meters);
-            if (findMin ? candidateMeters < bestMeters : candidateMeters > bestMeters) {
-                bestDistance = candidate;
-            }
-        }
-        return Optional.ofNullable(bestDistance);
-    }
 
     public Optional<Distance> getClosestDistance() {
         return filteredMinDistance;
