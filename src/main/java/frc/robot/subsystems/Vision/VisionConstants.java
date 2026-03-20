@@ -1,5 +1,7 @@
 package frc.robot.subsystems.Vision;
 
+import java.util.Optional;
+
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
@@ -78,9 +80,9 @@ public final class VisionConstants {
     public static final FuelDetectionConfig fuelDetectionConfig =
         new FuelDetectionSubsystem.FuelDetectionConfig(
             cameraConfig100.getCameraName(),
-            Meters.of(cameraConfig100.getCameraPose().getZ()),
-            FUEL_TARGET_HEIGHT,
-            Radians.of(cameraConfig100.getCameraPose().getRotation().getY()),
+            Optional.of(Meters.of(cameraConfig100.getCameraPose().getZ())),
+            Optional.of(FUEL_TARGET_HEIGHT),
+            Optional.of(Radians.of(cameraConfig100.getCameraPose().getRotation().getY())),
             FUEL_PIPELINE_INDEX);
 
     public static final int FUEL_SMOOTHING_WINDOW_SIZE = 5;

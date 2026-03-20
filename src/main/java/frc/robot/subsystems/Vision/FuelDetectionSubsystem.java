@@ -38,23 +38,19 @@ public class FuelDetectionSubsystem extends SubsystemBase {
 
     public static record FuelDetectionConfig(
         String cameraName,
-        Distance cameraHeight,
-        Distance targetHeight,
-        Angle cameraPitch,
+        Optional<Distance> cameraHeight,
+        Optional<Distance> targetHeight,
+        Optional<Angle> cameraPitch,
         int pipelineIndex) {
         public FuelDetectionConfig {
             Objects.requireNonNull(cameraName, "cameraName is required");
-            Objects.requireNonNull(pipelineIndex, "pipelineIndex is required");
+            Objects.requireNonNull(cameraHeight, "cameraHeight cannot be null, use Optional.empty()");
+            Objects.requireNonNull(targetHeight, "targetHeight cannot be null, use Optional.empty()");
+            Objects.requireNonNull(cameraPitch, "cameraPitch cannot be null, use Optional.empty()");
+        }
 
-            if (!Double.isFinite(cameraHeight.in(Meters))) {
-                System.out.println("cameraHeight not supplied — distance detection will not work!");
-            }
-            if (!Double.isFinite(targetHeight.in(Meters))) {
-                System.out.println("targetHeight not supplied — distance detection will not work!");
-            }
-            if (!Double.isFinite(cameraPitch.in(Radians))) {
-                System.out.println("cameraPitch not supplied — distance detection will not work!");
-            }
+        public boolean canCalculateDistance() {
+            return cameraHeight.isPresent() && targetHeight.isPresent() && cameraPitch.isPresent();
         }
     }
 
@@ -67,9 +63,10 @@ public class FuelDetectionSubsystem extends SubsystemBase {
 
     private final PhotonCamera camera;
     private int pipelineIndex;
-    private final Distance cameraHeight;
-    private final Distance targetHeight;
-    private final Angle cameraPitch;
+    private final Optional<Distance> cameraHeight;
+    private final Optional<Distance> targetHeight;
+    private final Optional<Angle> cameraPitch;
+    private final boolean canCalculateDistance;
 
     private final String dashboardPrefix;
 
@@ -97,6 +94,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         cameraHeight = config.cameraHeight();
         targetHeight = config.targetHeight();
         cameraPitch = config.cameraPitch();
+        canCalculateDistance = config.canCalculateDistance();
         dashboardPrefix = "FuelDetection/" + config.cameraName() + "/";
         camera.setPipelineIndex(pipelineIndex);
     }
@@ -175,13 +173,15 @@ public class FuelDetectionSubsystem extends SubsystemBase {
 
     private Detection createDetection(double timestampSeconds, PhotonTrackedTarget target) {
         Optional<Distance> distanceMeters = Optional.empty();
-        double calculatedMeters = PhotonUtils.calculateDistanceToTargetMeters(
-            cameraHeight.in(Meters),
-            targetHeight.in(Meters),
-            cameraPitch.in(Radians),
-            Units.degreesToRadians(target.getPitch()));
-        if (Double.isFinite(calculatedMeters)) {
-            distanceMeters = Optional.of(Meters.of(calculatedMeters));
+        if (canCalculateDistance) {
+            double calculatedMeters = PhotonUtils.calculateDistanceToTargetMeters(
+                cameraHeight.get().in(Meters),
+                targetHeight.get().in(Meters),
+                cameraPitch.get().in(Radians),
+                Units.degreesToRadians(target.getPitch()));
+            if (Double.isFinite(calculatedMeters)) {
+                distanceMeters = Optional.of(Meters.of(calculatedMeters));
+            }
         }
         return new Detection(
             timestampSeconds,
