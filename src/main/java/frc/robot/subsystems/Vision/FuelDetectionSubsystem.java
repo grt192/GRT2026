@@ -77,11 +77,11 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     private Optional<Detection> bestDetection = Optional.empty();
 
     private final RollingAverage countAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
-    private final RollingAverage distanceAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
+    private final RollingAverage bestDistanceAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
     private final RollingAverage minDistanceAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
     private final RollingAverage maxDistanceAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
 
-    private Optional<Distance> filteredDistance = Optional.empty();
+    private Optional<Distance> filteredBestDistance = Optional.empty();
     private Optional<Distance> filteredMinDistance = Optional.empty();
     private Optional<Distance> filteredMaxDistance = Optional.empty();
     private Optional<Distance> filteredCount = Optional.empty();
@@ -183,8 +183,8 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         Optional<Distance> maxDistance,
         Time robotTimestamp) {
         detection.distanceMeters().ifPresent(d -> {
-            distanceAverage.addSample(d.in(Meters));
-            filteredDistance = Optional.of(Meters.of(distanceAverage.getAverage()));
+            bestDistanceAverage.addSample(d.in(Meters));
+            filteredBestDistance = Optional.of(Meters.of(bestDistanceAverage.getAverage()));
         });
         minDistance.ifPresent(d -> {
             minDistanceAverage.addSample(d.in(Meters));
@@ -234,7 +234,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         double decayProgress = Math.min(elapsed.div(VisionConstants.FUEL_DECAY_TIME_SECONDS).in(Value), 1.0);
         double scale = Math.max(0.0, 1.0 - decayProgress);
 
-        filteredDistance = filteredDistance.map(
+        filteredBestDistance = filteredBestDistance.map(
             distance -> Meters.of(distance.in(Meters) * scale));
         filteredMinDistance = filteredMinDistance.map(
             distance -> Meters.of(distance.in(Meters) * scale));
@@ -248,12 +248,12 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     }
 
     private void resetFilteredState() {
-        filteredDistance = Optional.empty();
+        filteredBestDistance = Optional.empty();
         filteredMinDistance = Optional.empty();
         filteredMaxDistance = Optional.empty();
         latestTimestamp = Optional.empty();
         countAverage.clear();
-        distanceAverage.clear();
+        bestDistanceAverage.clear();
         minDistanceAverage.clear();
         maxDistanceAverage.clear();
     }
@@ -268,7 +268,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     }
 
     public Optional<Distance> getBestDistance() {
-        return filteredDistance;
+        return filteredBestDistance;
     }
 
     private String getDashboardKey(String suffix) {
@@ -294,7 +294,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber(getDashboardKey("bestYawDeg"), bestDetection.orElse(EMPTY_DETECTION).yawDegrees());
         SmartDashboard.putNumber(getDashboardKey("bestPitchDeg"), bestDetection.orElse(EMPTY_DETECTION).pitchDegrees());
-        SmartDashboard.putNumber(getDashboardKey("bestDistanceMeters"), filteredDistance.orElse(Meters.of(Double.NaN)).in(Meters));
+        SmartDashboard.putNumber(getDashboardKey("bestDistanceMeters"), filteredBestDistance.orElse(Meters.of(Double.NaN)).in(Meters));
         SmartDashboard.putNumber(getDashboardKey("minDistanceMeters"), filteredMinDistance.orElse(Meters.of(Double.NaN)).in(Meters));
         SmartDashboard.putNumber(getDashboardKey("maxDistanceMeters"), filteredMaxDistance.orElse(Meters.of(Double.NaN)).in(Meters));
         SmartDashboard.putNumber(getDashboardKey("timestampSeconds"), latestTimestamp.orElse(Seconds.of(Double.NaN)).in(Seconds));
