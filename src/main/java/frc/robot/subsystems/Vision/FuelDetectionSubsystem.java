@@ -36,17 +36,16 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         Optional<Distance> distanceMeters) {
     }
 
-    public static record FuelDetectionConfig(
-        String cameraName,
-        Optional<Distance> cameraHeight,
-        Optional<Distance> targetHeight,
-        Optional<Angle> cameraPitch,
-        int pipelineIndex) {
+    public static record FuelDetectionConfig(String cameraName, Optional<Distance> cameraHeight, Optional<Distance> targetHeight, Optional<Angle> cameraPitch, int pipelineIndex) {
         public FuelDetectionConfig {
             Objects.requireNonNull(cameraName, "cameraName is required");
             Objects.requireNonNull(cameraHeight, "cameraHeight cannot be null, use Optional.empty()");
             Objects.requireNonNull(targetHeight, "targetHeight cannot be null, use Optional.empty()");
             Objects.requireNonNull(cameraPitch, "cameraPitch cannot be null, use Optional.empty()");
+        }
+
+        public FuelDetectionConfig(String cameraName, int pipelineIndex) {
+            this(cameraName, Optional.empty(), Optional.empty(), Optional.empty(), pipelineIndex);
         }
 
         public boolean canCalculateDistance() {
