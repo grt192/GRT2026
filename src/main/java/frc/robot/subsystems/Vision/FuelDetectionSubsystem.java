@@ -148,7 +148,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
             DistanceExtremes extremes = getDistanceExtremes(processed);
             bestDetection.ifPresentOrElse(
                 detection -> {
-                    recordDetectionForSmoothing(detection.distanceMeters, extremes.minDistance(), extremes.maxDistance(), robotTimestamp);
+                    recordDetectionForSmoothing(detection.distanceMeters(), extremes.minDistance(), extremes.maxDistance(), robotTimestamp);
                 },
                 () -> applyDecayToFilteredValues());
         }
