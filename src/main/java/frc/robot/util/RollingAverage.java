@@ -43,6 +43,12 @@ public class RollingAverage {
         return window.size();
     }
 
+    public void removeOldest() {
+        if (!window.isEmpty()) {
+            sum -= window.removeFirst();
+        }
+    }
+
     public void clear() {
         window.clear();
         sum = 0.0;

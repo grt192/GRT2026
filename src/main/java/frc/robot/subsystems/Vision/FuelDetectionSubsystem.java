@@ -3,10 +3,8 @@ package frc.robot.subsystems.Vision;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Value;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -84,10 +82,9 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     private Optional<Distance> filteredBestDistance = Optional.empty();
     private Optional<Distance> filteredMinDistance = Optional.empty();
     private Optional<Distance> filteredMaxDistance = Optional.empty();
-    private Optional<Distance> filteredCount = Optional.empty();
 
     private Optional<Time> latestTimestamp = Optional.empty();
-    private Optional<Time> startDecayTime = Optional.empty();
+    private final Timer decayTimer = new Timer();
 
     public FuelDetectionSubsystem(FuelDetectionConfig config) {
         Objects.requireNonNull(config, "FuelDetectionConfig cannot be null");
@@ -142,18 +139,18 @@ public class FuelDetectionSubsystem extends SubsystemBase {
 
         latestDetections = List.copyOf(processed);
         countAverage.addSample(processed.size());
+
         if (processed.isEmpty()) {
             bestDetection = Optional.empty();
-            applyDecayToFilteredValues(robotTimestamp);
+            applyDecayToFilteredValues();
         } else {
-            bestDetection = processed.stream()
-                .max(Comparator.comparingDouble(Detection::area));
+            bestDetection = Optional.of(createDetection(result.getTimestampSeconds(), result.getBestTarget()));
             DistanceExtremes extremes = getDistanceExtremes(processed);
             bestDetection.ifPresentOrElse(
                 detection -> {
-                    recordDetectionForSmoothing(detection, extremes.minDistance(), extremes.maxDistance(), robotTimestamp);
+                    recordDetectionForSmoothing(detection.distanceMeters, extremes.minDistance(), extremes.maxDistance(), robotTimestamp);
                 },
-                () -> applyDecayToFilteredValues(robotTimestamp));
+                () -> applyDecayToFilteredValues());
         }
     }
 
@@ -178,11 +175,11 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     }
 
     private void recordDetectionForSmoothing(
-        Detection detection,
+        Optional<Distance> bestDistance,
         Optional<Distance> minDistance,
         Optional<Distance> maxDistance,
         Time robotTimestamp) {
-        detection.distanceMeters().ifPresent(d -> {
+        bestDistance.ifPresent(d -> {
             bestDistanceAverage.addSample(d.in(Meters));
             filteredBestDistance = Optional.of(Meters.of(bestDistanceAverage.getAverage()));
         });
@@ -194,8 +191,8 @@ public class FuelDetectionSubsystem extends SubsystemBase {
             maxDistanceAverage.addSample(d.in(Meters));
             filteredMaxDistance = Optional.of(Meters.of(maxDistanceAverage.getAverage()));
         });
-        latestTimestamp = Optional.of(Seconds.of(detection.timestampSeconds()));
-        startDecayTime = Optional.of(robotTimestamp.plus(VisionConstants.FUEL_DECAY_HOLD_TIME_SECONDS));
+
+        decayTimer.restart();
     }
 
     private DistanceExtremes getDistanceExtremes(List<Detection> detections) {
@@ -203,11 +200,10 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         Optional<Distance> maxDistance = Optional.empty();
 
         for (Detection detection : detections) {
-            Optional<Distance> distance = detection.distanceMeters();
-            if (distance.isEmpty()) {
+            if (detection.distanceMeters().isEmpty()) {
                 continue;
             }
-            Distance candidate = distance.get();
+            Distance candidate = detection.distanceMeters().get();
 
             if (minDistance.isEmpty() || candidate.lt(minDistance.get())) {
                 minDistance = Optional.of(candidate);
@@ -220,30 +216,32 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         return new DistanceExtremes(minDistance, maxDistance);
     }
 
-    private void applyDecayToFilteredValues(Time timeNow) {
-        if (startDecayTime.isEmpty()) {
+    private void applyDecayToFilteredValues() {
+        if (bestDistanceAverage.isEmpty()) {
             resetFilteredState();
             return;
         }
-        Time decayStartTime = startDecayTime.get();
-        if (timeNow.lte(decayStartTime)) {
+
+        double removalInterval = VisionConstants.FUEL_DECAY_TIME_SECONDS.in(Seconds)
+            / VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE;
+
+        if (!decayTimer.hasElapsed(removalInterval)) {
             return;
         }
+        decayTimer.restart();
 
-        Time elapsed = timeNow.minus(decayStartTime);
-        double decayProgress = Math.min(elapsed.div(VisionConstants.FUEL_DECAY_TIME_SECONDS).in(Value), 1.0);
-        double scale = Math.max(0.0, 1.0 - decayProgress);
+        bestDistanceAverage.removeOldest();
+        minDistanceAverage.removeOldest();
+        maxDistanceAverage.removeOldest();
+        countAverage.removeOldest();
 
-        filteredBestDistance = filteredBestDistance.map(
-            distance -> Meters.of(distance.in(Meters) * scale));
-        filteredMinDistance = filteredMinDistance.map(
-            distance -> Meters.of(distance.in(Meters) * scale));
-        filteredMaxDistance = filteredMaxDistance.map(
-            distance -> Meters.of(distance.in(Meters) * scale));
-
-        if (decayProgress >= 1.0) {
+        if (bestDistanceAverage.isEmpty()) {
             resetFilteredState();
-            startDecayTime = Optional.empty();
+            decayTimer.stop();
+        } else {
+            filteredBestDistance = Optional.of(Meters.of(bestDistanceAverage.getAverage()));
+            filteredMinDistance = Optional.of(Meters.of(minDistanceAverage.getAverage()));
+            filteredMaxDistance = Optional.of(Meters.of(maxDistanceAverage.getAverage()));
         }
     }
 
@@ -307,7 +305,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         Time timeNow = Seconds.of(Timer.getFPGATimestamp());
 
         if (results.isEmpty()) {
-            applyDecayToFilteredValues(timeNow);
+            applyDecayToFilteredValues();
             publishTelemetry();
             return;
         }
