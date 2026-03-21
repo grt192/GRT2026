@@ -121,7 +121,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     }
 
     public boolean isFuelDetected() {
-        return getBestDistance().isPresent();
+        return bestDetection.isPresent();
     }
 
     public int getFuelCount() {
