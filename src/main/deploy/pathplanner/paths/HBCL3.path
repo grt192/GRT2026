@@ -48,7 +48,7 @@
   "folder": "POS3",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -179.14455335089764
   },
   "useDefaultConstraints": true
 }

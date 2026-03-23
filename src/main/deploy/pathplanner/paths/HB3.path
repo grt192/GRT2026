@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -179.14455335089764
   },
   "reversed": false,
   "folder": "POS3",

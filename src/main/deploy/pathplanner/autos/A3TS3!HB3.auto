@@ -7,25 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "A1TS1"
+            "pathName": "A3TS3"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "IB1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "IBCL1"
+            "pathName": "HB3"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "POS1",
+  "folder": "POS3",
   "choreoAuto": false
 }
