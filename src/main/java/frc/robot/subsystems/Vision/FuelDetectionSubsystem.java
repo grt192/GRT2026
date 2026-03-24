@@ -79,6 +79,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     private final RollingAverage minDistanceAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
     private final RollingAverage maxDistanceAverage = new RollingAverage(VisionConstants.FUEL_SMOOTHING_WINDOW_SIZE);
 
+    private int filteredCount = 0;
     private Optional<Distance> filteredBestDistance = Optional.empty();
     private Optional<Distance> filteredMinDistance = Optional.empty();
     private Optional<Distance> filteredMaxDistance = Optional.empty();
@@ -125,7 +126,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     }
 
     public int getFuelCount() {
-        return countAverage.getRoundedAverage();
+        return filteredCount;
     }
 
     private void handleResult(PhotonPipelineResult result, Time robotTimestamp) {
@@ -139,6 +140,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
 
         latestDetections = List.copyOf(processed);
         countAverage.addSample(processed.size());
+        filteredCount = countAverage.getRoundedAverage();
 
         if (processed.isEmpty()) {
             bestDetection = Optional.empty();
@@ -218,7 +220,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
     }
 
     private void applyDecayToFilteredValues() {
-        if (bestDistanceAverage.isEmpty()) {
+        if (countAverage.isEmpty() && bestDistanceAverage.isEmpty()) {
             resetFilteredState();
             return;
         }
@@ -231,22 +233,37 @@ public class FuelDetectionSubsystem extends SubsystemBase {
         }
         decayTimer.restart();
 
-        bestDistanceAverage.removeOldest();
-        minDistanceAverage.removeOldest();
-        maxDistanceAverage.removeOldest();
-        countAverage.removeOldest();
+        decayAverage(countAverage);
+        decayAverage(bestDistanceAverage);
+        decayAverage(minDistanceAverage);
+        decayAverage(maxDistanceAverage);
 
-        if (bestDistanceAverage.isEmpty()) {
+        filteredCount = countAverage.getRoundedAverage();
+        filteredBestDistance = averageToDistance(bestDistanceAverage);
+        filteredMinDistance = averageToDistance(minDistanceAverage);
+        filteredMaxDistance = averageToDistance(maxDistanceAverage);
+
+        if (countAverage.isEmpty() && bestDistanceAverage.isEmpty()) {
             resetFilteredState();
             decayTimer.stop();
-        } else {
-            filteredBestDistance = Optional.of(Meters.of(bestDistanceAverage.getAverage()));
-            filteredMinDistance = Optional.of(Meters.of(minDistanceAverage.getAverage()));
-            filteredMaxDistance = Optional.of(Meters.of(maxDistanceAverage.getAverage()));
         }
     }
 
+    private void decayAverage(RollingAverage average) {
+        if (!average.isEmpty()) {
+            average.removeOldest();
+        }
+    }
+
+    private Optional<Distance> averageToDistance(RollingAverage average) {
+        if (average.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(Meters.of(average.getAverage()));
+    }
+
     private void resetFilteredState() {
+        filteredCount = 0;
         filteredBestDistance = Optional.empty();
         filteredMinDistance = Optional.empty();
         filteredMaxDistance = Optional.empty();
