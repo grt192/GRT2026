@@ -192,6 +192,7 @@ public class FuelDetectionSubsystem extends SubsystemBase {
             filteredMaxDistance = Optional.of(Meters.of(maxDistanceAverage.getAverage()));
         });
 
+        latestTimestamp = Optional.of(robotTimestamp);
         decayTimer.restart();
     }
 
