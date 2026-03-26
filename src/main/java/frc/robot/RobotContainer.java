@@ -82,15 +82,15 @@ public class RobotContainer {
 
     private SwerveSubsystem swerveSubsystem = Constants.SWERVE_ENABLED ? new SwerveSubsystem(swerveCAN) : null;
     private final FieldManagementSubsystem fmsSubsystem = new FieldManagementSubsystem();
-    // private towerRollers tower = new towerRollers(mechCAN);
+     private towerRollers tower = new towerRollers(mechCAN);
 
     private final RollerIntakeSubsystem intakeSubsystem = new RollerIntakeSubsystem(mechCAN);
     private final PivotIntakeSubsystem pivotIntake = new PivotIntakeSubsystem(mechCAN);
     // private final HopperSubsystem HopperSubsystem = new HopperSubsystem(mechCAN);
     private final Field2d m_field = new Field2d();
     // private final ClimbSubsystem m_ClimbSubsystem = new ClimbSubsystem(mechCAN);
-    // private final flywheel flywheelSubsystem = new flywheel(mechCAN);
-    // private final hood hoodSubsystem = new hood(mechCAN);
+     private final flywheel flywheelSubsystem = new flywheel(mechCAN);
+     private final hood hoodSubsystem = new hood(mechCAN);
     private boolean shootSeq = false;
 
     // private final FuelDetectionSubsystem fuelDetectionSubsystem = new FuelDetectionSubsystem(VisionConstants.fuelDetectionConfig);
@@ -127,6 +127,10 @@ public class RobotContainer {
         SmartDashboard.putData("Field", m_field);
         NamedCommands.registerCommand("deployIntake", new PivotDownTimedCommand(pivotIntake));
         NamedCommands.registerCommand("runRollers", new RollerInCommand(intakeSubsystem));
+
+        SmartDashboard.putNumber("Shooter RPS", 0);
+        SmartDashboard.putNumber("Hood Angle", 0);
+        SmartDashboard.putNumber("Tower Speed", 0);
     }
 
     /**
@@ -281,17 +285,18 @@ public class RobotContainer {
             // ==================== SHOOTER ====================
 
             flywheelSubsystem.setDefaultCommand(Commands.run(() -> {
-                rps =  SmartDashboard.getNumber("Shooter RPS", rps);
+                rps =  SmartDashboard.getNumber("Shooter RPS", 0);
                 flywheelSubsystem.shoot(rps);
             }, flywheelSubsystem));
 
             tower.setDefaultCommand(Commands.run(() -> {
-                towerSpeed =  SmartDashboard.getNumber("Tower Speed", towerSpeed);
+                towerSpeed =  SmartDashboard.getNumber("Tower Speed", 0);
+                tower.setManualControl(towerSpeed);
             }, tower));
 
 
             hoodSubsystem.setDefaultCommand(Commands.run(() -> {
-                hoodAng =  SmartDashboard.getNumber("Hood Angle", hoodAng);
+                hoodAng =  SmartDashboard.getNumber("Hood Angle", 0);
                 hoodSubsystem.setHoodAngle(hoodAng);
             }, hoodSubsystem));
             
