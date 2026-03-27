@@ -388,6 +388,10 @@ public final class Constants {
         public static final double INDEXER_DUTY_CYCLE = 1;
     }
 
+    public static class LEDConstants {
+        public static final int candleID = 30; // TODO: Add actual value when assigned
+    }
+
     public static class DebugConstants {
         public static final boolean MASTER_DEBUG = true;
         public static final boolean DRIVE_DEBUG = true;
