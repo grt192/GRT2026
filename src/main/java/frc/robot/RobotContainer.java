@@ -8,7 +8,7 @@ import frc.robot.subsystems.Vision.VisionConstants;
 // import frc.robot.Constants.VisionConstants;
 // frc imports
 import frc.robot.controllers.PS5DriveController;
-import frc.robot.subsystems.climb.ClimbSubsystem;
+// import frc.robot.subsystems.climb.ClimbSubsystem;
 import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.subsystems.shooter.hood;
 // Subsystems
@@ -29,16 +29,16 @@ import frc.robot.subsystems.Vision.FuelDetectionSubsystem;
 import frc.robot.commands.vision.GetCameraDisplacement;
 import frc.robot.Constants.TowerConstants.TOWER_INTAKE;
 import frc.robot.Constants.HopperConstants.HOPPER_INTAKE;
-import frc.robot.commands.ManualShooterSequence;
+// import frc.robot.commands.ManualShooterSequence;
 import frc.robot.commands.ShooterSequence;
-import frc.robot.commands.auton.ShootAndLeaveAuton;
+// import frc.robot.commands.auton.ShootAndLeaveAuton;
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import frc.robot.commands.intake.pivot.*;
+// import frc.robot.commands.intake.pivot.*;
 import frc.robot.commands.intake.roller.*;
 import frc.robot.commands.hopper.*;
-import frc.robot.commands.climb.ClimbCommands.*;
+// import frc.robot.commands.climb.ClimbCommands.*;
 import frc.robot.commands.shooter.rampDownFlywheel;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
@@ -82,15 +82,15 @@ public class RobotContainer {
 
     private SwerveSubsystem swerveSubsystem = Constants.SWERVE_ENABLED ? new SwerveSubsystem(swerveCAN) : null;
     private final FieldManagementSubsystem fmsSubsystem = new FieldManagementSubsystem();
-     private towerRollers tower = new towerRollers(mechCAN);
+    private towerRollers tower = new towerRollers(mechCAN);
 
     private final RollerIntakeSubsystem intakeSubsystem = new RollerIntakeSubsystem(mechCAN);
     private final PivotIntakeSubsystem pivotIntake = new PivotIntakeSubsystem(mechCAN);
-    // private final HopperSubsystem HopperSubsystem = new HopperSubsystem(mechCAN);
+    private final HopperSubsystem HopperSubsystem = new HopperSubsystem(mechCAN);
     private final Field2d m_field = new Field2d();
     // private final ClimbSubsystem m_ClimbSubsystem = new ClimbSubsystem(mechCAN);
-     private final flywheel flywheelSubsystem = new flywheel(mechCAN);
-     private final hood hoodSubsystem = new hood(mechCAN);
+    private final flywheel flywheelSubsystem = new flywheel(mechCAN);
+    private final hood hoodSubsystem = new hood(mechCAN);
     private boolean shootSeq = false;
 
     // private final FuelDetectionSubsystem fuelDetectionSubsystem = new FuelDetectionSubsystem(VisionConstants.fuelDetectionConfig);
@@ -125,8 +125,10 @@ public class RobotContainer {
         cameraServer = CameraServer.getServer();
 
         SmartDashboard.putData("Field", m_field);
-        NamedCommands.registerCommand("deployIntake", new PivotDownTimedCommand(pivotIntake));
-        NamedCommands.registerCommand("runRollers", new RollerInCommand(intakeSubsystem));
+        /*
+         * NamedCommands.registerCommand("deployIntake", new PivotDownTimedCommand(pivotIntake));
+         * NamedCommands.registerCommand("runRollers", new RollerInCommand(intakeSubsystem));
+         */
 
         SmartDashboard.putNumber("Shooter RPS", 0);
         SmartDashboard.putNumber("Hood Angle", 0);
@@ -177,6 +179,7 @@ public class RobotContainer {
                     swerveSubsystem));
 
             // Create button = switch cameras
+
             driveController.create().onTrue(
                 Commands.runOnce(() -> {
                     if (isCamera1Active) {
@@ -221,23 +224,28 @@ public class RobotContainer {
 
             // ==================== INTAKE ROLLER ====================
             // R1 (mech) = intake out, L1 (mech) = intake in (duty cycle control)
-            mechController.L1().whileTrue(Commands.run(() -> intakeSubsystem.runInDutyCycle(), intakeSubsystem));
-            mechController.R1().whileTrue(Commands.run(() -> intakeSubsystem.runOutDutyCycle(), intakeSubsystem));
-            intakeSubsystem.setDefaultCommand(Commands.run(() -> intakeSubsystem.stop(), intakeSubsystem));
+            /*
+             * mechController.L1().whileTrue(Commands.run(() -> intakeSubsystem.runInDutyCycle(), intakeSubsystem));
+             * mechController.R1().whileTrue(Commands.run(() -> intakeSubsystem.runOutDutyCycle(), intakeSubsystem));
+             * intakeSubsystem.setDefaultCommand(Commands.run(() -> intakeSubsystem.stop(), intakeSubsystem));
+             */
 
             // ==================== INTAKE PIVOT ====================
             // D-pad left = pivot down (timed), D-pad right = pivot up (timed)
-            mechController.povLeft().onTrue(new PivotDownTimedCommand(pivotIntake));
-            mechController.povRight().onTrue(new PivotUpTimedCommand(pivotIntake));
-            pivotIntake.setDefaultCommand(Commands.run(() -> pivotIntake.stop(), pivotIntake));
+            /*
+             * mechController.povLeft().onTrue(new PivotDownTimedCommand(pivotIntake));
+             * mechController.povRight().onTrue(new PivotUpTimedCommand(pivotIntake));
+             * pivotIntake.setDefaultCommand(Commands.run(() -> pivotIntake.stop(), pivotIntake));
+             */
 
             // L2 (mech) = spin spindexer (hopper) at max RPM and tower at 0.7 duty cycle
-            // mechController.L2().whileTrue(Commands.run(() -> {
-            // HopperSubsystem.setManualControl(1.0); // Max duty cycle for spindexer
-            // tower.setManualControl(
-            // 0.7); // 0.7 duty cycle for tower
-            // }, HopperSubsystem, tower));
-            // HopperSubsystem.setDefaultCommand(Commands.run(() -> HopperSubsystem.setManualControl(0), HopperSubsystem));
+            mechController.L2().whileTrue(Commands.run(() -> {
+                HopperSubsystem.setManualControl(1.0); // Max duty cycle for spindexer
+                tower.setManualControl(
+                    0.7); // 0.7 duty cycle for tower
+            }, HopperSubsystem, tower));
+
+            HopperSubsystem.setDefaultCommand(Commands.run(() -> HopperSubsystem.setManualControl(0), HopperSubsystem));
 
             // R2 (drive) = force intake in (pivot up + stop rollers) - hold to override
             new Trigger(driveController::getRightTrigger)
@@ -285,21 +293,21 @@ public class RobotContainer {
             // ==================== SHOOTER ====================
 
             flywheelSubsystem.setDefaultCommand(Commands.run(() -> {
-                rps =  SmartDashboard.getNumber("Shooter RPS", 0);
+                rps = SmartDashboard.getNumber("Shooter RPS", 0);
                 flywheelSubsystem.shoot(rps);
             }, flywheelSubsystem));
 
             tower.setDefaultCommand(Commands.run(() -> {
-                towerSpeed =  SmartDashboard.getNumber("Tower Speed", 0);
+                towerSpeed = SmartDashboard.getNumber("Tower Speed", 0);
                 tower.setManualControl(towerSpeed);
             }, tower));
 
 
             hoodSubsystem.setDefaultCommand(Commands.run(() -> {
-                hoodAng =  SmartDashboard.getNumber("Hood Angle", 0);
+                hoodAng = SmartDashboard.getNumber("Hood Angle", 0);
                 hoodSubsystem.setHoodAngle(hoodAng);
             }, hoodSubsystem));
-            
+
             // R2 = flywheel (analog speed control)
             // Left stick Y = hood manual control
             // flywheelSubsystem.setDefaultCommand(Commands.run(() -> {
