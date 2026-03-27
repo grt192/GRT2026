@@ -8,17 +8,22 @@ import frc.robot.subsystems.Vision.VisionConstants;
 // import frc.robot.Constants.VisionConstants;
 // frc imports
 import frc.robot.controllers.PS5DriveController;
+import frc.robot.subsystems.shooter.FlywheelIOTalonFX;
+import frc.robot.subsystems.shooter.HoodIOTalonFX;
+import frc.robot.subsystems.shooter.TowerRollersIOTalonFX;
 import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.subsystems.shooter.hood;
-// Subsystems
+import frc.robot.subsystems.shooter.towerRollers;
+import frc.robot.subsystems.swerve.GyroIOPigeon2;
+import frc.robot.subsystems.swerve.ModuleIO;
+import frc.robot.subsystems.swerve.ModuleIOTalonFX;
 import frc.robot.subsystems.swerve.SwerveSubsystem;
-// import frc.robot.subsystems.Vision.VisionSubsystem;
-// import frc.robot.subsystems.Vision.CameraConfig;
+import frc.robot.subsystems.Intake.PivotIntakeIOTalonFX;
+import frc.robot.subsystems.Intake.PivotIntakeSubsystem;
+import frc.robot.subsystems.Intake.RollerIntakeIOTalonFX;
 import frc.robot.subsystems.Intake.RollerIntakeSubsystem;
 import frc.robot.subsystems.Vision.VisionSubsystem;
-import frc.robot.subsystems.shooter.towerRollers;
-
-import frc.robot.subsystems.Intake.PivotIntakeSubsystem;
+import frc.robot.subsystems.hopper.HopperIOTalonFX;
 import frc.robot.subsystems.hopper.HopperSubsystem;
 import frc.robot.subsystems.FMS.FieldManagementSubsystem;
 import frc.robot.subsystems.Vision.FuelDetectionSubsystem;
@@ -78,16 +83,16 @@ public class RobotContainer {
     private final CANBus swerveCAN = new CANBus(Constants.Swerve_CAN_BUS);
     private final CANBus mechCAN = new CANBus(Constants.Mech_CAN_BUS);
 
-    private SwerveSubsystem swerveSubsystem = Constants.SWERVE_ENABLED ? new SwerveSubsystem(swerveCAN) : null;
+    private SwerveSubsystem swerveSubsystem = Constants.SWERVE_ENABLED ? createSwerveSubsystem() : null;
     private final FieldManagementSubsystem fmsSubsystem = new FieldManagementSubsystem();
-    private towerRollers tower = new towerRollers(mechCAN);
+    private towerRollers tower = new towerRollers(new TowerRollersIOTalonFX(mechCAN));
 
-    private final RollerIntakeSubsystem intakeSubsystem = new RollerIntakeSubsystem(mechCAN);
-    private final PivotIntakeSubsystem pivotIntake = new PivotIntakeSubsystem(mechCAN);
-    private final HopperSubsystem HopperSubsystem = new HopperSubsystem(mechCAN);
+    private final RollerIntakeSubsystem intakeSubsystem = new RollerIntakeSubsystem(new RollerIntakeIOTalonFX(mechCAN));
+    private final PivotIntakeSubsystem pivotIntake = new PivotIntakeSubsystem(new PivotIntakeIOTalonFX(mechCAN));
+    private final HopperSubsystem HopperSubsystem = new HopperSubsystem(new HopperIOTalonFX(mechCAN));
     private final Field2d m_field = new Field2d();
-    private final flywheel flywheelSubsystem = new flywheel(mechCAN);
-    private final hood hoodSubsystem = new hood(mechCAN);
+    private final flywheel flywheelSubsystem = new flywheel(new FlywheelIOTalonFX(mechCAN));
+    private final hood hoodSubsystem = new hood(new HoodIOTalonFX(mechCAN));
     private boolean shootSeq = false;
 
     private final FuelDetectionSubsystem fuelDetectionSubsystem = new FuelDetectionSubsystem(VisionConstants.fuelDetectionConfig);
@@ -102,6 +107,54 @@ public class RobotContainer {
 
     // private final VisionSubsystem visionSubsystem1 = new VisionSubsystem(
     // VisionConstants.cameraConfig11);
+
+    private SwerveSubsystem createSwerveSubsystem() {
+        ModuleIO flIO = new ModuleIOTalonFX(
+            Constants.SwerveConstants.FL_DRIVE, Constants.SwerveConstants.FL_STEER,
+            Constants.SwerveConstants.FL_ENCODER, swerveCAN);
+        flIO.configureDrivePID(
+            Constants.SwerveConstants.DRIVE_P[0], Constants.SwerveConstants.DRIVE_I[0],
+            Constants.SwerveConstants.DRIVE_D[0], Constants.SwerveConstants.DRIVE_S[0],
+            Constants.SwerveConstants.DRIVE_V[0]);
+        flIO.configureSteerPID(
+            Constants.SwerveConstants.STEER_P[0], Constants.SwerveConstants.STEER_I[0],
+            Constants.SwerveConstants.STEER_D[0], Constants.SwerveConstants.STEER_S[0]);
+
+        ModuleIO frIO = new ModuleIOTalonFX(
+            Constants.SwerveConstants.FR_DRIVE, Constants.SwerveConstants.FR_STEER,
+            Constants.SwerveConstants.FR_ENCODER, swerveCAN);
+        frIO.configureDrivePID(
+            Constants.SwerveConstants.DRIVE_P[1], Constants.SwerveConstants.DRIVE_I[1],
+            Constants.SwerveConstants.DRIVE_D[1], Constants.SwerveConstants.DRIVE_S[1],
+            Constants.SwerveConstants.DRIVE_V[1]);
+        frIO.configureSteerPID(
+            Constants.SwerveConstants.STEER_P[1], Constants.SwerveConstants.STEER_I[1],
+            Constants.SwerveConstants.STEER_D[1], Constants.SwerveConstants.STEER_S[1]);
+
+        ModuleIO blIO = new ModuleIOTalonFX(
+            Constants.SwerveConstants.BL_DRIVE, Constants.SwerveConstants.BL_STEER,
+            Constants.SwerveConstants.BL_ENCODER, swerveCAN);
+        blIO.configureDrivePID(
+            Constants.SwerveConstants.DRIVE_P[2], Constants.SwerveConstants.DRIVE_I[2],
+            Constants.SwerveConstants.DRIVE_D[2], Constants.SwerveConstants.DRIVE_S[2],
+            Constants.SwerveConstants.DRIVE_V[2]);
+        blIO.configureSteerPID(
+            Constants.SwerveConstants.STEER_P[2], Constants.SwerveConstants.STEER_I[2],
+            Constants.SwerveConstants.STEER_D[2], Constants.SwerveConstants.STEER_S[2]);
+
+        ModuleIO brIO = new ModuleIOTalonFX(
+            Constants.SwerveConstants.BR_DRIVE, Constants.SwerveConstants.BR_STEER,
+            Constants.SwerveConstants.BR_ENCODER, swerveCAN);
+        brIO.configureDrivePID(
+            Constants.SwerveConstants.DRIVE_P[3], Constants.SwerveConstants.DRIVE_I[3],
+            Constants.SwerveConstants.DRIVE_D[3], Constants.SwerveConstants.DRIVE_S[3],
+            Constants.SwerveConstants.DRIVE_V[3]);
+        brIO.configureSteerPID(
+            Constants.SwerveConstants.STEER_P[3], Constants.SwerveConstants.STEER_I[3],
+            Constants.SwerveConstants.STEER_D[3], Constants.SwerveConstants.STEER_S[3]);
+
+        return new SwerveSubsystem(new GyroIOPigeon2(swerveCAN), flIO, frIO, blIO, brIO);
+    }
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.

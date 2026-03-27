@@ -1,13 +1,9 @@
 package frc.robot.subsystems.swerve;
 
-import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.studica.frc.AHRS;
-import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -17,138 +13,87 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.util.datalog.StructLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static frc.robot.Constants.DebugConstants.*;
-import static frc.robot.Constants.LoggingConstants.*;
+import org.littletonrobotics.junction.Logger;
+
 import static frc.robot.Constants.SwerveConstants.*;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_CRUISE_VELOCITY;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
 
-import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.Vision.TimestampedVisionUpdate;
-import frc.robot.util.GRTUtil;
 
 public class SwerveSubsystem extends SubsystemBase {
+    private final GyroIO gyroIO;
+    private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
 
     private final KrakenSwerveModule frontLeftModule, frontRightModule, backLeftModule, backRightModule;
+    private final KrakenSwerveModule[] modules;
+
     private SwerveModuleState[] states = {
-            new SwerveModuleState(),
-            new SwerveModuleState(),
-            new SwerveModuleState(),
-            new SwerveModuleState()
+            new SwerveModuleState(), new SwerveModuleState(),
+            new SwerveModuleState(), new SwerveModuleState()
     };
-    SwerveModuleState testState = new SwerveModuleState();
+
     private Pose2d estimatedPose = new Pose2d(10, 4, new Rotation2d());
     private final SwerveDriveKinematics kinematics;
     private final SwerveDrivePoseEstimator poseEstimator;
     private Rotation2d driverHeadingOffset = new Rotation2d();
 
-    private final Pigeon2 pidgey;
-    private final CANBus canivore;
     private Timer lockTimer;
     private double currentCruiseVelocityRPM = STEER_CRUISE_VELOCITY * STEER_GEAR_REDUCTION * 60.0;
 
-    // Acceleration limiting fields
     private ChassisSpeeds previousSpeeds = new ChassisSpeeds();
     private double lastUpdateTime = 0.0;
 
-    // DataLog entries
-    private StructLogEntry<Pose2d> poseLogEntry;
-    private DoubleLogEntry gyroHeadingLogEntry;
-    private DoubleLogEntry chassisVxLogEntry;
-    private DoubleLogEntry chassisVyLogEntry;
-    private DoubleLogEntry chassisOmegaLogEntry;
-    private DoubleLogEntry steerCruiseRPMLogEntry;
+    public double maxLinearAcceleration = MAX_LINEAR_ACCELERATION;
+    public double maxLinearDeceleration = MAX_LINEAR_DECELERATION;
+    public double maxAngularAcceleration = MAX_ANGULAR_ACCELERATION;
+    public double maxAngularDeceleration = MAX_ANGULAR_DECELERATION;
 
-    // logging
-    private NetworkTableInstance ntInstance;
-    private NetworkTable swerveTable;
-
-    private StructArrayPublisher<SwerveModuleState> swerveStatesPublisher;
-
-    private StructPublisher<Pose2d> estimatedPosePublisher;
-    // private StructLogEntry<Pose2d> estimatedPoseLogEntry =
-    // StructLogEntry.create(
-    // DataLogManager.getLog(),
-    // "estimatedPose",
-    // Pose2d.struct
-    // );
-
-    // NT Accel Config
-    public double maxLinearAcceleration = MAX_LINEAR_ACCELERATION; // meters per second squared
-    public double maxLinearDeceleration = MAX_LINEAR_DECELERATION; // meters per second squared
-    public double maxAngularAcceleration = MAX_ANGULAR_ACCELERATION; // radians per second squared
-    public double maxAngularDeceleration = MAX_ANGULAR_DECELERATION; // radians per second squared
-
-    // Boost mode flag
     private boolean boostModeEnabled = false;
-
-    public SwerveSubsystem(CANBus canBus) {
-        canivore = canBus;
-        ROTATION_PID.enableContinuousInput(-Math.PI, Math.PI);
-        // initialize and reset the NavX gyro
-        pidgey = new Pigeon2(SwerveConstants.PigeonID, canivore);
-        pidgey.reset();
-
-        frontLeftModule = new KrakenSwerveModule(FL_DRIVE, FL_STEER, FL_OFFSET, FL_ENCODER, canivore);
-        frontRightModule = new KrakenSwerveModule(FR_DRIVE, FR_STEER, FR_OFFSET, FR_ENCODER, canivore);
-        backLeftModule = new KrakenSwerveModule(BL_DRIVE, BL_STEER, BL_OFFSET, BL_ENCODER, canivore);
-        backRightModule = new KrakenSwerveModule(BR_DRIVE, BR_STEER, BR_OFFSET, BR_ENCODER, canivore);
-
-        // sets swerve
-        kinematics = new SwerveDriveKinematics(FL_POS, FR_POS, BL_POS, BR_POS);
-        poseEstimator = new SwerveDrivePoseEstimator(
-            kinematics,
-            getGyroHeading(),
-            getModulePositions(),
-            new Pose2d());
-
-        buildAuton();
-        initNT();
-        initLogs();
-
-
-        if (DRIVE_DEBUG) {
-            enableDriveDebug();
-        }
-        if (STEER_DEBUG) {
-            enableSteerDebug();
-        }
-
-        lockTimer = new Timer();
-
-        initAccelValues();
-    }
+    private double driveSpeedLimit = 1.0;
 
     private final PIDController ROTATION_PID = new PIDController(4.0, 0.0, 0.2);
 
+    public SwerveSubsystem(GyroIO gyroIO, ModuleIO flIO, ModuleIO frIO, ModuleIO blIO, ModuleIO brIO) {
+        this.gyroIO = gyroIO;
+        ROTATION_PID.enableContinuousInput(-Math.PI, Math.PI);
+
+        frontLeftModule = new KrakenSwerveModule("FL", flIO, FL_OFFSET);
+        frontRightModule = new KrakenSwerveModule("FR", frIO, FR_OFFSET);
+        backLeftModule = new KrakenSwerveModule("BL", blIO, BL_OFFSET);
+        backRightModule = new KrakenSwerveModule("BR", brIO, BR_OFFSET);
+        modules = new KrakenSwerveModule[] {frontLeftModule, frontRightModule, backLeftModule, backRightModule};
+
+        kinematics = new SwerveDriveKinematics(FL_POS, FR_POS, BL_POS, BR_POS);
+        poseEstimator = new SwerveDrivePoseEstimator(
+            kinematics, getGyroHeading(), getModulePositions(), new Pose2d());
+
+        buildAuton();
+        lockTimer = new Timer();
+    }
+
     @Override
     public void periodic() {
-        // update the poseestimator with curent gyro reading
-        // Pigeon is flipped, so negate to match vision coordinate system
-        Rotation2d gyroAngle = getGyroHeading();
-        estimatedPose = poseEstimator.update(
-            gyroAngle,
-            getModulePositions());
+        // Update IO
+        gyroIO.updateInputs(gyroInputs);
+        Logger.processInputs("Swerve/Gyro", gyroInputs);
+        for (KrakenSwerveModule module : modules) {
+            module.periodic();
+        }
 
-        // If all commanded velocities are 0, the system is idle (drivers / commands are
-        // not supplying input).
+        // Update pose
+        Rotation2d gyroAngle = getGyroHeading();
+        estimatedPose = poseEstimator.update(gyroAngle, getModulePositions());
+
+        // Idle detection and lock
         boolean isIdle = states[0].speedMetersPerSecond == 0.0
             && states[1].speedMetersPerSecond == 0.0
             && states[2].speedMetersPerSecond == 0.0
             && states[3].speedMetersPerSecond == 0.0;
 
-        // Start lock timer when idle
         if (isIdle) {
             lockTimer.start();
         } else {
@@ -156,134 +101,86 @@ public class SwerveSubsystem extends SubsystemBase {
             lockTimer.reset();
         }
 
-        // Lock the swerve module if the lock timeout has elapsed, or set them to their
-        // setpoints if drivers are supplying non-idle input.
         if (lockTimer.hasElapsed(1)) {
             applyLock();
         } else {
-            // update the swerve modules based on the current desired states from states[]
             frontLeftModule.setDesiredState(states[0]);
             frontRightModule.setDesiredState(states[1]);
             backLeftModule.setDesiredState(states[2]);
             backRightModule.setDesiredState(states[3]);
         }
 
-        // logging
-        // estimatedPoseLogEntry.append(estimatedPose, GRTUtil.getFPGATime());
-        SmartDashboard.putNumber("Steer/Current RPM", frontLeftModule.getSteerVelocityRPM());
-        SmartDashboard.putNumber("Steer/Max RPM", currentCruiseVelocityRPM);
+        // Log outputs
+        Logger.recordOutput("Swerve/EstimatedPose", estimatedPose);
+        Logger.recordOutput("Swerve/GyroHeadingDeg", gyroAngle.getDegrees());
+        Logger.recordOutput("Swerve/ModuleStates", getModuleStates());
+        Logger.recordOutput("Swerve/BoostMode", boostModeEnabled);
+        Logger.recordOutput("Swerve/SpeedLimit", driveSpeedLimit);
 
-        publishStats();
-        logStats();
+        ChassisSpeeds speeds = getRobotRelativeChassisSpeeds();
+        Logger.recordOutput("Swerve/ChassisVxMPS", speeds.vxMetersPerSecond);
+        Logger.recordOutput("Swerve/ChassisVyMPS", speeds.vyMetersPerSecond);
+        Logger.recordOutput("Swerve/ChassisOmegaRadPS", speeds.omegaRadiansPerSecond);
     }
 
-    /**
-     * Sets the powers of the drivetrain through PIDs. Relative to the driver
-     * heading on the field.
-     *
-     * @param xPower [-1, 1] The forward power.
-     * @param yPower [-1, 1] The left power.
-     * @param angularPower [-1, 1] The rotational power.
-     */
     public void setDrivePowers(double xPower, double yPower, double angularPower) {
-        // Determine max velocity based on boost mode and speed limit
         double baseMaxVel = boostModeEnabled ? BOOST_MAX_VEL : MAX_VEL;
         double baseMaxOmega = boostModeEnabled ? (BOOST_MAX_VEL / FL_POS.getNorm()) : MAX_OMEGA;
 
-        // Apply drive speed limit (controlled by left trigger)
         double limitedMaxVel = baseMaxVel * driveSpeedLimit;
         double limitedMaxOmega = baseMaxOmega * driveSpeedLimit;
 
         Rotation2d heading = getDriverHeading();
 
         ChassisSpeeds desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-            xPower * limitedMaxVel,
-            yPower * limitedMaxVel,
-            angularPower * limitedMaxOmega,
-            heading);
+            xPower * limitedMaxVel, yPower * limitedMaxVel,
+            angularPower * limitedMaxOmega, heading);
 
-        // Apply acceleration limiting (only limit acceleration, not deceleration)
         ChassisSpeeds speeds = limitAcceleration(desiredSpeeds);
 
         states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(
-            states, speeds,
-            limitedMaxVel, limitedMaxVel, limitedMaxOmega);
+            states, speeds, limitedMaxVel, limitedMaxVel, limitedMaxOmega);
     }
 
-    private void initAccelValues() {
-        SmartDashboard.setDefaultNumber("SwerveAccel/maxLinearAccel", MAX_LINEAR_ACCELERATION);
-        SmartDashboard.setDefaultNumber("SwerveAccel/maxLinearDecel", MAX_LINEAR_DECELERATION);
-        SmartDashboard.setDefaultNumber("SwerveAccel/maxAngularAccel", MAX_ANGULAR_ACCELERATION);
-        SmartDashboard.setDefaultNumber("SwerveAccel/maxAngularDecel", MAX_ANGULAR_DECELERATION);
-
-        SmartDashboard.setDefaultBoolean("imu/brownOut", false);
-    }
-
-    private void updateAccelValues() {
-        if (boostModeEnabled) {
-            // Use boost mode acceleration values
-            maxLinearAcceleration = BOOST_MAX_LINEAR_ACCELERATION;
-            maxLinearDeceleration = MAX_LINEAR_DECELERATION; // Keep decel the same
-            maxAngularAcceleration = BOOST_MAX_ANGULAR_ACCELERATION;
-            maxAngularDeceleration = MAX_ANGULAR_DECELERATION; // Keep decel the same
-        } else {
-            // Use normal values from SmartDashboard
-            maxLinearAcceleration = SmartDashboard.getNumber("SwerveAccel/maxLinearAccel", MAX_LINEAR_ACCELERATION);
-            maxLinearDeceleration = SmartDashboard.getNumber("SwerveAccel/maxLinearDecel", MAX_LINEAR_DECELERATION);
-            maxAngularAcceleration = SmartDashboard.getNumber("SwerveAccel/maxAngularAccel", MAX_ANGULAR_ACCELERATION);
-            maxAngularDeceleration = SmartDashboard.getNumber("SwerveAccel/maxAngularDecel", MAX_ANGULAR_DECELERATION);
-        }
-    }
-
-    /**
-     * Enables or disables boost mode.
-     * When enabled, uses higher max velocity and acceleration values.
-     * 
-     * @param enabled true to enable boost mode, false to disable
-     */
     public void setBoostMode(boolean enabled) {
         this.boostModeEnabled = enabled;
     }
 
-    /**
-     * Gets whether boost mode is currently enabled.
-     *
-     * @return true if boost mode is enabled
-     */
     public boolean isBoostModeEnabled() {
         return boostModeEnabled;
     }
 
-    /**
-     * Limits acceleration but allows full deceleration
-     * 
-     * @param desiredSpeeds The desired chassis speeds
-     * @return Limited chassis speeds
-     */
     private ChassisSpeeds limitAcceleration(ChassisSpeeds desiredSpeeds) {
-        updateAccelValues();
+        if (boostModeEnabled) {
+            maxLinearAcceleration = BOOST_MAX_LINEAR_ACCELERATION;
+            maxLinearDeceleration = MAX_LINEAR_DECELERATION;
+            maxAngularAcceleration = BOOST_MAX_ANGULAR_ACCELERATION;
+            maxAngularDeceleration = MAX_ANGULAR_DECELERATION;
+        } else {
+            maxLinearAcceleration = MAX_LINEAR_ACCELERATION;
+            maxLinearDeceleration = MAX_LINEAR_DECELERATION;
+            maxAngularAcceleration = MAX_ANGULAR_ACCELERATION;
+            maxAngularDeceleration = MAX_ANGULAR_DECELERATION;
+        }
+
         double currentTime = Timer.getFPGATimestamp();
         double dt = currentTime - lastUpdateTime;
 
-        // If this is the first update or dt is too large, don't limit
         if (lastUpdateTime == 0.0 || dt > 0.1 || dt <= 0.0) {
             lastUpdateTime = currentTime;
             previousSpeeds = desiredSpeeds;
             return desiredSpeeds;
         }
 
-        // Calculate current linear velocity magnitude
         double currentLinearVel = Math.hypot(previousSpeeds.vxMetersPerSecond, previousSpeeds.vyMetersPerSecond);
         double desiredLinearVel = Math.hypot(desiredSpeeds.vxMetersPerSecond, desiredSpeeds.vyMetersPerSecond);
 
-        // Limit both acceleration and deceleration
         double vx = desiredSpeeds.vxMetersPerSecond;
         double vy = desiredSpeeds.vyMetersPerSecond;
         double deltaV = desiredLinearVel - currentLinearVel;
 
         if (deltaV > 0) {
-            // We're accelerating - apply acceleration limits
             double maxDeltaV = maxLinearAcceleration * dt;
             if (deltaV > maxDeltaV) {
                 double limitedLinearVel = currentLinearVel + maxDeltaV;
@@ -292,7 +189,6 @@ public class SwerveSubsystem extends SubsystemBase {
                 vy = desiredSpeeds.vyMetersPerSecond * scale;
             }
         } else if (deltaV < 0) {
-            // We're decelerating - apply deceleration limits
             double maxDeltaV = maxLinearDeceleration * dt;
             if (-deltaV > maxDeltaV) {
                 double limitedLinearVel = currentLinearVel - maxDeltaV;
@@ -301,7 +197,6 @@ public class SwerveSubsystem extends SubsystemBase {
                     vx = desiredSpeeds.vxMetersPerSecond * scale;
                     vy = desiredSpeeds.vyMetersPerSecond * scale;
                 } else {
-                    // Decelerating toward zero - use direction from previous speeds
                     double prevMag = Math.hypot(previousSpeeds.vxMetersPerSecond, previousSpeeds.vyMetersPerSecond);
                     if (prevMag > 0.001) {
                         vx = (previousSpeeds.vxMetersPerSecond / prevMag) * limitedLinearVel;
@@ -311,12 +206,8 @@ public class SwerveSubsystem extends SubsystemBase {
             }
         }
 
-        // Limit angular acceleration and deceleration separately
         double omega = desiredSpeeds.omegaRadiansPerSecond;
         double deltaOmega = omega - previousSpeeds.omegaRadiansPerSecond;
-
-        // Determine if we're accelerating or decelerating (speeding up or slowing down
-        // rotation)
         boolean isAngularAccelerating = Math.abs(omega) > Math.abs(previousSpeeds.omegaRadiansPerSecond);
         double maxDeltaOmega = (isAngularAccelerating ? maxAngularAcceleration : maxAngularDeceleration) * dt;
 
@@ -325,17 +216,11 @@ public class SwerveSubsystem extends SubsystemBase {
         }
 
         ChassisSpeeds limitedSpeeds = new ChassisSpeeds(vx, vy, omega);
-
         lastUpdateTime = currentTime;
         previousSpeeds = limitedSpeeds;
-
         return limitedSpeeds;
     }
 
-    /**
-     * Executes swerve X locking, putting swerve's wheels into an X configuration to
-     * prevent motion.
-     */
     public void applyLock() {
         frontLeftModule.setDesiredState(new SwerveModuleState(0.0, new Rotation2d(Math.PI / 4.0)));
         frontRightModule.setDesiredState(new SwerveModuleState(0.0, new Rotation2d(-Math.PI / 4.0)));
@@ -344,287 +229,103 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void addVisionMeasurements(TimestampedVisionUpdate update) {
-        poseEstimator.addVisionMeasurement(
-            update.pose(),
-            update.timestamp(),
-            update.stdDevs());
+        poseEstimator.addVisionMeasurement(update.pose(), update.timestamp(), update.stdDevs());
     }
 
-    /**
-     * Gets the module positions.
-     * 
-     * @return The array of module positions.
-     *         The angles are in radians, and the distances are in meters.
-     */
     public SwerveModulePosition[] getModulePositions() {
         return new SwerveModulePosition[] {
-                frontLeftModule.getPosition(),
-                frontRightModule.getPosition(),
-                backLeftModule.getPosition(),
-                backRightModule.getPosition()
+                frontLeftModule.getPosition(), frontRightModule.getPosition(),
+                backLeftModule.getPosition(), backRightModule.getPosition()
         };
     }
 
-    /**
-     * Gets the states of the module
-     * 
-     * @return The array of module states
-     */
     public SwerveModuleState[] getModuleStates() {
         return new SwerveModuleState[] {
-                frontLeftModule.getState(),
-                frontRightModule.getState(),
-                backLeftModule.getState(),
-                backRightModule.getState()
+                frontLeftModule.getState(), frontRightModule.getState(),
+                backLeftModule.getState(), backRightModule.getState()
         };
     }
 
-    /**
-     * Gets the driver heading.
-     *
-     * @return The angle of the robot relative to the driver heading.
-     */
     public Rotation2d getDriverHeading() {
-        Rotation2d robotHeading = getGyroHeading();
-        return robotHeading.minus(driverHeadingOffset);
+        return getGyroHeading().minus(driverHeadingOffset);
     }
 
-    /**
-     * Resets the driver heading.
-     *
-     * @param currentRotation The new driver heading.
-     */
     public void resetDriverHeading(Rotation2d currentRotation) {
         driverHeadingOffset = getGyroHeading().minus(currentRotation);
     }
 
-    /**
-     * Resets the driver heading to 0.
-     */
     public void resetDriverHeading() {
         resetDriverHeading(new Rotation2d());
     }
 
-    /**
-     * Resets the driver heading with a 90 degree offset.
-     */
     public void resetDriverHeadingOffset90() {
         resetDriverHeading(Rotation2d.fromDegrees(90));
     }
 
-
-    /** Gets the gyro heading. */
     private Rotation2d getGyroHeading() {
-        return Rotation2d.fromDegrees(pidgey.getYaw().getValueAsDouble()); // Might need to flip depending on the robot
-                                                                           // setup
+        return Rotation2d.fromDegrees(gyroInputs.yawDegrees);
     }
 
-    /**
-     * Gets the current robot pose.
-     *
-     * @return The robot Pose2d.
-     */
     public Pose2d getRobotPosition() {
         return estimatedPose;
     }
 
     public void resetPose(Pose2d currentPose) {
-        // Pigeon is flipped, so negate to match vision coordinate system
         Rotation2d gyroAngle = getGyroHeading().times(-1);
-        poseEstimator.resetPosition(
-            gyroAngle,
-            getModulePositions(),
-            currentPose);
+        poseEstimator.resetPosition(gyroAngle, getModulePositions(), currentPose);
     }
 
-    /**
-     * Resets the robot pose to the default starting position in front of the red
-     * hub.
-     * Use this for testing/practice when starting in a known position.
-     */
     public void resetToStartingPosition() {
-        // Starting position: 1.5 meters in front of red hub (which is at x=11.9)
         Pose2d startingPose = new Pose2d(10.4, 4.0, new Rotation2d());
         resetPose(startingPose);
     }
 
     public ChassisSpeeds getRobotRelativeChassisSpeeds() {
         SwerveModuleState[] currentModuleStates = getModuleStates();
-        ChassisSpeeds robotRelativeSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+        return ChassisSpeeds.fromFieldRelativeSpeeds(
             kinematics.toChassisSpeeds(currentModuleStates),
-            getRobotPosition().getRotation() // Could be replaced with getGyroHeading() if desired
-        );
-        return robotRelativeSpeeds;
+            getRobotPosition().getRotation());
     }
 
     public void setRobotRelativeDrivePowers(ChassisSpeeds robotRelativeSpeeds) {
         ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(
-            robotRelativeSpeeds,
-            new Rotation2d(0));
-
+            robotRelativeSpeeds, new Rotation2d(0));
         states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(
-            states, speeds,
-            MAX_VEL, MAX_VEL, MAX_OMEGA);
+            states, speeds, MAX_VEL, MAX_VEL, MAX_OMEGA);
     }
 
-    /**
-     * Sets the power of the drivetrain through PIDs. Relative to the robot with the
-     * intake in the front.
-     *
-     * @param xPower [-1, 1] The forward power.
-     * @param yPower [-1, 1] The left power.
-     * @param angularPower [-1, 1] The rotational power.
-     */
     public void setRobotRelativeDrivePowers(double xPower, double yPower, double angularPower) {
         ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(
-            xPower * MAX_VEL,
-            yPower * MAX_VEL,
-            angularPower * MAX_OMEGA,
-            new Rotation2d(0));
-
+            xPower * MAX_VEL, yPower * MAX_VEL,
+            angularPower * MAX_OMEGA, new Rotation2d(0));
         states = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(
-            states, speeds,
-            MAX_VEL, MAX_VEL, MAX_OMEGA);
+            states, speeds, MAX_VEL, MAX_VEL, MAX_OMEGA);
     }
 
-    // Drive speed limit multiplier (controlled by left trigger)
-    private double driveSpeedLimit = 1.0;
-
-    /**
-     * Sets the drive speed limit multiplier. This scales max velocity and
-     * acceleration.
-     * 
-     * @param limit [0, 1] fraction of max speed. 1.0 = full speed, 0.0 = stopped.
-     */
     public void setDriveSpeedLimit(double limit) {
         this.driveSpeedLimit = Math.max(0.0, Math.min(1.0, limit));
     }
 
-    /**
-     * Gets the current drive speed limit.
-     * 
-     * @return The current speed limit multiplier [0, 1]
-     */
     public double getDriveSpeedLimit() {
         return driveSpeedLimit;
     }
 
-    /**
-     * Limits all steer motor speeds by scaling the MotionMagic cruise velocity.
-     *
-     * @param limit [0, 1] fraction of max cruise velocity. 1.0 = full speed, 0.25 =
-     *        quarter speed.
-     */
     public void setSteerSpeedLimit(double limit) {
         double velocity = STEER_CRUISE_VELOCITY * limit;
         currentCruiseVelocityRPM = velocity * STEER_GEAR_REDUCTION * 60.0;
-        frontLeftModule.setSteerCruiseVelocity(velocity);
-        frontRightModule.setSteerCruiseVelocity(velocity);
-        backLeftModule.setSteerCruiseVelocity(velocity);
-        backRightModule.setSteerCruiseVelocity(velocity);
-    }
-
-    private void initNT() {
-        ntInstance = NetworkTableInstance.getDefault();
-        swerveTable = ntInstance.getTable(SWERVE_TABLE);
-
-        swerveStatesPublisher = swerveTable.getStructArrayTopic(
-            "SwerveStates", SwerveModuleState.struct).publish();
-
-        estimatedPosePublisher = swerveTable.getStructTopic(
-            "estimatedPose",
-            Pose2d.struct).publish();
-    }
-
-    /**
-     * publishes swerve stats to NT
-     */
-    private void publishStats() {
-        estimatedPosePublisher.set(estimatedPose);
-
-        SmartDashboard.putBoolean("imu/brownOut", pidgey.getStickyFault_Undervoltage().getValue());
-
-        if (STATE_DEBUG || DRIVE_DEBUG || STEER_DEBUG) {
-            swerveStatesPublisher.set(getModuleStates());
-        }
-
-        if (DRIVE_DEBUG) {
-            frontLeftModule.publishDriveStats();
-            frontRightModule.publishDriveStats();
-            backLeftModule.publishDriveStats();
-            backRightModule.publishDriveStats();
-        }
-
-        if (STEER_DEBUG) {
-            frontLeftModule.publishSteerStats();
-            frontRightModule.publishSteerStats();
-            backLeftModule.publishSteerStats();
-            backRightModule.publishSteerStats();
+        for (KrakenSwerveModule module : modules) {
+            module.setSteerCruiseVelocity(velocity);
         }
     }
 
-    private void initLogs() {
-        poseLogEntry = StructLogEntry.create(DataLogManager.getLog(), "swerve/estimatedPose", Pose2d.struct);
-        gyroHeadingLogEntry = new DoubleLogEntry(DataLogManager.getLog(), "swerve/gyroHeading");
-        chassisVxLogEntry = new DoubleLogEntry(DataLogManager.getLog(), "swerve/chassisVx");
-        chassisVyLogEntry = new DoubleLogEntry(DataLogManager.getLog(), "swerve/chassisVy");
-        chassisOmegaLogEntry = new DoubleLogEntry(DataLogManager.getLog(), "swerve/chassisOmega");
-        steerCruiseRPMLogEntry = new DoubleLogEntry(DataLogManager.getLog(), "swerve/steerCruiseRPM");
-    }
-
-    private void logStats() {
-        long ts = GRTUtil.getFPGATime();
-
-        // Subsystem-level
-        poseLogEntry.append(estimatedPose, ts);
-        gyroHeadingLogEntry.append(getGyroHeading().getDegrees(), ts);
-        steerCruiseRPMLogEntry.append(currentCruiseVelocityRPM, ts);
-
-        // Chassis speeds
-        ChassisSpeeds speeds = getRobotRelativeChassisSpeeds();
-        chassisVxLogEntry.append(speeds.vxMetersPerSecond, ts);
-        chassisVyLogEntry.append(speeds.vyMetersPerSecond, ts);
-        chassisOmegaLogEntry.append(speeds.omegaRadiansPerSecond, ts);
-
-        // Per-module logging
-        frontLeftModule.logStats();
-        frontRightModule.logStats();
-        backLeftModule.logStats();
-        backRightModule.logStats();
-    }
-
-    /**
-     * Enables drive debug
-     */
-    private void enableDriveDebug() {
-        frontLeftModule.driveDebug();
-        frontRightModule.driveDebug();
-        backLeftModule.driveDebug();
-        backRightModule.driveDebug();
-    }
-
-    /**
-     * Enables steer debug
-     */
-    private void enableSteerDebug() {
-        frontLeftModule.steerDebug();
-        frontRightModule.steerDebug();
-        backLeftModule.steerDebug();
-        backRightModule.steerDebug();
-    }
-
-    /**
-     * Builds the auton builder
-     */
     private void buildAuton() {
         RobotConfig config = null;
         try {
             config = RobotConfig.fromGUISettings();
         } catch (Exception e) {
             e.printStackTrace();
-            // Handle exception as needed, maybe use default values or fallback
         }
 
         AutoBuilder.configure(
@@ -632,12 +333,9 @@ public class SwerveSubsystem extends SubsystemBase {
             this::resetPose,
             this::getRobotRelativeChassisSpeeds,
             (speeds, feedforwards) -> setRobotRelativeDrivePowers(speeds),
-
-            // 1.25/3.25
             new PPHolonomicDriveController(
                 new PIDConstants(1.38, 0, 0.0),
                 new PIDConstants(3.3, 0.0, 0.0)),
-
             config,
             () -> {
                 var alliance = DriverStation.getAlliance();

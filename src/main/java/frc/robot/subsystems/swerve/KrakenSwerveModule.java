@@ -1,86 +1,28 @@
 package frc.robot.subsystems.swerve;
 
-import java.util.EnumSet;
-
-import com.ctre.phoenix6.CANBus;
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.NetworkTableEvent;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import static frc.robot.Constants.SwerveConstants.DRIVE_D;
-import static frc.robot.Constants.SwerveConstants.DRIVE_I;
-import static frc.robot.Constants.SwerveConstants.DRIVE_P;
-import static frc.robot.Constants.SwerveConstants.DRIVE_S;
-import static frc.robot.Constants.SwerveConstants.DRIVE_V;
-import static frc.robot.Constants.SwerveConstants.STEER_D;
-import static frc.robot.Constants.SwerveConstants.STEER_S;
-import static frc.robot.Constants.SwerveConstants.STEER_I;
-import static frc.robot.Constants.SwerveConstants.STEER_P;
+import org.littletonrobotics.junction.Logger;
 
 public class KrakenSwerveModule {
+    private final ModuleIO io;
+    private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
+    private final String name;
+    private final double offsetRads;
 
-    private final DriveMotor driveMotor;
-    private final SteerMotor steerMotor;
-
-    private int drivePort;
-    private int steerPort;
-
-    private int driveIndex;
-    private int steerIndex;
-
-    private double offsetRads = 0;
-
-    /**
-     * Constructs a Swerve Module.
-     *
-     * @param drivePort The CAN ID of the drive motor
-     * @param steerPort The CAN ID of the steer motor
-     * @param offsetRads The offset of the absolute encoder (0 for our cases)
-     * @param canCoderPort The CAN ID of the steer motor encoder
-     */
-    public KrakenSwerveModule(int drivePort, int steerPort, double offsetRads, int canCoderPort, CANBus canivore) {
-
-        this.drivePort = drivePort;
-        this.steerPort = steerPort;
-
-        // very efficient code VVV :)
-        driveIndex = drivePort / 2;// this means that drive must be even IE: 0, 2, 4, 8
-        steerIndex = (steerPort - 1) / 2;// this means that steer must be odd IE: 1,3,5,7
-
-        // steerMotor = new SteerMotor(steerPort, canCoderPort);
-        // steerMotor.configPID(
-        // STEER_P[steerIndex],
-        // STEER_I[steerIndex],
-        // STEER_D[steerIndex],
-        // STEER_FF[steerIndex]
-        // );
-        steerMotor = new SteerMotor(steerPort, canCoderPort, canivore);
-        steerMotor.configPID(
-            STEER_P[steerIndex],
-            STEER_I[steerIndex],
-            STEER_D[steerIndex],
-            STEER_S[steerIndex]);
-
-        driveMotor = new DriveMotor(drivePort, canivore);
-        driveMotor.configPID(
-            DRIVE_P[driveIndex],
-            DRIVE_I[driveIndex],
-            DRIVE_D[driveIndex],
-            DRIVE_S[driveIndex],
-            DRIVE_V[driveIndex]);
-
+    public KrakenSwerveModule(String name, ModuleIO io, double offsetRads) {
+        this.name = name;
+        this.io = io;
         this.offsetRads = offsetRads;
     }
 
-    /**
-     * Sets the un optimized desired state of this swerve module through setting the
-     * PID targets.
-     *
-     * @param state The desired SwerveModuleState
-     */
+    public void periodic() {
+        io.updateInputs(inputs);
+        Logger.processInputs("Swerve/" + name, inputs);
+    }
+
     public void setDesiredState(SwerveModuleState state) {
         Rotation2d currentAngle = getWrappedAngle();
         state.optimize(currentAngle);
@@ -89,149 +31,37 @@ public class KrakenSwerveModule {
         double angleErrorRads = state.angle.minus(currentAngle).getRadians();
         double targetVelocity = state.speedMetersPerSecond * Math.cos(angleErrorRads);
 
-        driveMotor.setVelocity(targetVelocity);
-        steerMotor.setPosition(targetAngleRads);
-
+        io.setDriveVelocity(targetVelocity);
+        io.setSteerPosition(targetAngleRads);
     }
 
-    /**
-     * Sets the optimized desired state of this swerve module through setting the
-     * PID targets.
-     *
-     * @param state The desired SwerveModuleState
-     */
-    // public void setOptomizedDesiredState(SwerveModuleState state) {
-    // driveMotor.setVelocity(state.speedMetersPerSecond);
-    // steerMotor.setPosition(state.angle.getRadians());
-    // }
-
-    /**
-     * Gets the current state of the swerve module.
-     *
-     * @return The current SwerveModulePosition of this module
-     */
     public SwerveModulePosition getPosition() {
-        return new SwerveModulePosition(
-            driveMotor.getDistance(),
-            getWrappedAngle());
+        return new SwerveModulePosition(inputs.drivePositionMeters, getWrappedAngle());
     }
 
-    /**
-     * Gets the state of the swerve module (drive velo in m/s + angle 0-1 )
-     * 
-     * @return state of the module (velo is m/s and angle is double from 0 to 1)
-     */
     public SwerveModuleState getState() {
-        return new SwerveModuleState(
-            driveMotor.getVelocity(),
-            getWrappedAngle());
+        return new SwerveModuleState(inputs.driveVelocityMPS, getWrappedAngle());
     }
 
-    /**
-     * Gets the current angle of the module.
-     *
-     * @return Wrapped angle in radians from -pi to pi
-     */
     public Rotation2d getWrappedAngle() {
-        // returned a 0-1 value
-        double angleDouble = steerMotor.getPosition(); // 0..1
-
-        double angleRads = (2.0 * Math.PI * angleDouble) - Math.PI; // [-π, π)
-        // double wrappedAngleRads = MathUtil.angleModulus(angleRads + offsetRads);
+        double angleRads = (2.0 * Math.PI * inputs.steerPositionRotations) - Math.PI;
         angleRads = MathUtil.angleModulus(angleRads + offsetRads);
-
         return new Rotation2d(angleRads);
     }
 
-    /**
-     * Gets the distance the distance driven by the drive motor.
-     *
-     * @return The distance driven in meters.
-     */
-    public double getDistanceDriven() {
-        return driveMotor.getDistance();
-    }
-
-    /**
-     * Gets the velocity of the drive motor.
-     *
-     * @return The velocity of the drive motor in meters/second.
-     */
-    public double getDriveVelocity() {
-        return driveMotor.getVelocity();
-    }
-
-    public void steerDebug() {
-        NetworkTableInstance.getDefault().getTable("steerDebug")
-            .getEntry(steerPort + "PIDF")
-            .setDoubleArray(
-                new double[] {
-                        STEER_P[steerIndex],
-                        STEER_I[steerIndex],
-                        STEER_D[steerIndex],
-                        STEER_S[steerIndex]
-                });
-        NetworkTableInstance.getDefault().getTable("steerDebug").addListener(
-            steerPort + "PIDF",
-            EnumSet.of(NetworkTableEvent.Kind.kValueAll),
-            (table, key, event) -> {
-                double[] pidf = event.valueData.value.getDoubleArray();
-                steerMotor.configPID(pidf[0], pidf[1], pidf[2], pidf[3]);
-            });
-    }
-
-    public void driveDebug() {
-        NetworkTableInstance.getDefault().getTable("driveDebug")
-            .getEntry(drivePort + "PIDSV")
-            .setDoubleArray(
-                new double[] {
-                        DRIVE_P[driveIndex],
-                        DRIVE_I[driveIndex],
-                        DRIVE_D[driveIndex],
-                        DRIVE_S[driveIndex],
-                        DRIVE_V[driveIndex]
-                });
-        NetworkTableInstance.getDefault().getTable("driveDebug").addListener(
-            drivePort + "PIDSV",
-            EnumSet.of(NetworkTableEvent.Kind.kValueAll),
-            (table, key, event) -> {
-                double[] pidsv = event.valueData.value.getDoubleArray();
-                driveMotor.configPID(pidsv[0], pidsv[1], pidsv[2], pidsv[3], pidsv[4]);
-            });
-    }
-
-    /**
-     * Publishes drive motor statistics to NetworkTables
-     */
-    public void publishDriveStats() {
-        driveMotor.publishStats();
-    }
-
-    /**
-     * Sets the steer motor cruise velocity for MotionMagic.
-     * 
-     * @param velocity cruise velocity in rotations per second
-     */
-    public void setSteerCruiseVelocity(double velocity) {
-        steerMotor.setCruiseVelocity(velocity);
-    }
-
     public double getSteerVelocityRPM() {
-        return steerMotor.getVelocityRPM();
+        return inputs.steerVelocityRPM;
     }
 
-    /**
-     * Publishes steer motor statistics to NetworkTables
-     */
-    public void publishSteerStats() {
-        // steerMotor.publishStats();
+    public void setSteerCruiseVelocity(double velocity) {
+        io.setSteerCruiseVelocity(velocity);
     }
 
-    /**
-     * Logs all motor statistics to data log
-     */
-    public void logStats() {
-        driveMotor.logStats();
-        steerMotor.logStats();
+    public void configureDrivePID(double p, double i, double d, double s, double v) {
+        io.configureDrivePID(p, i, d, s, v);
+    }
+
+    public void configureSteerPID(double p, double i, double d, double s) {
+        io.configureSteerPID(p, i, d, s);
     }
 }
