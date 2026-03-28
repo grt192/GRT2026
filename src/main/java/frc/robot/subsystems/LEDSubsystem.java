@@ -20,6 +20,12 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class LEDSubsystem extends SubsystemBase {
+    public enum LedStrip {
+        LEFT_HOPPER,
+        RIGHT_HOPPER,
+        ALL
+    }
+
     private CANdle candle;
     private CANdleConfiguration candleConfig;
 
@@ -38,6 +44,22 @@ public class LEDSubsystem extends SubsystemBase {
                 .withStatusLedWhenActive(StatusLedWhenActiveValue.Disabled));
 
         candle.getConfigurator().apply(candleConfig);
+    }
+
+    private int[] getLEDIndexes(LedStrip strip) {
+        switch (strip) {
+            case LEFT_HOPPER:
+                return LEFT_HOPPER_START_END;
+            case RIGHT_HOPPER:
+                return RIGHT_HOPPER_START_END;
+            case ALL:
+                return new int[] {
+                        Math.min(LEFT_HOPPER_START_END[0], RIGHT_HOPPER_START_END[0]),
+                        Math.max(LEFT_HOPPER_START_END[1], RIGHT_HOPPER_START_END[1])
+                };
+            default:
+                return new int[] {0, 0};
+        }
     }
     }
 }
