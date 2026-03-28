@@ -29,6 +29,9 @@ public class LEDSubsystem extends SubsystemBase {
     private CANdle candle;
     private CANdleConfiguration candleConfig;
 
+    private int[] LEFT_HOPPER_START_END = {0, 13};
+    private int[] RIGHT_HOPPER_START_END = {14, 28};
+
     public LEDSubsystem(CANBus can) {
         candle = new CANdle(0, can);
 
@@ -61,5 +64,43 @@ public class LEDSubsystem extends SubsystemBase {
                 return new int[] {0, 0};
         }
     }
+
+    public void strobeLED(LedStrip strip, RGBWColor color) {
+        int[] indexes = getLEDIndexes(strip);
+        StrobeAnimation anim = new StrobeAnimation(indexes[0], indexes[1]);
+
+        candle.setControl(anim.withSlot(strip.ordinal()).withColor(color));
+    }
+
+    public void fadeLED(LedStrip strip, RGBWColor color) {
+        int[] indexes = getLEDIndexes(strip);
+        SingleFadeAnimation anim = new SingleFadeAnimation(indexes[0], indexes[1]);
+
+        candle.setControl(anim.withSlot(strip.ordinal()).withColor(color));
+    }
+
+    public void setLEDColor(LedStrip strip, RGBWColor color) {
+        int[] indexes = getLEDIndexes(strip);
+        SolidColor anim = new SolidColor(indexes[0], indexes[1]);
+
+        candle.setControl(anim.withColor(color));
+    }
+
+    public void bounceLED(LedStrip strip, RGBWColor color, int windowSize) {
+        int[] indexes = getLEDIndexes(strip);
+        LarsonAnimation anim = new LarsonAnimation(indexes[0], indexes[1]);
+
+        candle.setControl(anim.withSlot(strip.ordinal())
+            .withColor(color)
+            .withBounceMode(LarsonBounceValue.Front)
+            .withSize(windowSize));
+    }
+
+    public void loadingLED(LedStrip strip, RGBWColor color, Time fillTime) {
+        int[] indexes = getLEDIndexes(strip);
+        ColorFlowAnimation anim = new ColorFlowAnimation(indexes[0], indexes[1]);
+
+        Frequency animationFrequency = fillTime.div(indexes[1] - indexes[0] + 1).asFrequency(); // Divide fill time by led count (max - min + 1) to find time per LED then flip to a frequency
+        candle.setControl(anim.withSlot(strip.ordinal()).withColor(color).withFrameRate(animationFrequency));
     }
 }
