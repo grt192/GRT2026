@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.configs.CANdleFeaturesConfigs;
 import com.ctre.phoenix6.configs.LEDConfigs;
 import com.ctre.phoenix6.controls.ColorFlowAnimation;
+import com.ctre.phoenix6.controls.EmptyAnimation;
 import com.ctre.phoenix6.controls.LarsonAnimation;
 import com.ctre.phoenix6.controls.SingleFadeAnimation;
 import com.ctre.phoenix6.controls.SolidColor;
@@ -65,7 +66,16 @@ public class LEDSubsystem extends SubsystemBase {
         }
     }
 
+    private void clearStrip(LedStrip strip) {
+        if (strip == LedStrip.ALL) {
+            candle.setControl(new EmptyAnimation(LedStrip.LEFT_HOPPER.ordinal()));
+            candle.setControl(new EmptyAnimation(LedStrip.RIGHT_HOPPER.ordinal()));
+        }
+        candle.setControl(new EmptyAnimation(strip.ordinal()));
+    }
+
     public void strobeLED(LedStrip strip, RGBWColor color) {
+        clearStrip(strip);
         int[] indexes = getLEDIndexes(strip);
         StrobeAnimation anim = new StrobeAnimation(indexes[0], indexes[1]);
 
@@ -73,6 +83,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public void fadeLED(LedStrip strip, RGBWColor color) {
+        clearStrip(strip);
         int[] indexes = getLEDIndexes(strip);
         SingleFadeAnimation anim = new SingleFadeAnimation(indexes[0], indexes[1]);
 
@@ -80,6 +91,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public void setLEDColor(LedStrip strip, RGBWColor color) {
+        clearStrip(strip);
         int[] indexes = getLEDIndexes(strip);
         SolidColor anim = new SolidColor(indexes[0], indexes[1]);
 
@@ -87,6 +99,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public void bounceLED(LedStrip strip, RGBWColor color, int windowSize) {
+        clearStrip(strip);
         int[] indexes = getLEDIndexes(strip);
         LarsonAnimation anim = new LarsonAnimation(indexes[0], indexes[1]);
 
@@ -97,6 +110,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public void loadingLED(LedStrip strip, RGBWColor color, Time fillTime) {
+        clearStrip(strip);
         int[] indexes = getLEDIndexes(strip);
         ColorFlowAnimation anim = new ColorFlowAnimation(indexes[0], indexes[1]);
 
