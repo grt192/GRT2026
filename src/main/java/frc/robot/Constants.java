@@ -390,6 +390,9 @@ public final class Constants {
 
     public static class LEDConstants {
         public static final int candleID = 30; // TODO: Add actual value when assigned
+
+        public static final int[] LEFT_HOPPER_START_END = {0, 13};
+        public static final int[] RIGHT_HOPPER_START_END = {14, 28};
     }
 
     public static class DebugConstants {

@@ -19,6 +19,7 @@ import com.ctre.phoenix6.signals.StripTypeValue;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.LEDConstants;
 
 public class LEDSubsystem extends SubsystemBase {
     public enum LedStrip {
@@ -29,9 +30,6 @@ public class LEDSubsystem extends SubsystemBase {
 
     private CANdle candle;
     private CANdleConfiguration candleConfig;
-
-    private int[] LEFT_HOPPER_START_END = {0, 13};
-    private int[] RIGHT_HOPPER_START_END = {14, 28};
 
     public LEDSubsystem(CANBus can) {
         candle = new CANdle(0, can);
@@ -53,13 +51,13 @@ public class LEDSubsystem extends SubsystemBase {
     private int[] getLEDIndexes(LedStrip strip) {
         switch (strip) {
             case LEFT_HOPPER:
-                return LEFT_HOPPER_START_END;
+                return LEDConstants.LEFT_HOPPER_START_END;
             case RIGHT_HOPPER:
-                return RIGHT_HOPPER_START_END;
+                return LEDConstants.RIGHT_HOPPER_START_END;
             case ALL:
                 return new int[] {
-                        Math.min(LEFT_HOPPER_START_END[0], RIGHT_HOPPER_START_END[0]),
-                        Math.max(LEFT_HOPPER_START_END[1], RIGHT_HOPPER_START_END[1])
+                        Math.min(LEDConstants.LEFT_HOPPER_START_END[0], LEDConstants.RIGHT_HOPPER_START_END[0]),
+                        Math.max(LEDConstants.LEFT_HOPPER_START_END[1], LEDConstants.RIGHT_HOPPER_START_END[1])
                 };
             default:
                 return new int[] {0, 0};
