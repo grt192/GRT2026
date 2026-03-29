@@ -20,6 +20,7 @@ import frc.robot.subsystems.shooter.towerRollers;
 
 import frc.robot.subsystems.Intake.PivotIntakeSubsystem;
 import frc.robot.subsystems.hopper.HopperSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.FMS.FieldManagementSubsystem;
 import frc.robot.subsystems.Vision.FuelDetectionSubsystem;
 // import frc.robot.Constants.IntakeConstants;
@@ -88,6 +89,7 @@ public class RobotContainer {
     private final Field2d m_field = new Field2d();
     private final flywheel flywheelSubsystem = new flywheel(mechCAN);
     private final hood hoodSubsystem = new hood(mechCAN);
+    private final LEDSubsystem ledSubsystem = new LEDSubsystem(mechCAN);
     private boolean shootSeq = false;
 
     private final FuelDetectionSubsystem fuelDetectionSubsystem = new FuelDetectionSubsystem(VisionConstants.fuelDetectionConfig);
@@ -138,6 +140,13 @@ public class RobotContainer {
      */
 
     private void configureBindings() {
+        new Trigger(() -> !swerveCANConnected() && !mechCANConnected())
+            .whileTrue(ledSubsystem.canDisconnectedAlertCommand(LEDSubsystem.CANAlert.BOTH));
+        new Trigger(() -> !swerveCANConnected() && mechCANConnected())
+            .whileTrue(ledSubsystem.canDisconnectedAlertCommand(LEDSubsystem.CANAlert.SWERVE));
+        new Trigger(() -> swerveCANConnected() && !mechCANConnected())
+            .whileTrue(ledSubsystem.canDisconnectedAlertCommand(LEDSubsystem.CANAlert.MECH));
+
         /*
          * Driving -- One joystick controls translation, the other rotation. If the
          * robot-relative button is held down,

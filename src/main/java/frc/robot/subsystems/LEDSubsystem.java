@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Second;
+import java.util.function.BooleanSupplier;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.configs.CANdleFeaturesConfigs;
@@ -19,7 +19,11 @@ import com.ctre.phoenix6.signals.StatusLedWhenActiveValue;
 import com.ctre.phoenix6.signals.StripTypeValue;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LEDConstants;
 
@@ -28,6 +32,12 @@ public class LEDSubsystem extends SubsystemBase {
         LEFT_HOPPER,
         RIGHT_HOPPER,
         ALL
+    }
+
+    public enum CANAlert {
+        SWERVE,
+        MECH,
+        BOTH
     }
 
     private CANdle candle;
@@ -88,17 +98,17 @@ public class LEDSubsystem extends SubsystemBase {
         });
     }
 
-    public SingleFadeAnimation getFadeControl(LedStrip strip, RGBWColor color) {
+    public SingleFadeAnimation getSingleFadeControl(LedStrip strip, RGBWColor color) {
         int[] indexes = getLEDIndexes(strip);
         return new SingleFadeAnimation(indexes[0], indexes[1])
             .withSlot(strip.ordinal())
             .withColor(color);
     }
 
-    public Command fadeCommand(LedStrip strip, RGBWColor color) {
+    public Command singleFadeCommand(LedStrip strip, RGBWColor color) {
         return this.runOnce(() -> {
             clearStrip(strip);
-            candle.setControl(getFadeControl(strip, color));
+            candle.setControl(getSingleFadeControl(strip, color));
         });
     }
 
@@ -160,4 +170,31 @@ public class LEDSubsystem extends SubsystemBase {
             candle.setControl(getLoadingControl(strip, color, fillTime));
         }).withTimeout(fillTime).andThen(solidColorCommand(strip, color));
     }
+
+    public Command getDisabledCommand(boolean mechCanHealthy, boolean swerveCanHealthy) {
+        boolean bothFucked = !mechCanHealthy && !swerveCanHealthy;
+        if (bothFucked) {
+            return bounceCommand(LedStrip.ALL, LEDConstants.WHITE, 5);
+        } else if (!mechCanHealthy) {
+            return bounceCommand(LedStrip.ALL, LEDConstants.ORANGE, 5);
+        } else if (!swerveCanHealthy) {
+            return bounceCommand(LedStrip.ALL, LEDConstants.PURPLE, 5);
+        } else { // ALL GOOD
+            Alliance allianceSide = DriverStation.getAlliance().orElse(Alliance.Red); // Defaults to red (GRT Color!!!)
+            RGBWColor allianceColor = switch (allianceSide) {
+                case Red -> LEDConstants.RED_ALLIANCE;
+                case Blue -> LEDConstants.BLUE_ALLIANCE;
+            };
+            return singleFadeCommand(LedStrip.ALL, allianceColor);
+        }
+    }
+
+    public Command idleAnimation(BooleanSupplier mechCanHealth, BooleanSupplier swerveCanHealth) {
+        return new ConditionalCommand(
+            Commands.none(), // if enabled; TODO: implement in match behavior. Vans idea to display hub status
+            getDisabledCommand(false, false), // If not enabled
+            DriverStation::isEnabled).ignoringDisable(true).repeatedly();
+    }
+
+
 }
