@@ -146,4 +146,8 @@ public class HopperSubsystem extends SubsystemBase {
     public void periodic() {
         krakenMotor.updateDashboard();
     }
+
+    public boolean allConnected() {
+        return krakenMotor.isConnected();
+    }
 }

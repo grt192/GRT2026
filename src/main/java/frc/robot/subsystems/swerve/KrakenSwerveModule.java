@@ -234,4 +234,8 @@ public class KrakenSwerveModule {
         driveMotor.logStats();
         steerMotor.logStats();
     }
+
+    public boolean allConnected() {
+        return driveMotor.isConnected() && steerMotor.isConnected();
+    }
 }

@@ -198,4 +198,8 @@ public class PivotIntakeSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("Intake/Pivot/Motor/Connected", pivotMotor.isConnected());
         SmartDashboard.putBoolean("Intake/Pivot/CANcoder/Connected", canCoder.getPosition().getStatus().isOK());
     }
+
+    public boolean allConnected() {
+        return pivotMotor.isConnected() && canCoder.isConnected();
+    }
 }

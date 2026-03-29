@@ -159,4 +159,8 @@ public class RollerIntakeSubsystem extends SubsystemBase {
     public boolean isRunning() {
         return Math.abs(rollerMotor.get()) > 0.01;
     }
+
+    public boolean allConnected() {
+        return rollerMotor.isConnected();
+    }
 }

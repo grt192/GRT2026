@@ -141,5 +141,7 @@ public class hood extends SubsystemBase {
         // hoodMotor.isConnected());
     }
 
-
+    public boolean allConnected() {
+        return hoodMotor.isConnected() && hoodCoder.isConnected();
+    }
 }

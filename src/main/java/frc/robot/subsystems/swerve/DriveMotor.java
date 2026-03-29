@@ -356,4 +356,7 @@ public class DriveMotor {
         temperatureLogEntry.append(getTemperature(), ts);
     }
 
+    public boolean isConnected() {
+        return motor.isConnected();
+    }
 }

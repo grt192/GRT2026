@@ -176,4 +176,7 @@ public class flywheel extends SubsystemBase {
             upperMotor.isConnected());
     }
 
+    public boolean allConnected() {
+        return upperMotor.isConnected() && secondMotor.isConnected();
+    }
 }

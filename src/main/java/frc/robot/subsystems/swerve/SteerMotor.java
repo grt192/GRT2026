@@ -331,4 +331,8 @@ public class SteerMotor extends SubsystemBase {
         mmConfigs.MotionMagicAcceleration = acceleration;
         motor.getConfigurator().apply(mmConfigs);
     }
+
+    public boolean isConnected() {
+        return motor.isConnected() && cancoder.isConnected();
+    }
 }

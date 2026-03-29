@@ -648,4 +648,12 @@ public class SwerveSubsystem extends SubsystemBase {
             },
             this);
     }
+
+    public boolean allConnected() {
+        return pidgey.isConnected()
+            && frontLeftModule.allConnected()
+            && frontRightModule.allConnected()
+            && backLeftModule.allConnected()
+            && backRightModule.allConnected();
+    }
 }
