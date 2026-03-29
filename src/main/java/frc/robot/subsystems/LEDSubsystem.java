@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Second;
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.configs.CANdleFeaturesConfigs;
@@ -81,7 +82,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command strobeCommand(LedStrip strip, RGBWColor color) {
-        return runOnce(() -> {
+        return this.runOnce(() -> {
             clearStrip(strip);
             candle.setControl(getStrobeControl(strip, color));
         });
@@ -95,7 +96,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command fadeCommand(LedStrip strip, RGBWColor color) {
-        return runOnce(() -> {
+        return this.runOnce(() -> {
             clearStrip(strip);
             candle.setControl(getFadeControl(strip, color));
         });
@@ -108,7 +109,7 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command solidColorCommand(LedStrip strip, RGBWColor color) {
-        return runOnce(() -> {
+        return this.runOnce(() -> {
             clearStrip(strip);
             candle.setControl(getSolidColorControl(strip, color));
         });
@@ -124,9 +125,23 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command bounceCommand(LedStrip strip, RGBWColor color, int windowSize) {
-        return runOnce(() -> {
+        return this.runOnce(() -> {
             clearStrip(strip);
             candle.setControl(getBounceControl(strip, color, windowSize));
+        });
+    }
+
+    public ColorFlowAnimation getFlowControl(LedStrip strip, RGBWColor color) {
+        int[] indexes = getLEDIndexes(strip);
+        return new ColorFlowAnimation(indexes[0], indexes[1])
+            .withSlot(strip.ordinal())
+            .withColor(color);
+    }
+
+    public Command flowingCommand(LedStrip strip, RGBWColor color) {
+        return this.runOnce(() -> {
+            clearStrip(strip);
+            candle.setControl(getFlowControl(strip, color));
         });
     }
 
@@ -140,9 +155,9 @@ public class LEDSubsystem extends SubsystemBase {
     }
 
     public Command loadingCommand(LedStrip strip, RGBWColor color, Time fillTime) {
-        return runOnce(() -> {
+        return this.runOnce(() -> {
             clearStrip(strip);
             candle.setControl(getLoadingControl(strip, color, fillTime));
-        });
+        }).withTimeout(fillTime).andThen(solidColorCommand(strip, color));
     }
 }
