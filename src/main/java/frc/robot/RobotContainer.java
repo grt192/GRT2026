@@ -331,4 +331,16 @@ public class RobotContainer {
 
     }
 
+    private boolean swerveCANConnected() {
+        return swerveSubsystem == null || swerveSubsystem.allConnected();
+    }
+
+    private boolean mechCANConnected() {
+        return intakeSubsystem.allConnected()
+            && pivotIntake.allConnected()
+            && HopperSubsystem.allConnected()
+            && flywheelSubsystem.allConnected()
+            && hoodSubsystem.allConnected()
+            && tower.allConnected();
+    }
 }
