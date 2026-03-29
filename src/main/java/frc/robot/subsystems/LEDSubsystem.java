@@ -18,6 +18,7 @@ import com.ctre.phoenix6.signals.StatusLedWhenActiveValue;
 import com.ctre.phoenix6.signals.StripTypeValue;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LEDConstants;
 
@@ -72,47 +73,76 @@ public class LEDSubsystem extends SubsystemBase {
         candle.setControl(new EmptyAnimation(strip.ordinal()));
     }
 
-    public void strobeLED(LedStrip strip, RGBWColor color) {
-        clearStrip(strip);
+    public StrobeAnimation getStrobeControl(LedStrip strip, RGBWColor color) {
         int[] indexes = getLEDIndexes(strip);
-        StrobeAnimation anim = new StrobeAnimation(indexes[0], indexes[1]);
-
-        candle.setControl(anim.withSlot(strip.ordinal()).withColor(color));
+        return new StrobeAnimation(indexes[0], indexes[1])
+            .withSlot(strip.ordinal())
+            .withColor(color);
     }
 
-    public void fadeLED(LedStrip strip, RGBWColor color) {
-        clearStrip(strip);
-        int[] indexes = getLEDIndexes(strip);
-        SingleFadeAnimation anim = new SingleFadeAnimation(indexes[0], indexes[1]);
-
-        candle.setControl(anim.withSlot(strip.ordinal()).withColor(color));
+    public Command strobeCommand(LedStrip strip, RGBWColor color) {
+        return runOnce(() -> {
+            clearStrip(strip);
+            candle.setControl(getStrobeControl(strip, color));
+        });
     }
 
-    public void setLEDColor(LedStrip strip, RGBWColor color) {
-        clearStrip(strip);
+    public SingleFadeAnimation getFadeControl(LedStrip strip, RGBWColor color) {
         int[] indexes = getLEDIndexes(strip);
-        SolidColor anim = new SolidColor(indexes[0], indexes[1]);
-
-        candle.setControl(anim.withColor(color));
+        return new SingleFadeAnimation(indexes[0], indexes[1])
+            .withSlot(strip.ordinal())
+            .withColor(color);
     }
 
-    public void bounceLED(LedStrip strip, RGBWColor color, int windowSize) {
-        clearStrip(strip);
-        int[] indexes = getLEDIndexes(strip);
-        LarsonAnimation anim = new LarsonAnimation(indexes[0], indexes[1]);
+    public Command fadeCommand(LedStrip strip, RGBWColor color) {
+        return runOnce(() -> {
+            clearStrip(strip);
+            candle.setControl(getFadeControl(strip, color));
+        });
+    }
 
-        candle.setControl(anim.withSlot(strip.ordinal())
+    public SolidColor getSolidColorControl(LedStrip strip, RGBWColor color) {
+        int[] indexes = getLEDIndexes(strip);
+        return new SolidColor(indexes[0], indexes[1])
+            .withColor(color);
+    }
+
+    public Command solidColorCommand(LedStrip strip, RGBWColor color) {
+        return runOnce(() -> {
+            clearStrip(strip);
+            candle.setControl(getSolidColorControl(strip, color));
+        });
+    }
+
+    public LarsonAnimation getBounceControl(LedStrip strip, RGBWColor color, int windowSize) {
+        int[] indexes = getLEDIndexes(strip);
+        return new LarsonAnimation(indexes[0], indexes[1])
+            .withSlot(strip.ordinal())
             .withColor(color)
             .withBounceMode(LarsonBounceValue.Front)
-            .withSize(windowSize));
+            .withSize(windowSize);
     }
 
-    public void loadingLED(LedStrip strip, RGBWColor color, Time fillTime) {
-        clearStrip(strip);
-        int[] indexes = getLEDIndexes(strip);
-        ColorFlowAnimation anim = new ColorFlowAnimation(indexes[0], indexes[1]);
+    public Command bounceCommand(LedStrip strip, RGBWColor color, int windowSize) {
+        return runOnce(() -> {
+            clearStrip(strip);
+            candle.setControl(getBounceControl(strip, color, windowSize));
+        });
+    }
 
-        Frequency animationFrequency = fillTime.div(indexes[1] - indexes[0] + 1).asFrequency(); // Divide fill time by led count (max - min + 1) to find time per LED then flip to a frequency
-        candle.setControl(anim.withSlot(strip.ordinal()).withColor(color).withFrameRate(animationFrequency));
+    public ColorFlowAnimation getLoadingControl(LedStrip strip, RGBWColor color, Time fillTime) {
+        int[] indexes = getLEDIndexes(strip);
+        Frequency animationFrequency = fillTime.div(indexes[1] - indexes[0] + 1).asFrequency();
+        return new ColorFlowAnimation(indexes[0], indexes[1])
+            .withSlot(strip.ordinal())
+            .withColor(color)
+            .withFrameRate(animationFrequency);
+    }
+
+    public Command loadingCommand(LedStrip strip, RGBWColor color, Time fillTime) {
+        return runOnce(() -> {
+            clearStrip(strip);
+            candle.setControl(getLoadingControl(strip, color, fillTime));
+        });
     }
 }
