@@ -10,7 +10,7 @@ import static edu.wpi.first.units.Units.Rotations;
 
 
 import com.ctre.phoenix6.signals.InvertedValue;
-
+import com.ctre.phoenix6.signals.RGBWColor;
 // Units library:
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -393,6 +393,13 @@ public final class Constants {
 
         public static final int[] LEFT_HOPPER_START_END = {0, 13};
         public static final int[] RIGHT_HOPPER_START_END = {14, 28};
+
+        public static final RGBWColor PURPLE = new RGBWColor(128, 0, 255, 0); // TODO: TEST (Googled)
+        public static final RGBWColor ORANGE = new RGBWColor(255, 165, 0, 0); // TODO: TEST (Googled)
+        public static final RGBWColor WHITE = new RGBWColor(255, 255, 255, 255);
+
+        public static final RGBWColor RED_ALLIANCE = new RGBWColor(255, 0, 0, 0); // TODD: Maybe find better shade
+        public static final RGBWColor BLUE_ALLIANCE = new RGBWColor(0, 0, 255, 0); // TODD: Maybe find better shade
     }
 
     public static class DebugConstants {
