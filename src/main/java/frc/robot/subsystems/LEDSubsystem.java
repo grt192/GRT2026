@@ -98,17 +98,17 @@ public class LEDSubsystem extends SubsystemBase {
         });
     }
 
-    public SingleFadeAnimation getSingleFadeControl(LedStrip strip, RGBWColor color) {
+    public SingleFadeAnimation getFadeControl(LedStrip strip, RGBWColor color) {
         int[] indexes = getLEDIndexes(strip);
         return new SingleFadeAnimation(indexes[0], indexes[1])
             .withSlot(strip.ordinal())
             .withColor(color);
     }
 
-    public Command singleFadeCommand(LedStrip strip, RGBWColor color) {
+    public Command fadeCommand(LedStrip strip, RGBWColor color) {
         return this.runOnce(() -> {
             clearStrip(strip);
-            candle.setControl(getSingleFadeControl(strip, color));
+            candle.setControl(getFadeControl(strip, color));
         });
     }
 
@@ -185,7 +185,7 @@ public class LEDSubsystem extends SubsystemBase {
                 case Red -> LEDConstants.RED_ALLIANCE;
                 case Blue -> LEDConstants.BLUE_ALLIANCE;
             };
-            return singleFadeCommand(LedStrip.ALL, allianceColor);
+            return fadeCommand(LedStrip.ALL, allianceColor);
         }
     }
 

@@ -140,12 +140,6 @@ public class RobotContainer {
      */
 
     private void configureBindings() {
-        new Trigger(() -> !swerveCANConnected() && !mechCANConnected())
-            .whileTrue(ledSubsystem.canDisconnectedAlertCommand(LEDSubsystem.CANAlert.BOTH));
-        new Trigger(() -> !swerveCANConnected() && mechCANConnected())
-            .whileTrue(ledSubsystem.canDisconnectedAlertCommand(LEDSubsystem.CANAlert.SWERVE));
-        new Trigger(() -> swerveCANConnected() && !mechCANConnected())
-            .whileTrue(ledSubsystem.canDisconnectedAlertCommand(LEDSubsystem.CANAlert.MECH));
 
         /*
          * Driving -- One joystick controls translation, the other rotation. If the
