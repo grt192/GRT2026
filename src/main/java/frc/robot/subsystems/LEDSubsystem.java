@@ -34,12 +34,6 @@ public class LEDSubsystem extends SubsystemBase {
         ALL
     }
 
-    public enum CANAlert {
-        SWERVE,
-        MECH,
-        BOTH
-    }
-
     private CANdle candle;
     private CANdleConfiguration candleConfig;
 
@@ -80,8 +74,9 @@ public class LEDSubsystem extends SubsystemBase {
         if (strip == LedStrip.ALL) {
             candle.setControl(new EmptyAnimation(LedStrip.LEFT_HOPPER.ordinal()));
             candle.setControl(new EmptyAnimation(LedStrip.RIGHT_HOPPER.ordinal()));
+        } else {
+            candle.setControl(new EmptyAnimation(strip.ordinal()));
         }
-        candle.setControl(new EmptyAnimation(strip.ordinal()));
     }
 
     public StrobeAnimation getStrobeControl(LedStrip strip, RGBWColor color) {
@@ -192,9 +187,7 @@ public class LEDSubsystem extends SubsystemBase {
     public Command idleAnimation(BooleanSupplier mechCanHealth, BooleanSupplier swerveCanHealth) {
         return new ConditionalCommand(
             Commands.none(), // if enabled; TODO: implement in match behavior. Vans idea to display hub status
-            getDisabledCommand(false, false), // If not enabled
+            this.defer(() -> getDisabledCommand(mechCanHealth.getAsBoolean(), swerveCanHealth.getAsBoolean())), // If not enabled
             DriverStation::isEnabled).ignoringDisable(true).repeatedly();
     }
-
-
 }
