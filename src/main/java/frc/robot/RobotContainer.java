@@ -276,6 +276,43 @@ public class RobotContainer {
                 // Options button = reset pose to starting position (in front of red hub)
                 driveController.options()
                     .onTrue(Commands.runOnce(() -> swerveSubsystem.resetToStartingPosition(), swerveSubsystem));
+
+                // Triangle = turn 90 degrees CCW (for testing gyro/rotation direction)
+                // Uses a simple inline command to test the swerve rotation directly
+                driveController.triangle()
+                    .onTrue(Commands.runOnce(() -> {
+                        // Capture target angle at button press
+                        double targetAngle = swerveSubsystem.getRobotPosition().getRotation().getDegrees() + 90;
+                        SmartDashboard.putNumber("Test/TargetAngle", targetAngle);
+                    }).andThen(
+                        Commands.run(() -> {
+                            double targetAngle = SmartDashboard.getNumber("Test/TargetAngle", 0);
+                            double currentAngle = swerveSubsystem.getRobotPosition().getRotation().getDegrees();
+                            double error = targetAngle - currentAngle;
+                            // Normalize error to -180 to 180
+                            while (error > 180)
+                                error -= 360;
+                            while (error < -180)
+                                error += 360;
+                            // Use AUTO_ROTATION_KP to test the same gain as PathPlanner
+                            double rotationPower = error * 0.02; // Simple P control for testing
+                            rotationPower = MathUtil.clamp(rotationPower, -0.5, 0.5);
+                            swerveSubsystem.setDrivePowers(0, 0, rotationPower);
+                            SmartDashboard.putNumber("Test/CurrentAngle", currentAngle);
+                            SmartDashboard.putNumber("Test/Error", error);
+                            SmartDashboard.putNumber("Test/RotationPower", rotationPower);
+                        }, swerveSubsystem)
+                            .until(() -> {
+                                double targetAngle = SmartDashboard.getNumber("Test/TargetAngle", 0);
+                                double currentAngle = swerveSubsystem.getRobotPosition().getRotation().getDegrees();
+                                double error = targetAngle - currentAngle;
+                                while (error > 180)
+                                    error -= 360;
+                                while (error < -180)
+                                    error += 360;
+                                return Math.abs(error) < 3.0; // Within 3 degrees
+                            }))
+                        .andThen(Commands.runOnce(() -> swerveSubsystem.setDrivePowers(0, 0, 0), swerveSubsystem)));
             }
         }
 

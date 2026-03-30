@@ -130,12 +130,11 @@ public class SwerveSubsystem extends SubsystemBase {
         initAccelValues();
     }
 
-    private final PIDController ROTATION_PID = new PIDController(4.0, 0.0, 0.2);
+    private final PIDController ROTATION_PID = new PIDController(ROTATION_KP, ROTATION_KI, ROTATION_KD);
 
     @Override
     public void periodic() {
-        // update the poseestimator with curent gyro reading
-        // Pigeon is flipped, so negate to match vision coordinate system
+        // Update the pose estimator with current gyro reading
         Rotation2d gyroAngle = getGyroHeading();
         estimatedPose = poseEstimator.update(
             gyroAngle,
@@ -175,6 +174,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
         publishStats();
         logStats();
+
+        // Update current limits from NetworkTables (only first module needed since they share NT entries)
+        frontLeftModule.updateCurrentLimits();
+        frontRightModule.updateCurrentLimits();
+        backLeftModule.updateCurrentLimits();
+        backRightModule.updateCurrentLimits();
     }
 
     /**
@@ -413,10 +418,10 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
 
-    /** Gets the gyro heading. */
+    /** Gets the gyro heading. Negated to match WPILib CCW-positive convention. */
     private Rotation2d getGyroHeading() {
-        return Rotation2d.fromDegrees(pidgey.getYaw().getValueAsDouble()); // Might need to flip depending on the robot
-                                                                           // setup
+        // Pigeon2 is CW-positive, WPILib expects CCW-positive, so negate
+        return Rotation2d.fromDegrees(-pidgey.getYaw().getValueAsDouble());
     }
 
     /**
@@ -429,10 +434,8 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void resetPose(Pose2d currentPose) {
-        // Pigeon is flipped, so negate to match vision coordinate system
-        Rotation2d gyroAngle = getGyroHeading().times(-1);
         poseEstimator.resetPosition(
-            gyroAngle,
+            getGyroHeading(),
             getModulePositions(),
             currentPose);
     }
@@ -633,10 +636,9 @@ public class SwerveSubsystem extends SubsystemBase {
             this::getRobotRelativeChassisSpeeds,
             (speeds, feedforwards) -> setRobotRelativeDrivePowers(speeds),
 
-            // 1.25/3.25
             new PPHolonomicDriveController(
-                new PIDConstants(1.38, 0, 0.0),
-                new PIDConstants(3.3, 0.0, 0.0)),
+                new PIDConstants(AUTO_TRANSLATION_KP, AUTO_TRANSLATION_KI, AUTO_TRANSLATION_KD),
+                new PIDConstants(AUTO_ROTATION_KP, AUTO_ROTATION_KI, AUTO_ROTATION_KD)),
 
             config,
             () -> {
