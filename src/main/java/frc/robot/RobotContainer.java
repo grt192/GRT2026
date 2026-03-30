@@ -140,6 +140,7 @@ public class RobotContainer {
      */
 
     private void configureBindings() {
+        ledSubsystem.setDefaultCommand(ledSubsystem.idleAnimation(this::mechCANConnected, this::swerveCANConnected));
 
         /*
          * Driving -- One joystick controls translation, the other rotation. If the
