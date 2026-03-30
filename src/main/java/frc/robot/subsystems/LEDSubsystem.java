@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.configs.CANdleFeaturesConfigs;
 import com.ctre.phoenix6.configs.LEDConfigs;
 import com.ctre.phoenix6.controls.ColorFlowAnimation;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.EmptyAnimation;
 import com.ctre.phoenix6.controls.LarsonAnimation;
 import com.ctre.phoenix6.controls.SingleFadeAnimation;
@@ -166,28 +167,34 @@ public class LEDSubsystem extends SubsystemBase {
         }).withTimeout(fillTime).andThen(solidColorCommand(strip, color));
     }
 
-    public Command getDisabledCommand(boolean mechCanHealthy, boolean swerveCanHealthy) {
-        boolean bothFucked = !mechCanHealthy && !swerveCanHealthy;
-        if (bothFucked) {
-            return bounceCommand(LedStrip.ALL, LEDConstants.WHITE, 5);
-        } else if (!mechCanHealthy) {
-            return bounceCommand(LedStrip.ALL, LEDConstants.ORANGE, 5);
-        } else if (!swerveCanHealthy) {
-            return bounceCommand(LedStrip.ALL, LEDConstants.PURPLE, 5);
-        } else { // ALL GOOD
-            Alliance allianceSide = DriverStation.getAlliance().orElse(Alliance.Red); // Defaults to red (GRT Color!!!)
-            RGBWColor allianceColor = switch (allianceSide) {
-                case Red -> LEDConstants.RED_ALLIANCE;
-                case Blue -> LEDConstants.BLUE_ALLIANCE;
-            };
-            return fadeCommand(LedStrip.ALL, allianceColor);
-        }
+    public Command disabledIdleAnimation(BooleanSupplier mechCanHealthy, BooleanSupplier swerveCanHealthy) {
+        return this.runOnce(() -> {
+            ControlRequest ledControl;
+            boolean bothFucked = !mechCanHealthy.getAsBoolean() && !swerveCanHealthy.getAsBoolean();
+            if (bothFucked) {
+                ledControl = getBounceControl(LedStrip.ALL, LEDConstants.WHITE, 5);
+            } else if (!mechCanHealthy.getAsBoolean()) {
+                ledControl = getBounceControl(LedStrip.ALL, LEDConstants.ORANGE, 5);
+            } else if (!swerveCanHealthy.getAsBoolean()) {
+                ledControl = getBounceControl(LedStrip.ALL, LEDConstants.PURPLE, 5);
+            } else { // ALL GOOD
+                Alliance allianceSide = DriverStation.getAlliance().orElse(Alliance.Red); // Defaults to red (GRT Color!!!)
+                RGBWColor allianceColor = switch (allianceSide) {
+                    case Red -> LEDConstants.RED_ALLIANCE;
+                    case Blue -> LEDConstants.BLUE_ALLIANCE;
+                };
+                ledControl = getFadeControl(LedStrip.ALL, allianceColor);
+            }
+
+            clearStrip(LedStrip.ALL);
+            candle.setControl(ledControl);
+        });
     }
 
     public Command idleAnimation(BooleanSupplier mechCanHealth, BooleanSupplier swerveCanHealth) {
         return new ConditionalCommand(
             Commands.none(), // if enabled; TODO: implement in match behavior. Vans idea to display hub status
-            this.defer(() -> getDisabledCommand(mechCanHealth.getAsBoolean(), swerveCanHealth.getAsBoolean())), // If not enabled
+            disabledIdleAnimation(mechCanHealth, swerveCanHealth), // If not enabled
             DriverStation::isEnabled).ignoringDisable(true).repeatedly();
     }
 }
