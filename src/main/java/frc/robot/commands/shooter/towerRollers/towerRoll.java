@@ -21,7 +21,8 @@ public class towerRoll extends Command {
 
     @Override
     public void execute() {
-        t.setManualControl(SmashAndShootConstants.TOWER_DUTY_CYCLE);
+        // t.setManualControl(SmashAndShootConstants.TOWER_DUTY_CYCLE);
+        t.setTower(TOWER_INTAKE.BALLUP);
         // t.setTower(TOWER_INTAKE.BALLUP);
         // if (fly.wantedVel() && hd.wantedAngl()) {
         // t.setTower(TOWER_INTAKE.BALLUP);

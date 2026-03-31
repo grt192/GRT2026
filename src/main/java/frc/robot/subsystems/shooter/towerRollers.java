@@ -36,11 +36,13 @@ public class towerRollers extends SubsystemBase {
     private DoubleSubscriber sub;
     private TalonFXConfiguration config = new TalonFXConfiguration();
     private Slot0Configs pidSlots = new Slot0Configs();
+    private double targetRPS = 0;
 
     public towerRollers(CANBus canBus) {
         krakenMotor = new LoggedTalon(TowerConstants.KRAKEN_CAN_ID, canBus);
         velocityControl = new MotionMagicVelocityTorqueCurrentFOC(0);
         dutyCycleControl = new DutyCycleOut(0);
+        targetRPS = TowerConstants.TARGET_RPS;
         configureMotor();
         configThruNT();
     }
@@ -85,7 +87,7 @@ public class towerRollers extends SubsystemBase {
         // tuneThis("A", val -> pidSlots.withKP(val), TowerConstants.KA);
         // tuneThis("G", val -> pidSlots.withKP(val), TowerConstants.KG);
         yoTuneThis("setDutyCyclePercent", val -> krakenMotor.setControl(new DutyCycleOut(val)), 0);
-        yoTuneThis("setMMVTCF", val -> krakenMotor.setControl(new VelocityVoltage(val)), 0);
+        yoTuneThis("setMMVTCF", val -> targetRPS = val, TowerConstants.TARGET_RPS);
 
         yoTuneThis("MMAccel", val -> config.MotionMagic.MotionMagicAcceleration = val, TowerConstants.MM_ACCEL);
         yoTuneThis("MMJerk", val -> config.MotionMagic.MotionMagicJerk = val, TowerConstants.MM_JERK);
@@ -124,10 +126,10 @@ public class towerRollers extends SubsystemBase {
     public void setTower(TOWER_INTAKE state) {
         switch (state) {
             case BALLUP:
-                krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(TowerConstants.TARGET_RPS));
+                krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(targetRPS));
                 break;
             case BALLDOWN:
-                krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(-TowerConstants.TARGET_RPS));
+                krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(-targetRPS));
                 break;
             case STOP:
                 krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(0.0));

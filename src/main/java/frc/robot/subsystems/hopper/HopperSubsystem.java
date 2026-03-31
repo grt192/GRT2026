@@ -37,11 +37,13 @@ public class HopperSubsystem extends SubsystemBase {
     private DoubleSubscriber sub;
     private TalonFXConfiguration config = new TalonFXConfiguration();
     private Slot0Configs pidSlots = new Slot0Configs();
+    private double targetRPS;
 
     public HopperSubsystem(CANBus canBus) {
         krakenMotor = new LoggedTalon(HopperConstants.KRAKEN_CAN_ID, canBus);
         velocityControl = new MotionMagicVelocityTorqueCurrentFOC(0);
         dutyCycleControl = new DutyCycleOut(0);
+        targetRPS = HopperConstants.TARGET_RPS;
         configureMotor();
         configThruNT();
     }
@@ -84,7 +86,7 @@ public class HopperSubsystem extends SubsystemBase {
         // tuneThis("A", val -> pidSlots.withKP(val), TowerConstants.KA);
         // tuneThis("G", val -> pidSlots.withKP(val), TowerConstants.KG);
         yoTuneThis("setDutyCyclePercent", val -> krakenMotor.setControl(dutyCycleControl.withOutput(val)), 0);
-        yoTuneThis("setMMVTCF", val -> krakenMotor.setControl(new VelocityVoltage(val)), 0);
+        yoTuneThis("setMMVTCF", val -> targetRPS = val, HopperConstants.TARGET_RPS);
 
         yoTuneThis("MMAccel", val -> config.MotionMagic.MotionMagicAcceleration = val, 100);
         yoTuneThis("MMJerk", val -> config.MotionMagic.MotionMagicJerk = val, 1000);
@@ -126,10 +128,10 @@ public class HopperSubsystem extends SubsystemBase {
         switch (state) {
             case BALLIN:
                 setManualControl(1);
-                krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(HopperConstants.TARGET_RPS));
+                krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(targetRPS));
                 break;
             case BALLOUT:
-                krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(-HopperConstants.TARGET_RPS));
+                krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(-targetRPS));
                 break;
             case STOP:
                 krakenMotor.setControl(new MotionMagicVelocityTorqueCurrentFOC(0.0));
