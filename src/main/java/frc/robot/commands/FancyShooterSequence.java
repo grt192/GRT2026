@@ -1,13 +1,19 @@
 package frc.robot.commands;
 
+import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.SmashAndShootConstants;
+import frc.robot.subsystems.FMS.FieldManagementSubsystem;
 import frc.robot.subsystems.Intake.PivotIntakeSubsystem;
+import frc.robot.subsystems.shooter.Intertable;
 import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.subsystems.shooter.hood;
 import frc.robot.subsystems.shooter.towerRollers;
 import frc.robot.subsystems.hopper.HopperSubsystem;
-
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructSubscriber;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -23,32 +29,49 @@ public class FancyShooterSequence extends Command {
     private final towerRollers tower;
     private final HopperSubsystem hopper;
     private final PivotIntakeSubsystem pivotIntake;
-
+    private final FieldManagementSubsystem fms;
     private final Timer pivotTimer = new Timer();
     private boolean pivotIsIn = true;
     private boolean initialDelayDone = false;
+    private Intertable tableThing = new Intertable();
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("SWERVE_TABLE_NAME");
+    StructSubscriber<Pose2d> poseSub = table.getStructTopic("estimatedPose", Pose2d.struct).subscribe(new Pose2d());
 
     public FancyShooterSequence(
         flywheel fly,
         hood hood,
         towerRollers tower,
         HopperSubsystem hopper,
-
+        FieldManagementSubsystem fms,
         PivotIntakeSubsystem pivotIntake) {
         this.fly = fly;
         this.hd = hood;
         this.tower = tower;
         this.hopper = hopper;
         this.pivotIntake = pivotIntake;
+        this.fms = fms;
+
 
         addRequirements(fly, hood, tower, hopper, pivotIntake);
     }
 
     @Override
     public void initialize() {
+        double RPS = 0.0;
+        double ang = 0.0;
+
         // Start ramping flywheel and moving hood to position
-        fly.shoot(SmashAndShootConstants.FLYWHEEL_RPS);
-        hd.setHoodAngle(SmashAndShootConstants.HOOD_POSITION);
+        if (fms.isRedAlliance()) {
+            RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
+            ang = tableThing.getAngle(poseSub.get().getTranslation().getDistance(AlignConstants.RED_AIM_TOP));
+
+        } else {
+            RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
+            ang = tableThing.getAngle(poseSub.get().getTranslation().getDistance(AlignConstants.RED_AIM_TOP));
+
+        }
+        fly.shoot(RPS);
+        hd.setHoodAngle(ang);
         // Start with pivot out, wait 5 seconds before first toggle
         pivotIsIn = false;
         initialDelayDone = false;
@@ -59,8 +82,6 @@ public class FancyShooterSequence extends Command {
     @Override
     public void execute() {
         // Keep commanding flywheel and hood targets
-        fly.shoot(SmashAndShootConstants.FLYWHEEL_RPS);
-        hd.setHoodAngle(SmashAndShootConstants.HOOD_POSITION);
 
         // Wait 5 seconds before first pivot up, then toggle every 2 seconds
         if (!initialDelayDone) {
