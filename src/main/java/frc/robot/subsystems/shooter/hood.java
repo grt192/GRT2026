@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import frc.robot.Constants.ShooterConstants;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -24,6 +25,7 @@ public class hood extends SubsystemBase {
     private final CANcoder hoodCoder;
 
     private double wantedAngle = 0.1;
+    private Timer stopHoodTimer = new Timer();
 
     private double commandedDutyCycle = 0.0;
     private static final String LOG_PREFIX = "Hood/";
@@ -32,6 +34,8 @@ public class hood extends SubsystemBase {
         hoodMotor = new LoggedTalon(ShooterConstants.Hood.MOTOR_ID, cn);
         hoodCoder = new CANcoder(ShooterConstants.Hood.ENCODER_ID, cn);
         config();
+
+        stopHoodTimer.reset();
     }
 
     public void config() {
@@ -76,6 +80,12 @@ public class hood extends SubsystemBase {
             hoodMotor.setControl(focThing.withPosition(rotationAngle));
             System.out.println("HoodControl" + rotationAngle);
             wantedAngle = rotationAngle;
+            if (wantedAngle == 0.0) {
+                stopHoodTimer.restart();
+            } else {
+                stopHoodTimer.stop();
+                stopHoodTimer.reset();
+            }
         }
     }
 
@@ -107,6 +117,12 @@ public class hood extends SubsystemBase {
     public void periodic() {
         hoodMotor.updateDashboard();
         sendData();
+
+        if (stopHoodTimer.hasElapsed(2)) {
+            hoodSpeed(0);
+            stopHoodTimer.stop();
+            stopHoodTimer.reset();
+        }
     }
 
 

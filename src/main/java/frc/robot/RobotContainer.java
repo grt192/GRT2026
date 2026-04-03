@@ -239,18 +239,14 @@ public class RobotContainer {
 
             // ==================== MANUAL SHOOTER SEQUENCE (SMASH AND SHOOT) ====================
             // Square (mech) = manual shooter sequence
-            mechController.square().onTrue(new FancyAutoShootCommand(mechController.square(),
+            mechController.square().onTrue(new FancyAutoShootCommand(
                 swerveSubsystem,
                 fmsSubsystem,
                 flywheelSubsystem,
                 hoodSubsystem,
                 tower,
                 HopperSubsystem,
-                pivotIntake)
-                    .andThen(Commands.waitSeconds(2))
-                    .andThen(Commands.runOnce(() -> {
-                        hoodSubsystem.hoodSpeed(0);
-                    }, hoodSubsystem)));
+                pivotIntake));
 
             // Joystick movement cancels itum4 yn
             // Trigger joystickMoved = new Trigger(() -> Math.abs(driveController.getForwardPower()) > 0.1 ||
