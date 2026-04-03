@@ -42,8 +42,8 @@ public class FancyShooterSequence extends Command {
         hood hood,
         towerRollers tower,
         HopperSubsystem hopper,
-        FieldManagementSubsystem fms,
-        PivotIntakeSubsystem pivotIntake) {
+        PivotIntakeSubsystem pivotIntake,
+        FieldManagementSubsystem fms) {
         this.fly = fly;
         this.hd = hood;
         this.tower = tower;
