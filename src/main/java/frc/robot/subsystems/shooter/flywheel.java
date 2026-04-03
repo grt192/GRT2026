@@ -24,6 +24,7 @@ import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import static edu.wpi.first.units.Units.Volts;
 import java.util.EnumSet;
@@ -69,7 +70,7 @@ public class flywheel extends SubsystemBase {
         yoTuneThis("Pids/S", val -> pidSlots.withKS(val), ShooterConstants.Flywheel.KS);
         yoTuneThis("Pids/V", val -> pidSlots.withKV(val), ShooterConstants.Flywheel.KV);
         yoTuneThis("setDutyCyclePercent", val -> upperMotor.setControl(new DutyCycleOut(val)), 0);
-        yoTuneThis("setMMVTCF", val -> targetRPS = val, 0);
+        yoTuneThis("setMMVTCF", val -> upperMotor.setControl(new VelocityTorqueCurrentFOC(val)), 0);
 
         yoTuneThis("MMAccel", val -> cfg.MotionMagic.MotionMagicAcceleration = val, ShooterConstants.Flywheel.MM_ACCEL);
         yoTuneThis("MMJerk", val -> cfg.MotionMagic.MotionMagicJerk = val, ShooterConstants.Flywheel.MM_JERK);
@@ -110,7 +111,7 @@ public class flywheel extends SubsystemBase {
 
     public void shoot(double rps) {
         // wantedVe = rps;
-        upperMotor.setControl(spinner.withVelocity(targetRPS));
+        upperMotor.setControl(spinner.withVelocity(rps));
     }
 
     public double getRPS() {
