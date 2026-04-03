@@ -5,6 +5,9 @@ import java.util.function.BooleanSupplier;
 
 import com.ctre.phoenix6.signals.RGBWColor;
 
+import static edu.wpi.first.units.Units.Seconds;
+
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -27,7 +30,7 @@ public class RioLEDSubsystem extends SubsystemBase {
 
     @FunctionalInterface
     private interface AnimationUpdater {
-        void update(double time);
+        void update(Time time);
     }
 
     private final AddressableLED led;
@@ -90,7 +93,8 @@ public class RioLEDSubsystem extends SubsystemBase {
         return this.runOnce(() -> {
             int[] indexes = getLEDIndexes(strip);
             currentAnimation = (time) -> {
-                boolean on = ((int) (time * 10)) % 2 == 0;
+                double t = time.in(Seconds);
+                boolean on = ((int) (t * 10)) % 2 == 0;
                 if (on) {
                     setSolidRange(indexes[0], indexes[1], color);
                 } else {
@@ -104,7 +108,8 @@ public class RioLEDSubsystem extends SubsystemBase {
         return this.runOnce(() -> {
             int[] indexes = getLEDIndexes(strip);
             currentAnimation = (time) -> {
-                double brightness = (Math.sin(time * 2 * Math.PI * 0.5) + 1.0) / 2.0;
+                double t = time.in(Seconds);
+                double brightness = (Math.sin(t * 2 * Math.PI * 0.5) + 1.0) / 2.0;
                 for (int i = indexes[0]; i <= indexes[1]; i++) {
                     setRGB(i,
                         (int) (color.Red * brightness),
@@ -120,13 +125,14 @@ public class RioLEDSubsystem extends SubsystemBase {
             int[] indexes = getLEDIndexes(strip);
             int stripLen = indexes[1] - indexes[0] + 1;
             currentAnimation = (time) -> {
+                double t = time.in(Seconds);
                 clearRange(indexes[0], indexes[1]);
                 int range = stripLen - windowSize;
                 if (range <= 0) {
                     setSolidRange(indexes[0], indexes[1], color);
                     return;
                 }
-                double pos = (Math.sin(time * 2 * Math.PI * 0.75) + 1.0) / 2.0 * range;
+                double pos = (Math.sin(t * 2 * Math.PI * 0.75) + 1.0) / 2.0 * range;
                 int start = indexes[0] + (int) pos;
                 int end = Math.min(start + windowSize - 1, indexes[1]);
                 setSolidRange(start, end, color);
@@ -139,7 +145,8 @@ public class RioLEDSubsystem extends SubsystemBase {
             int[] indexes = getLEDIndexes(strip);
             int stripLen = indexes[1] - indexes[0] + 1;
             currentAnimation = (time) -> {
-                int offset = ((int) (time * 10)) % stripLen;
+                double t = time.in(Seconds);
+                int offset = ((int) (t * 10)) % stripLen;
                 for (int i = indexes[0]; i <= indexes[1]; i++) {
                     double brightness = (double) ((i - indexes[0] + offset) % stripLen) / stripLen;
                     setRGB(i,
@@ -233,13 +240,14 @@ public class RioLEDSubsystem extends SubsystemBase {
         return this.run(() -> {
             int[] indexes = getLEDIndexes(strip);
             currentAnimation = (time) -> {
+                double t = time.in(Seconds);
                 if (isHubActive()) {
                     setSolidRange(indexes[0], indexes[1], LEDConstants.GREEN);
                 } else {
                     double timeUntilActive = getTimeUntilNextShift();
                     if (timeUntilActive <= 5.0) {
                         // Blink red when hub activates within 5 seconds
-                        boolean on = ((int) (time * 6)) % 2 == 0; // 3 Hz blink
+                        boolean on = ((int) (t * 6)) % 2 == 0; // 3 Hz blink
                         if (on) {
                             setSolidRange(indexes[0], indexes[1], LEDConstants.RED_ALLIANCE);
                         } else {
@@ -283,7 +291,7 @@ public class RioLEDSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (currentAnimation != null) {
-            currentAnimation.update(Timer.getFPGATimestamp());
+            currentAnimation.update(Seconds.of(Timer.getFPGATimestamp()));
             led.setData(buffer);
         }
     }
