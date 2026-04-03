@@ -110,7 +110,9 @@ public class flywheel extends SubsystemBase {
 
     public void shoot(double rps) {
         // wantedVe = rps;
-        upperMotor.setControl(spinner.withVelocity(targetRPS));
+        // upperMotor.setControl(spinner.withVelocity(targetRPS));
+        upperMotor.setControl(spinner.withVelocity(rps));
+
     }
 
     public double getRPS() {
