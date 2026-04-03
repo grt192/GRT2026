@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.ShooterConstants.Hood;
 import frc.robot.Constants.SmashAndShootConstants;
 import frc.robot.subsystems.Intake.PivotIntakeSubsystem;
 import frc.robot.subsystems.shooter.flywheel;
@@ -92,7 +93,7 @@ public class ManualShooterSequence extends Command {
     @Override
     public void end(boolean interrupted) {
         fly.dontShoot();
-        hd.setHoodAngle(0);
+        hd.setHoodAngle(Hood.LOWER_ANGLE_LIMIT);
         tower.setManualControl(0);
         hopper.setManualControl(0);
         pivotIntake.setPosition(IntakeConstants.PIVOT_OUT_POS);
