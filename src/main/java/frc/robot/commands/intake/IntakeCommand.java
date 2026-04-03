@@ -18,13 +18,13 @@ public class IntakeCommand extends Command {
 
     @Override
     public void initialize() {
-        pivotIntake.setPosition(IntakeConstants.PIVOT_IN_POS);
+        pivotIntake.setPosition(IntakeConstants.PIVOT_OUT_POS);
         rollerIntake.runIn();
     }
 
     @Override
     public void execute() {
-        pivotIntake.setPosition(IntakeConstants.PIVOT_IN_POS);
+        pivotIntake.setPosition(IntakeConstants.PIVOT_OUT_POS);
         rollerIntake.runIn();
     }
 
