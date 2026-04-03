@@ -439,6 +439,7 @@ public final class Constants {
         public static final RGBWColor PURPLE = new RGBWColor(128, 0, 255, 0); // TODO: TEST (Googled)
         public static final RGBWColor ORANGE = new RGBWColor(255, 165, 0, 0); // TODO: TEST (Googled)
         public static final RGBWColor WHITE = new RGBWColor(255, 255, 255, 255);
+        public static final RGBWColor GREEN = new RGBWColor(0, 255, 0, 0);
 
         public static final RGBWColor RED_ALLIANCE = new RGBWColor(255, 0, 0, 0); // TODD: Maybe find better shade
         public static final RGBWColor BLUE_ALLIANCE = new RGBWColor(0, 0, 255, 0); // TODD: Maybe find better shade
