@@ -232,6 +232,6 @@ public class PivotIntakeSubsystem extends SubsystemBase {
     }
 
     public boolean allConnected() {
-        return pivotMotor.isConnected() && canCoder.isConnected();
+        return pivotMotor.isConnected(); // && canCoder.isConnected();
     }
 }
