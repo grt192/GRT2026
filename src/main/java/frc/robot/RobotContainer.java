@@ -30,6 +30,7 @@ import frc.robot.Constants.TowerConstants.TOWER_INTAKE;
 import frc.robot.Constants.HopperConstants.HOPPER_INTAKE;
 import frc.robot.commands.AutonShooterSequence;
 import frc.robot.commands.CycleManualShooterSequence;
+import frc.robot.commands.FancyAutoShootCommand;
 import frc.robot.commands.ManualShooterSequence;
 import frc.robot.commands.ShooterSequence;
 import frc.robot.commands.cycleBallsCommand;
@@ -238,22 +239,15 @@ public class RobotContainer {
 
             // ==================== MANUAL SHOOTER SEQUENCE (SMASH AND SHOOT) ====================
             // Square (mech) = manual shooter sequence
-            mechController.square().toggleOnTrue(
-                Commands.defer(
-                    () -> new ManualShooterSequence(
-                        flywheelSubsystem,
-                        hoodSubsystem,
-                        tower,
-                        HopperSubsystem,
-                        pivotIntake),
-                    java.util.Set.of(
-                        flywheelSubsystem,
-                        hoodSubsystem,
-                        HopperSubsystem,
-                        tower,
-                        pivotIntake)));
+            mechController.square().toggleOnTrue(new FancyAutoShootCommand(swerveSubsystem,
+                fmsSubsystem,
+                flywheelSubsystem,
+                hoodSubsystem,
+                tower,
+                HopperSubsystem,
+                pivotIntake));
 
-            // Joystick movement cancels it
+            // Joystick movement cancels itum4 yn
             // Trigger joystickMoved = new Trigger(() -> Math.abs(driveController.getForwardPower()) > 0.1 ||
             // Math.abs(driveController.getLeftPower()) > 0.1 ||
             // Math.abs(driveController.getRotatePower()) > 0.1);
