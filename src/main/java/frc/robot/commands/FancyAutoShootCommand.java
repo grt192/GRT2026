@@ -30,7 +30,7 @@ public class FancyAutoShootCommand extends SequentialCommandGroup {
 
         aimToHub = new AimToHubCommand(swerveSubsystem, fms);
         addCommands(
-            aimToHub.createAimCommand(() -> false).raceWith(Commands.waitUntil(stop)),
-            new FancyShooterSequence(shooterFlywheel, shooterHood, tower, hopper, pivot, fms));
+            aimToHub.createAimCommand(() -> false),
+            new FancyShooterSequence(shooterFlywheel, shooterHood, tower, hopper, pivot, fms).raceWith(Commands.waitUntil(stop)));
     }
 }
