@@ -41,13 +41,6 @@ public class RioLEDSubsystem extends SubsystemBase {
         led.start();
     }
 
-    @Override
-    public void periodic() {
-        if (currentAnimation != null) {
-            currentAnimation.update(Timer.getFPGATimestamp());
-            led.setData(buffer);
-        }
-    }
 
     private int[] getLEDIndexes(LedStrip strip) {
         switch (strip) {
@@ -285,5 +278,13 @@ public class RioLEDSubsystem extends SubsystemBase {
             hubStatusCommand(LedStrip.ALL),
             disabledIdleAnimation(mechCanHealth, swerveCanHealth),
             DriverStation::isEnabled).ignoringDisable(true).repeatedly();
+    }
+
+    @Override
+    public void periodic() {
+        if (currentAnimation != null) {
+            currentAnimation.update(Timer.getFPGATimestamp());
+            led.setData(buffer);
+        }
     }
 }
