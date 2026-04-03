@@ -33,7 +33,6 @@ import frc.robot.commands.CycleManualShooterSequence;
 import frc.robot.commands.ManualShooterSequence;
 import frc.robot.commands.ShooterSequence;
 import frc.robot.commands.cycleBallsCommand;
-import frc.robot.commands.allign.AimToHubCommand;
 import frc.robot.commands.auton.ShootAndLeaveAuton;
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -94,8 +93,6 @@ public class RobotContainer {
     private final flywheel flywheelSubsystem = new flywheel(mechCAN);
     private final hood hoodSubsystem = new hood(mechCAN);
     private boolean shootSeq = false;
-
-    private AimToHubCommand aimToHub = new AimToHubCommand(swerveSubsystem, fmsSubsystem);
 
     private final FuelDetectionSubsystem fuelDetectionSubsystem = new FuelDetectionSubsystem(VisionConstants.fuelDetectionConfig);
 
@@ -254,8 +251,7 @@ public class RobotContainer {
                         hoodSubsystem,
                         HopperSubsystem,
                         tower,
-                        pivotIntake))
-                    .alongWith(aimToHub.createAimCommand(mechController.square())));
+                        pivotIntake)));
 
             // Joystick movement cancels it
             // Trigger joystickMoved = new Trigger(() -> Math.abs(driveController.getForwardPower()) > 0.1 ||
