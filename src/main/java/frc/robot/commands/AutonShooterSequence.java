@@ -36,7 +36,7 @@ public class AutonShooterSequence extends Command {
         this.hopper = hopper;
         this.pivotIntake = pivotIntake;
 
-        addRequirements(fly, hood, tower, hopper);
+        addRequirements(fly, hood, tower, hopper, pivotIntake);
     }
 
     @Override
@@ -76,5 +76,6 @@ public class AutonShooterSequence extends Command {
         hd.setHoodAngle(0);
         tower.setManualControl(0);
         hopper.setManualControl(0);
+        pivotIntake.stop();
     }
 }
