@@ -245,7 +245,11 @@ public class RobotContainer {
                 hoodSubsystem,
                 tower,
                 HopperSubsystem,
-                pivotIntake));
+                pivotIntake)
+                    .andThen(Commands.waitSeconds(2))
+                    .andThen(Commands.runOnce(() -> {
+                        hoodSubsystem.hoodSpeed(0);
+                    }, hoodSubsystem)));
 
             // Joystick movement cancels itum4 yn
             // Trigger joystickMoved = new Trigger(() -> Math.abs(driveController.getForwardPower()) > 0.1 ||
