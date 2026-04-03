@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import com.ctre.phoenix6.signals.RGBWColor;
@@ -173,6 +174,92 @@ public class RioLEDSubsystem extends SubsystemBase {
         }).withTimeout(fillTimeSeconds).andThen(solidColorCommand(strip, color));
     }
 
+    // Shift boundaries (matchTime counting down):
+    // >130: Transition (active), >105: Shift 1, >80: Shift 2, >55: Shift 3, >30: Shift 4, <=30: Endgame (active)
+    private static final double[] SHIFT_BOUNDARIES = {130, 105, 80, 55, 30};
+
+    private boolean isHubActive() {
+        Optional<Alliance> alliance = DriverStation.getAlliance();
+        if (alliance.isEmpty()) {
+            return false;
+        }
+        if (DriverStation.isAutonomousEnabled()) {
+            return true;
+        }
+        if (!DriverStation.isTeleopEnabled()) {
+            return false;
+        }
+
+        double matchTime = DriverStation.getMatchTime();
+        String gameData = DriverStation.getGameSpecificMessage();
+
+        if (gameData.isEmpty()) {
+            return true;
+        }
+
+        boolean redInactiveFirst;
+        switch (gameData.charAt(0)) {
+            case 'R' -> redInactiveFirst = true;
+            case 'B' -> redInactiveFirst = false;
+            default -> {
+                return true;
+            }
+        }
+
+        boolean shift1Active = switch (alliance.get()) {
+            case Red -> !redInactiveFirst;
+            case Blue -> redInactiveFirst;
+        };
+
+        if (matchTime > 130) {
+            return true; // Transition
+        } else if (matchTime > 105) {
+            return shift1Active; // Shift 1
+        } else if (matchTime > 80) {
+            return !shift1Active; // Shift 2
+        } else if (matchTime > 55) {
+            return shift1Active; // Shift 3
+        } else if (matchTime > 30) {
+            return !shift1Active; // Shift 4
+        } else {
+            return true; // Endgame
+        }
+    }
+
+    private double getTimeUntilNextShift() {
+        double matchTime = DriverStation.getMatchTime();
+        for (double boundary : SHIFT_BOUNDARIES) {
+            if (matchTime > boundary) {
+                return matchTime - boundary;
+            }
+        }
+        return 0;
+    }
+
+    public Command hubStatusCommand(LedStrip strip) {
+        return this.run(() -> {
+            int[] indexes = getLEDIndexes(strip);
+            currentAnimation = (time) -> {
+                if (isHubActive()) {
+                    setSolidRange(indexes[0], indexes[1], LEDConstants.GREEN);
+                } else {
+                    double timeUntilActive = getTimeUntilNextShift();
+                    if (timeUntilActive <= 5.0) {
+                        // Blink red when hub activates within 5 seconds
+                        boolean on = ((int) (time * 6)) % 2 == 0; // 3 Hz blink
+                        if (on) {
+                            setSolidRange(indexes[0], indexes[1], LEDConstants.RED_ALLIANCE);
+                        } else {
+                            clearRange(indexes[0], indexes[1]);
+                        }
+                    } else {
+                        setSolidRange(indexes[0], indexes[1], LEDConstants.RED_ALLIANCE);
+                    }
+                }
+            };
+        });
+    }
+
     public Command disabledIdleAnimation(BooleanSupplier mechCanHealthy, BooleanSupplier swerveCanHealthy) {
         return this.runOnce(() -> {
             boolean bothDown = !mechCanHealthy.getAsBoolean() && !swerveCanHealthy.getAsBoolean();
@@ -195,7 +282,7 @@ public class RioLEDSubsystem extends SubsystemBase {
 
     public Command idleAnimation(BooleanSupplier mechCanHealth, BooleanSupplier swerveCanHealth) {
         return new ConditionalCommand(
-            Commands.none(),
+            hubStatusCommand(LedStrip.ALL),
             disabledIdleAnimation(mechCanHealth, swerveCanHealth),
             DriverStation::isEnabled).ignoringDisable(true).repeatedly();
     }
