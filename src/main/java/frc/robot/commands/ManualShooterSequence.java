@@ -47,7 +47,7 @@ public class ManualShooterSequence extends Command {
     public void initialize() {
         // Start ramping flywheel and moving hood to position
         fly.shoot(SmashAndShootConstants.FLYWHEEL_RPS);
-        hd.setHoodAngle(SmashAndShootConstants.HOOD_POSITION);
+        // hd.setHoodAngle(SmashAndShootConstants.HOOD_POSITION);
         // Start with pivot out, wait 5 seconds before first toggle
         pivotIsIn = false;
         initialDelayDone = false;

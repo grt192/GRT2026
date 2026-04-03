@@ -252,7 +252,7 @@ public final class Constants {
 
             // Position control PID
             public static final double KP = 3000;
-            public static final double KI = 30;
+            public static final double KI = 0;
             public static final double KD = 60;
             public static final double KS = 120;
 
