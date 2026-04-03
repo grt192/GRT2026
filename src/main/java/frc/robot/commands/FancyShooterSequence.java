@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
  * Uses fixed hood position and flywheel RPS from SmashAndShootConstants.
  * Waits for flywheel and hood to reach targets before feeding balls.
  */
-public class ManualShooterSequence extends Command {
+public class FancyShooterSequence extends Command {
 
     private final flywheel fly;
     private final hood hd;
@@ -28,7 +28,7 @@ public class ManualShooterSequence extends Command {
     private boolean pivotIsIn = true;
     private boolean initialDelayDone = false;
 
-    public ManualShooterSequence(
+    public FancyShooterSequence(
         flywheel fly,
         hood hood,
         towerRollers tower,
