@@ -3,6 +3,8 @@ package frc.robot.commands;
 import java.util.function.BooleanSupplier;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.allign.AimToHubCommand;
@@ -18,7 +20,7 @@ public class FancyAutoShootCommand extends SequentialCommandGroup {
 
     private AimToHubCommand aimToHub;
 
-    public FancyAutoShootCommand(SwerveSubsystem swerveSubsystem,
+    public FancyAutoShootCommand(BooleanSupplier stop, SwerveSubsystem swerveSubsystem,
         FieldManagementSubsystem fms,
         flywheel shooterFlywheel,
         hood shooterHood,
@@ -28,7 +30,7 @@ public class FancyAutoShootCommand extends SequentialCommandGroup {
 
         aimToHub = new AimToHubCommand(swerveSubsystem, fms);
         addCommands(
-            aimToHub.createAimCommand(() -> false),
+            aimToHub.createAimCommand(() -> false).raceWith(Commands.waitUntil(stop)),
             new FancyShooterSequence(shooterFlywheel, shooterHood, tower, hopper, pivot, fms));
     }
 }

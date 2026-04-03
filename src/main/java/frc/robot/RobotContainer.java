@@ -239,7 +239,8 @@ public class RobotContainer {
 
             // ==================== MANUAL SHOOTER SEQUENCE (SMASH AND SHOOT) ====================
             // Square (mech) = manual shooter sequence
-            mechController.square().toggleOnTrue(new FancyAutoShootCommand(swerveSubsystem,
+            mechController.square().onTrue(new FancyAutoShootCommand(mechController.square(),
+                swerveSubsystem,
                 fmsSubsystem,
                 flywheelSubsystem,
                 hoodSubsystem,
