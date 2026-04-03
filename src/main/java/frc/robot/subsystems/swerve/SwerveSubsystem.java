@@ -75,6 +75,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private NetworkTable swerveTable;
 
     private StructArrayPublisher<SwerveModuleState> swerveStatesPublisher;
+    private StructArrayPublisher<SwerveModuleState> desiredStatesPublisher;
 
     private StructPublisher<Pose2d> estimatedPosePublisher;
     // private StructLogEntry<Pose2d> estimatedPoseLogEntry =
@@ -130,7 +131,7 @@ public class SwerveSubsystem extends SubsystemBase {
         initAccelValues();
     }
 
-    private final PIDController ROTATION_PID = new PIDController(4.0, 0.0, 0.2);
+    private final PIDController ROTATION_PID = new PIDController(ROTATION_KP, ROTATION_KI, ROTATION_KD);
 
     @Override
     public void periodic() {
@@ -175,6 +176,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
         publishStats();
         logStats();
+
+        // Update current limits from NetworkTables (only first module needed since they share NT entries)
+        frontLeftModule.updateCurrentLimits();
+        frontRightModule.updateCurrentLimits();
+        backLeftModule.updateCurrentLimits();
+        backRightModule.updateCurrentLimits();
     }
 
     /**
@@ -533,6 +540,9 @@ public class SwerveSubsystem extends SubsystemBase {
         swerveStatesPublisher = swerveTable.getStructArrayTopic(
             "SwerveStates", SwerveModuleState.struct).publish();
 
+        desiredStatesPublisher = swerveTable.getStructArrayTopic(
+            "DesiredStates", SwerveModuleState.struct).publish();
+
         estimatedPosePublisher = swerveTable.getStructTopic(
             "estimatedPose",
             Pose2d.struct).publish();
@@ -548,6 +558,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
         if (STATE_DEBUG || DRIVE_DEBUG || STEER_DEBUG) {
             swerveStatesPublisher.set(getModuleStates());
+            desiredStatesPublisher.set(states);
         }
 
         if (DRIVE_DEBUG) {
@@ -633,10 +644,9 @@ public class SwerveSubsystem extends SubsystemBase {
             this::getRobotRelativeChassisSpeeds,
             (speeds, feedforwards) -> setRobotRelativeDrivePowers(speeds),
 
-            // 1.25/3.25
             new PPHolonomicDriveController(
-                new PIDConstants(1.38, 0, 0.0),
-                new PIDConstants(3.3, 0.0, 0.0)),
+                new PIDConstants(AUTO_TRANSLATION_KP, AUTO_TRANSLATION_KI, AUTO_TRANSLATION_KD),
+                new PIDConstants(AUTO_ROTATION_KP, AUTO_ROTATION_KI, AUTO_ROTATION_KD)),
 
             config,
             () -> {

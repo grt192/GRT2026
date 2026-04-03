@@ -29,8 +29,10 @@ import frc.robot.subsystems.Vision.FuelDetectionSubsystem;
 import frc.robot.commands.vision.GetCameraDisplacement;
 import frc.robot.Constants.TowerConstants.TOWER_INTAKE;
 import frc.robot.Constants.HopperConstants.HOPPER_INTAKE;
+import frc.robot.commands.CycleManualShooterSequence;
 import frc.robot.commands.ManualShooterSequence;
 import frc.robot.commands.ShooterSequence;
+import frc.robot.commands.cycleBallsCommand;
 import frc.robot.commands.auton.ShootAndLeaveAuton;
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -59,6 +61,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -94,9 +97,12 @@ public class RobotContainer {
 
     private final FuelDetectionSubsystem fuelDetectionSubsystem = new FuelDetectionSubsystem(VisionConstants.fuelDetectionConfig);
 
-    // private final VisionSubsystem visionSubsystem1 = new VisionSubsystem(
-    // VisionConstants.cameraConfig11);
-
+    private final VisionSubsystem visionSubsystem1 = new VisionSubsystem(
+        VisionConstants.cameraConfig1);
+    private final VisionSubsystem visionSubsystem2 = new VisionSubsystem(
+        VisionConstants.cameraConfig2);
+    private final VisionSubsystem visionSubsystem3 = new VisionSubsystem(
+        VisionConstants.cameraConfig3);
     private UsbCamera camera1;
     private UsbCamera camera2;
     private VideoSink cameraServer;
@@ -157,9 +163,14 @@ public class RobotContainer {
                     // L1 = boost mode (higher accel/velocity)
                     swerveSubsystem.setBoostMode(driveController.getLeftBumper());
 
-                    // L2 = speed limit (harder press = slower)
-                    double leftTrigger = driveController.getLeftTriggerAxis();
-                    double speedLimit = 1.0 - leftTrigger;
+                    // R1 = slow mode (30% speed), L2 = variable speed limit
+                    double speedLimit;
+                    if (driveController.getRightBumper()) {
+                        speedLimit = Constants.SwerveConstants.SLOW_MODE_SPEED_LIMIT;
+                    } else {
+                        double leftTrigger = driveController.getLeftTriggerAxis();
+                        speedLimit = 1.0 - leftTrigger;
+                    }
                     swerveSubsystem.setDriveSpeedLimit(speedLimit);
 
                     swerveSubsystem.setDrivePowers(
@@ -190,19 +201,18 @@ public class RobotContainer {
         if (Constants.MECH_ENABLED) {
             // ==================== INTAKE ROLLER ====================
             // R1 (mech) = intake out, L1 (mech) = intake in (duty cycle control)
-            mechController.L1().whileTrue(Commands.run(() -> intakeSubsystem.runInDutyCycle(), intakeSubsystem));
-            mechController.R1().whileTrue(Commands.run(() -> intakeSubsystem.runOutDutyCycle(), intakeSubsystem));
+            mechController.L1().whileTrue(Commands.run(() -> intakeSubsystem.runIn(), intakeSubsystem));
+            mechController.R1().whileTrue(Commands.run(() -> intakeSubsystem.runOut(), intakeSubsystem));
             intakeSubsystem.setDefaultCommand(Commands.run(() -> intakeSubsystem.stop(), intakeSubsystem));
 
             // ==================== INTAKE PIVOT ====================
             // D-pad left = pivot down (timed), D-pad right = pivot up (timed)
-            mechController.povLeft().onTrue(new PivotDownTimedCommand(pivotIntake));
-            mechController.povRight().onTrue(new PivotUpTimedCommand(pivotIntake));
-            pivotIntake.setDefaultCommand(Commands.run(() -> pivotIntake.stop(), pivotIntake));
+            mechController.povLeft().whileTrue(new PivotOutCommand(pivotIntake));
+            mechController.povRight().whileTrue(new PivotInCommand(pivotIntake));
 
             // L2 (mech) = spin spindexer (hopper) at max RPM and tower at 0.7 duty cycle
             mechController.L2().whileTrue(Commands.run(() -> {
-                HopperSubsystem.setManualControl(1.0); // Max duty cycle for spindexer
+                HopperSubsystem.setManualControl(-1.0); // Max duty cycle for spindexer
                 tower.setManualControl(0.7); // 0.7 duty cycle for tower
             }, HopperSubsystem, tower));
             HopperSubsystem.setDefaultCommand(Commands.run(() -> HopperSubsystem.setManualControl(0), HopperSubsystem));
@@ -228,21 +238,21 @@ public class RobotContainer {
              */
 
             // ==================== MANUAL SHOOTER SEQUENCE (SMASH AND SHOOT) ====================
-            // R1 (drive) = manual shooter sequence, any other button cancels
-            // mechController.square().toggleOnTrue(
-            // Commands.defer(
-            // () -> new ShooterSequence(
-            // flywheelSubsystem,
-            // hoodSubsystem,
-            // tower,
-            // HopperSubsystem,
-            // intakeSubsystem),
-            // java.util.Set.of(
-            // flywheelSubsystem,
-            // hoodSubsystem,
-            // HopperSubsystem,
-            // tower,
-            // intakeSubsystem)));
+            // Square (mech) = manual shooter sequence
+            mechController.square().toggleOnTrue(
+                Commands.defer(
+                    () -> new ManualShooterSequence(
+                        flywheelSubsystem,
+                        hoodSubsystem,
+                        tower,
+                        HopperSubsystem,
+                        pivotIntake),
+                    java.util.Set.of(
+                        flywheelSubsystem,
+                        hoodSubsystem,
+                        HopperSubsystem,
+                        tower,
+                        pivotIntake)));
 
             // Joystick movement cancels it
             // Trigger joystickMoved = new Trigger(() -> Math.abs(driveController.getForwardPower()) > 0.1 ||
@@ -275,6 +285,14 @@ public class RobotContainer {
                 }
             }, hoodSubsystem));
 
+            // Cross = cycle shooter (hold to run, release to stop)
+            mechController.cross().whileTrue(new CycleManualShooterSequence(
+                flywheelSubsystem,
+                hoodSubsystem,
+                tower,
+                HopperSubsystem,
+                pivotIntake));
+
             // Swerve-dependent drive controller commands
             if (Constants.SWERVE_ENABLED && swerveSubsystem != null) {
                 // Options button = reset pose to starting position (in front of red hub)
@@ -305,10 +323,19 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Selector", autoChooser);
     }
 
-    // public Command getAutonomousCommand() {
-    // // return new PathPlannerAuto("auton1");
-    // return new ShootAndLeaveAuton(swerveSubsystem, flywheelSubsystem, hoodSubsystem, HopperSubsystem, tower, pivotIntake, intakeSubsystem);
-    // }
+    public Command getAutonomousCommand() {
+        // return new PathPlannerAuto("auton1");
+        // return new ShootAndLeaveAuton(swerveSubsystem, flywheelSubsystem, hoodSubsystem, HopperSubsystem, tower, pivotIntake, intakeSubsystem);
+
+        // Run ManualShooterSequence for 10 seconds
+        return new ManualShooterSequence(
+            flywheelSubsystem,
+            hoodSubsystem,
+            tower,
+            HopperSubsystem,
+            pivotIntake).withTimeout(10);
+
+    }
 
     /**
      * Called when teleop starts to reset driver heading with 90 degree offset.
@@ -318,12 +345,21 @@ public class RobotContainer {
             swerveSubsystem.resetDriverHeadingOffset90();
         }
     }
+
+    /**
+     * Called when autonomous starts to zero the pivot encoder.
+     */
+    public void onAutonInit() {
+        pivotIntake.zeroEncoder();
+    }
     // return new ShootAndLeaveAuton(swerveSubsystem, flywheelSubsystem, hoodSubsystem, HopperSubsystem, tower, pivotIntake);
     // }
 
     // vision shit
     public void visionStuff() {
-        // visionSubsystem1.setInterface(swerveSubsystem::addVisionMeasurements);
+        visionSubsystem1.setInterface(swerveSubsystem::addVisionMeasurements);
+        visionSubsystem2.setInterface(swerveSubsystem::addVisionMeasurements);
+        visionSubsystem3.setInterface(swerveSubsystem::addVisionMeasurements);
 
         // CommandScheduler.getInstance().schedule(
         // new GetCameraDisplacement(visionSubsystem1,

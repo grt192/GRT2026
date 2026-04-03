@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import frc.robot.Constants.CycleShooterConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.SmashAndShootConstants;
 import frc.robot.subsystems.Intake.PivotIntakeSubsystem;
@@ -13,10 +14,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Manual shooter sequence - no auto-aim.
- * Uses fixed hood position and flywheel RPS from SmashAndShootConstants.
+ * Uses fixed hood position and flywheel RPS from CycleShooterConstants.
  * Waits for flywheel and hood to reach targets before feeding balls.
  */
-public class ManualShooterSequence extends Command {
+public class CycleManualShooterSequence extends Command {
 
     private final flywheel fly;
     private final hood hd;
@@ -28,7 +29,7 @@ public class ManualShooterSequence extends Command {
     private boolean pivotIsIn = true;
     private boolean initialDelayDone = false;
 
-    public ManualShooterSequence(
+    public CycleManualShooterSequence(
         flywheel fly,
         hood hood,
         towerRollers tower,
@@ -46,8 +47,8 @@ public class ManualShooterSequence extends Command {
     @Override
     public void initialize() {
         // Start ramping flywheel and moving hood to position
-        fly.shoot(SmashAndShootConstants.FLYWHEEL_RPS);
-        hd.setHoodAngle(SmashAndShootConstants.HOOD_POSITION);
+        fly.shoot(CycleShooterConstants.FLYWHEEL_RPS);
+        hd.setHoodAngle(CycleShooterConstants.HOOD_POSITION);
         // Start with pivot out, wait 5 seconds before first toggle
         pivotIsIn = false;
         initialDelayDone = false;
@@ -58,8 +59,8 @@ public class ManualShooterSequence extends Command {
     @Override
     public void execute() {
         // Keep commanding flywheel and hood targets
-        fly.shoot(SmashAndShootConstants.FLYWHEEL_RPS);
-        hd.setHoodAngle(SmashAndShootConstants.HOOD_POSITION);
+        fly.shoot(CycleShooterConstants.FLYWHEEL_RPS);
+        hd.setHoodAngle(CycleShooterConstants.HOOD_POSITION);
 
         // Wait 5 seconds before first pivot up, then toggle every 2 seconds
         if (!initialDelayDone) {
@@ -76,8 +77,8 @@ public class ManualShooterSequence extends Command {
 
         // Only feed balls when flywheel is at speed AND hood is at position
         if (/* fly.wantedVel() && hd.wantedAngl() */ true) {
-            tower.setManualControl(SmashAndShootConstants.TOWER_DUTY_CYCLE);
-            hopper.setManualControl(SmashAndShootConstants.INDEXER_DUTY_CYCLE);
+            tower.setManualControl(CycleShooterConstants.TOWER_DUTY_CYCLE);
+            hopper.setManualControl(CycleShooterConstants.INDEXER_DUTY_CYCLE);
         } else {
             tower.setManualControl(0);
             hopper.setManualControl(0);
