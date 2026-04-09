@@ -113,16 +113,18 @@ public class Robot extends LoggedRobot {
     @Override
     public void disabledPeriodic() {}
 
-    @Override
-    public void autonomousInit() {
-        m_robotContainer.onAutonInit();
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-        // schedule the autonomous command
-        if (m_autonomousCommand != null) {
-            CommandScheduler.getInstance().schedule(m_autonomousCommand);
-        }
-    }
+    /*
+     * @Override
+     * public void autonomousInit() {
+     * m_robotContainer.onAutonInit();
+     * m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+     * 
+     * // schedule the autonomous command
+     * if (m_autonomousCommand != null) {
+     * CommandScheduler.getInstance().schedule(m_autonomousCommand);
+     * }
+     * }
+     */
 
     /** This function is called periodically during autonomous. */
     @Override
