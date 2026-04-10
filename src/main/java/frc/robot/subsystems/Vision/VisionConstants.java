@@ -50,10 +50,10 @@ public final class VisionConstants {
     public static final CameraConfig cameraConfig1 = new CameraConfig(// climb camera
         "1",
         new Transform3d(
-            Units.inchesToMeters(27.5 / 2 - 8.75),
+            Units.inchesToMeters(27.5 / 2 - 19.75),
             Units.inchesToMeters(27.5 / 2 - 2.75),
             Units.inchesToMeters(11.5),
-            ZYXtoXYZeulerConverter.zyxToXyz(Math.PI / 2.0, -Math.toRadians(25), Math.PI)));
+            new Rotation3d(-Math.toRadians(26), Math.PI, Math.PI / 2.0)));
 
     // intake
     public static final CameraConfig cameraConfig2 = new CameraConfig(// shooter camera
@@ -62,7 +62,7 @@ public final class VisionConstants {
             Units.inchesToMeters(-(27.5 / 2 - 1.5)),
             Units.inchesToMeters(-(27.5 / 2 - 6.5)),
             Units.inchesToMeters(18.75),
-            ZYXtoXYZeulerConverter.zyxToXyz(-Math.PI / 2, -Math.toRadians(20), 0)));
+            ZYXtoXYZeulerConverter.zyxToXyz(-Math.PI / 2, -Math.toRadians(22), 0)));
 
     // hopper
     public static final CameraConfig cameraConfig3 = new CameraConfig(// auxillary camera
