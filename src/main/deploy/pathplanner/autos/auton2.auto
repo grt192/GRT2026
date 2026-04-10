@@ -45,7 +45,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "path2"
+            "pathName": null
           }
         },
         {
