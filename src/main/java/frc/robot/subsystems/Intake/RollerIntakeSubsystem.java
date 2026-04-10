@@ -23,7 +23,7 @@ import frc.robot.Constants.IntakeConstants;
 public class RollerIntakeSubsystem extends SubsystemBase {
     private final TalonFX rollerMotor;
     private final VelocityVoltage velocityRequest = new VelocityVoltage(0); // .withEnableFOC(true); enable if re-run with FOC
-    private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0).withEnableFOC(true);
+    private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0);
     private final VoltageOut sysIdVoltage = new VoltageOut(0).withEnableFOC(true);
     private final SysIdRoutine sysIdRoutine;
 

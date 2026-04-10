@@ -19,7 +19,7 @@ import com.ctre.phoenix6.configs.*;
 public class hood extends SubsystemBase {
 
     private final LoggedTalon hoodMotor;
-    private final DutyCycleOut dutyCycl = new DutyCycleOut(0).withEnableFOC(true);
+    private final DutyCycleOut dutyCycl = new DutyCycleOut(0);
     private PositionTorqueCurrentFOC focThing = new PositionTorqueCurrentFOC(0);
     private final CANcoder hoodCoder;
 

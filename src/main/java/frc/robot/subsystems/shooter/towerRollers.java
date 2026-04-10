@@ -35,7 +35,7 @@ public class towerRollers extends SubsystemBase {
 
     private final LoggedTalon krakenMotor;
     private final VelocityVoltage velocityControl = new VelocityVoltage(0); // .withEnableFOC(true); enable if re-run with FOC
-    private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0).withEnableFOC(true);
+    private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
     private final VoltageOut sysIdVoltage = new VoltageOut(0).withEnableFOC(true);
     private final SysIdRoutine sysIdRoutine;
     private NetworkTable NTtable;
@@ -94,7 +94,7 @@ public class towerRollers extends SubsystemBase {
         yoTuneThis("Pids/V", val -> pidSlots.withKV(val), TowerConstants.KV);
         // tuneThis("A", val -> pidSlots.withKP(val), TowerConstants.KA);
         // tuneThis("G", val -> pidSlots.withKP(val), TowerConstants.KG);
-        yoTuneThis("setDutyCyclePercent", val -> krakenMotor.setControl(new DutyCycleOut(val).withEnableFOC(true)), 0);
+        yoTuneThis("setDutyCyclePercent", val -> krakenMotor.setControl(new DutyCycleOut(val)), 0);
         yoTuneThis("setMMVTCF", val -> krakenMotor.setControl(new VelocityVoltage(val)), 0);
 
         yoTuneThis("MMAccel", val -> config.MotionMagic.MotionMagicAcceleration = val, TowerConstants.MM_ACCEL);
@@ -109,7 +109,7 @@ public class towerRollers extends SubsystemBase {
         // Motor output
         config.withMotorOutput(new MotorOutputConfigs()
             .withNeutralMode(NeutralModeValue.Coast)
-            .withInverted(TowerConstants.HOPPER_INVERTED));
+            .withInverted(TowerConstants.HOPPERINVERTED));
 
         // Current limits
         config.withCurrentLimits(

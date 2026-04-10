@@ -33,7 +33,7 @@ public class PivotIntakeSubsystem extends SubsystemBase {
     private final TalonFX pivotMotor;
     private final CANcoder canCoder;
 
-    private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0).withEnableFOC(true);
+    private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
     private final PositionVoltage voltagePosControl = new PositionVoltage(0); // .withEnableFOC(true); enable if re-run with FOC
     private final VoltageOut sysIdVoltage = new VoltageOut(0).withEnableFOC(true);
     private final SysIdRoutine sysIdRoutine;
