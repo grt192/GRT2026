@@ -138,8 +138,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // update the poseestimator with curent gyro reading
-        // Pigeon is flipped, so negate to match vision coordinate system
+        // Update the pose estimator with current gyro reading (already CCW-positive
+        // via getGyroHeading()).
         Rotation2d gyroAngle = getGyroHeading();
         estimatedPose = poseEstimator.update(
             gyroAngle,
@@ -445,10 +445,14 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
 
-    /** Gets the gyro heading. */
+    /**
+     * Gets the gyro heading in WPILib CCW-positive convention. The Pigeon2 on this
+     * robot is mounted flipped so its raw yaw is CW-positive; negate once here so
+     * every consumer (pose estimator update/reset, driver heading, PathPlanner,
+     * AimToHub) sees a consistent CCW-positive heading.
+     */
     private Rotation2d getGyroHeading() {
-        return Rotation2d.fromDegrees(pidgey.getYaw().getValueAsDouble()); // Might need to flip depending on the robot
-                                                                           // setup
+        return Rotation2d.fromDegrees(-pidgey.getYaw().getValueAsDouble());
     }
 
     /**
@@ -461,10 +465,8 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public void resetPose(Pose2d currentPose) {
-        // Pigeon is flipped, so negate to match vision coordinate system
-        Rotation2d gyroAngle = getGyroHeading().times(-1);
         poseEstimator.resetPosition(
-            gyroAngle,
+            getGyroHeading(),
             getModulePositions(),
             currentPose);
     }
