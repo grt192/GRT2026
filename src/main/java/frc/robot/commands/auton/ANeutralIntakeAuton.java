@@ -13,11 +13,13 @@ import frc.robot.subsystems.hopper.HopperSubsystem;
 import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.subsystems.shooter.hood;
 import frc.robot.subsystems.shooter.towerRollers;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 public class ANeutralIntakeAuton extends SequentialCommandGroup {
     private static final double SHOOT_TIMEOUT_SECONDS = 3.0;
 
     public ANeutralIntakeAuton(
+        SwerveSubsystem swerveSubsystem,
         flywheel flySubsystem,
         hood hoodSubsystem,
         towerRollers towerSubsystem,
