@@ -33,7 +33,7 @@ public class HopperSubsystem extends SubsystemBase {
 
     private final LoggedTalon krakenMotor;
     private final VelocityVoltage velocityControl = new VelocityVoltage(0); // .withEnableFOC(true); enable if re-run with FOC
-    private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0);
+    private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0).withEnableFOC(true);
     private final VoltageOut sysIdVoltage = new VoltageOut(0).withEnableFOC(true);
     private final SysIdRoutine sysIdRoutine;
     private NetworkTableInstance NTinst;
@@ -89,7 +89,7 @@ public class HopperSubsystem extends SubsystemBase {
         yoTuneThis("Pids/V", val -> pidSlots.withKV(val), HopperConstants.KV);
         // tuneThis("A", val -> pidSlots.withKP(val), TowerConstants.KA);
         // tuneThis("G", val -> pidSlots.withKP(val), TowerConstants.KG);
-        yoTuneThis("setDutyCyclePercent", val -> krakenMotor.setControl(dutyCycleControl.withOutput(val)), 0);
+        yoTuneThis("setDutyCyclePercent", val -> krakenMotor.setControl(dutyCycleControl.withOutput(val).withEnableFOC(true)), 0);
         yoTuneThis("setMMVTCF", val -> krakenMotor.setControl(new VelocityVoltage(val)), 0);
 
         yoTuneThis("MMAccel", val -> config.MotionMagic.MotionMagicAcceleration = val, 100);
@@ -105,7 +105,7 @@ public class HopperSubsystem extends SubsystemBase {
         // Motor output
         config.withMotorOutput(new MotorOutputConfigs()
             .withNeutralMode(NeutralModeValue.Coast)
-            .withInverted(HopperConstants.HOPPERINVERTED));
+            .withInverted(HopperConstants.HOPPER_INVERTED));
 
         // Current limits
         config.withCurrentLimits(
@@ -149,7 +149,7 @@ public class HopperSubsystem extends SubsystemBase {
 
     public void setManualControl(double percentOutput) {
         percentOutput = Math.max(-1.0, Math.min(1.0, percentOutput));
-        krakenMotor.setControl(dutyCycleControl.withOutput(percentOutput));
+        krakenMotor.setControl(dutyCycleControl.withOutput(percentOutput).withEnableFOC(true));
     }
 
     @Override

@@ -37,7 +37,7 @@ public class flywheel extends SubsystemBase {
     private final LoggedTalon upperMotor;
     private final LoggedTalon secondMotor;
     private VelocityTorqueCurrentFOC spinner = new VelocityTorqueCurrentFOC(0);
-    private DutyCycleOut dutyCycl = new DutyCycleOut(0);
+    private DutyCycleOut dutyCycl = new DutyCycleOut(0).withEnableFOC(true);
     private VoltageOut voltOut = new VoltageOut(0);
     private TalonFXConfiguration cfg = new TalonFXConfiguration();
     private Slot0Configs pidSlots = new Slot0Configs();
@@ -68,7 +68,7 @@ public class flywheel extends SubsystemBase {
         yoTuneThis("Pids/D", val -> pidSlots.withKD(val), ShooterConstants.Flywheel.KD);
         yoTuneThis("Pids/S", val -> pidSlots.withKS(val), ShooterConstants.Flywheel.KS);
         yoTuneThis("Pids/V", val -> pidSlots.withKV(val), ShooterConstants.Flywheel.KV);
-        yoTuneThis("setDutyCyclePercent", val -> upperMotor.setControl(new DutyCycleOut(val)), 0);
+        yoTuneThis("setDutyCyclePercent", val -> upperMotor.setControl(new DutyCycleOut(val).withEnableFOC(true)), 0);
         yoTuneThis("setMMVTCF", val -> targetRPS = val, 0);
 
         yoTuneThis("MMAccel", val -> cfg.MotionMagic.MotionMagicAcceleration = val, ShooterConstants.Flywheel.MM_ACCEL);
