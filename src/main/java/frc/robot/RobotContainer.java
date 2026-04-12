@@ -34,6 +34,7 @@ import frc.robot.Constants.HopperConstants.HOPPER_INTAKE;
 import frc.robot.Constants.ShooterConstants.Flywheel;
 import frc.robot.commands.AutonShooterSequence;
 import frc.robot.commands.CycleShot;
+import frc.robot.commands.FancyAutoShootCommand;
 import frc.robot.commands.SmashShot;
 import frc.robot.commands.TowerShot;
 import frc.robot.commands.allign.AimToHubCommand;
@@ -291,21 +292,6 @@ public class RobotContainer {
 
             // ==================== SHOOTING PRESETS ====================
             // Square (mech) = smash-and-shoot preset (close-range)
-            mechController.square().whileTrue(
-                Commands.defer(
-                    () -> new SmashShot(
-                        flywheelSubsystem,
-                        hoodSubsystem,
-                        tower,
-                        HopperSubsystem,
-                        pivotIntake,
-                        learner),
-                    java.util.Set.of(
-                        flywheelSubsystem,
-                        hoodSubsystem,
-                        HopperSubsystem,
-                        tower,
-                        pivotIntake)));
 
             // ==================== INTERPOLATION TABLE CALIBRATION ====================
             // D-pad up/down: bump flywheel RPM offset (5 RPS per press)
@@ -369,6 +355,21 @@ public class RobotContainer {
                     cycleFlywheelVelo -= 5;
                 }
             }));
+            mechController.square().whileTrue(
+                Commands.defer(
+                    () -> new SmashShot(
+                        flywheelSubsystem,
+                        hoodSubsystem,
+                        tower,
+                        HopperSubsystem,
+                        pivotIntake,
+                        learner),
+                    java.util.Set.of(
+                        flywheelSubsystem,
+                        hoodSubsystem,
+                        HopperSubsystem,
+                        tower,
+                        pivotIntake)));
 
             // Cross = passing shot — flywheel pinned to max (120 RPS)
             mechController.cross().whileTrue(new CycleShot(
@@ -386,6 +387,14 @@ public class RobotContainer {
                 HopperSubsystem,
                 pivotIntake,
                 learner));
+            mechController.circle().onTrue(new FancyAutoShootCommand(
+                swerveSubsystem,
+                fmsSubsystem,
+                flywheelSubsystem,
+                hoodSubsystem,
+                tower,
+                HopperSubsystem,
+                pivotIntake));
 
             // Swerve-dependent drive controller commands
             if (Constants.SWERVE_ENABLED && swerveSubsystem != null) {
