@@ -11,6 +11,7 @@ import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.subsystems.shooter.hood;
 import frc.robot.subsystems.shooter.towerRollers;
 import frc.robot.subsystems.hopper.HopperSubsystem;
+import org.json.simple.ItemList;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -34,7 +35,7 @@ public class FancyShooterSequence extends Command {
     private final Timer pivotTimer = new Timer();
     private boolean pivotIsIn = true;
     private boolean initialDelayDone = false;
-    private Intertable tableThing = Intertable.getInstance();
+    private Intertable tableThing = new Intertable();
     NetworkTable table = NetworkTableInstance.getDefault().getTable("SWERVE_TABLE_NAME");
     StructSubscriber<Pose2d> poseSub = table.getStructTopic("estimatedPose", Pose2d.struct).subscribe(new Pose2d());
 

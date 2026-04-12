@@ -4,7 +4,7 @@ import frc.robot.subsystems.shooter.flywheel;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.AlignToHubConstants;
 import frc.robot.subsystems.shooter.Intertable;
-
+import java.io.Serial;
 import com.google.flatbuffers.Table;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,7 +18,7 @@ public class flywheelAutoShoot extends Command {
 
     private boolean redTeam = false;
     private flywheel fly;
-    private Intertable tableThing = Intertable.getInstance();
+    private Intertable tableThing = new Intertable();
     NetworkTable table = NetworkTableInstance.getDefault().getTable("SWERVE_TABLE_NAME");
     StructSubscriber<Pose2d> poseSub = table.getStructTopic("estimatedPose", Pose2d.struct).subscribe(new Pose2d());
     private final NetworkTableEntry offsetEntry;
@@ -41,6 +41,8 @@ public class flywheelAutoShoot extends Command {
 
         if (redTeam) {
             if (poseSub.get().getX() > AlignConstants.RED_WALL_X) {
+                System.out.print("Distance To HUB: ");
+                System.out.println(poseSub.get().getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
                 RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
             } else {
                 if (poseSub.get().getY() > AlignConstants.HUB_Y) {
@@ -52,6 +54,9 @@ public class flywheelAutoShoot extends Command {
 
         } else {
             if (poseSub.get().getX() < AlignConstants.BLUE_WALL_X) {
+                System.out.print("Distance To HUB: ");
+                System.out.println(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
+
                 RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
             } else {
                 if (poseSub.get().getY() > AlignConstants.HUB_Y) {

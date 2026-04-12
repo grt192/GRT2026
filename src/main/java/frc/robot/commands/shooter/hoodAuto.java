@@ -17,7 +17,7 @@ import edu.wpi.first.networktables.StructSubscriber;
 public class hoodAuto extends Command {
 
     private hood hd;
-    private Intertable tableThing = Intertable.getInstance();
+    private Intertable tableThing = new Intertable();
     private boolean redTeam = false;
     NetworkTable table = NetworkTableInstance.getDefault().getTable("SWERVE_TABLE_NAME");
     StructSubscriber<Pose2d> poseSub = table.getStructTopic("estimatedPose", Pose2d.struct).subscribe(new Pose2d());

@@ -4,14 +4,14 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 
 public class Intertable {
 
-    private static final Intertable INSTANCE = new Intertable();
+    // private static final Intertable INSTANCE = new Intertable();
 
     private static InterpolatingDoubleTreeMap shooterAngle = new InterpolatingDoubleTreeMap();
     private static InterpolatingDoubleTreeMap shooterRPS = new InterpolatingDoubleTreeMap();
 
     private static boolean initialized = false;
 
-    private Intertable() {
+    public Intertable() {
         if (!initialized) {
             // Hood angles must be within limits: 0.06 to 0.169 rotations
             // Closer distance = higher angle, farther = lower angle
@@ -31,9 +31,9 @@ public class Intertable {
         }
     }
 
-    public static Intertable getInstance() {
-        return INSTANCE;
-    }
+    // public static Intertable getInstance() {
+    // return INSTANCE;
+    // }
 
     public double getRPS(double dis) {
         return shooterRPS.get(dis);
