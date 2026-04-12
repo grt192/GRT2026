@@ -65,10 +65,12 @@ public class FancyShooterSequence extends Command {
         if (fms.isRedAlliance()) {
             RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
             ang = tableThing.getAngle(poseSub.get().getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
+            System.out.println(poseSub.get().getTranslation().getDistance(AlignConstants.RED_HUB_TRANS));
 
         } else {
             RPS = tableThing.getRPS(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
             ang = tableThing.getAngle(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
+            System.out.println(poseSub.get().getTranslation().getDistance(AlignConstants.BLUE_HUB_TRANS));
 
         }
         fly.shoot(RPS);

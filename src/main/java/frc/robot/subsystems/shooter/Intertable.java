@@ -15,17 +15,17 @@ public class Intertable {
         if (!initialized) {
             // Hood angles must be within limits: 0.06 to 0.169 rotations
             // Closer distance = higher angle, farther = lower angle
-            shooterAngle.put(1.524, 0.16); // closest - highest angle
-            shooterAngle.put(1.651, 0.14);
-            shooterAngle.put(1.981, 0.12);
-            shooterAngle.put(2.261, 0.10);
-            shooterAngle.put(2.616, 0.08); // farthest - lowest angle
+            shooterAngle.put(1.524, 0.14); // closest - highest angle
+            shooterAngle.put(1.651, 0.23);
+            shooterAngle.put(1.981, 0.32);
+            shooterAngle.put(2.261, 0.41);
+            shooterAngle.put(2.616, 0.5); // farthest - lowest angle
 
-            shooterRPS.put(1.524, 45.0);
-            shooterRPS.put(1.651, 45.0);
-            shooterRPS.put(1.981, 50.0);
-            shooterRPS.put(2.261, 50.0);
-            shooterRPS.put(2.616, 60.0);
+            shooterRPS.put(1.524, 40.0);
+            shooterRPS.put(1.651, 42.25);
+            shooterRPS.put(1.981, 44.5);
+            shooterRPS.put(2.261, 46.75);
+            shooterRPS.put(2.616, 49.0);
 
             initialized = true;
         }
