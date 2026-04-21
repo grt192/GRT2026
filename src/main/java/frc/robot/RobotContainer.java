@@ -334,31 +334,47 @@ public class RobotContainer {
             // Left stick Y = hood manual control
             flywheelSubsystem.setDefaultCommand(Commands.run(() -> {
                 if (DriverStation.isJoystickConnected(1)) {
-                    flywheelSubsystem.flySpeed((mechController.getR2Axis() + 1) / 3);
+                    flywheelSubsystem.flySpeed((mechController.getR2Axis() + 1) / 2);
                 } else {
                     flywheelSubsystem.flySpeed(0);
                 }
             }, flywheelSubsystem));
 
+            new Trigger(() -> mechController.getR2Axis() > -0.7)
+                .whileTrue(
+                    Commands.run(() -> HopperSubsystem.setManualControl(-1.0), HopperSubsystem));
+
             tower.setDefaultCommand(Commands.run(() -> {
-                tower.setManualControl(0); // Stop tower by default
+                if (DriverStation.isJoystickConnected(1) && mechController.getR2Axis() > -0.7) {
+                    tower.setManualControl(Constants.CycleShooterConstants.TOWER_DUTY_CYCLE);
+                } else {
+                    tower.setManualControl(0); // Stop tower by default
+                }
             }, tower));
 
             hoodSubsystem.setDefaultCommand(Commands.run(() -> {
-                if (mechController.L3().getAsBoolean()) {
-                    desiredHoodSpeed = 0.15;
-                    hoodSubsystem.hoodSpeed(0.15);
-                } else if (mechController.R3().getAsBoolean()) {
-                    desiredHoodSpeed = -0.15;
-                    hoodSubsystem.hoodSpeed(-0.15);
-                } else {
-                    if (desiredHoodSpeed != 0) {
-                        desiredHoodSpeed = 0;
-                        hoodSubsystem.hoodSpeed(0);
-
-                    }
+                if (DriverStation.isJoystickConnected(1)) {
+                    hoodSubsystem.setHoodAngle(((mechController.getR2Axis() + 1) / 2) * 0.1);
                 }
             }, hoodSubsystem));
+
+            /*
+             * hoodSubsystem.setDefaultCommand(Commands.run(() -> {
+             * if (mechController.L3().getAsBoolean()) {
+             * desiredHoodSpeed = 0.15;
+             * hoodSubsystem.hoodSpeed(0.15);
+             * } else if (mechController.R3().getAsBoolean()) {
+             * desiredHoodSpeed = -0.15;
+             * hoodSubsystem.hoodSpeed(-0.15);
+             * } else {
+             * if (desiredHoodSpeed != 0) {
+             * desiredHoodSpeed = 0;
+             * hoodSubsystem.hoodSpeed(0);
+             * 
+             * }
+             * }
+             * }, hoodSubsystem));
+             */
 
             mechController.povUp().onTrue(Commands.runOnce(() -> {
                 if (cycleFlywheelVelo < Flywheel.FLYWHEEL_MAX_SPEED) {
