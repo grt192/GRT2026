@@ -30,9 +30,7 @@ public class ShooterCircus extends SequentialCommandGroup {
         HopperSubsystem hopper,
         PivotIntakeSubsystem pivotIntake,
         FieldManagementSubsystem fms,
-        towerRollers b,
-        DoubleSupplier xSpeed,
-        DoubleSupplier ySpeed) {
+        towerRollers b) {
 
         boolean redTeam = fms.isRedAlliance();
 

@@ -33,6 +33,7 @@ import frc.robot.Constants.CycleShooterConstants;
 import frc.robot.Constants.HopperConstants.HOPPER_INTAKE;
 import frc.robot.Constants.ShooterConstants.Flywheel;
 import frc.robot.commands.AutonShooterSequence;
+import frc.robot.commands.ShooterCircus;
 import frc.robot.commands.CycleShot;
 import frc.robot.commands.SmashShot;
 import frc.robot.commands.TowerShot;
@@ -293,21 +294,41 @@ public class RobotContainer {
 
             // ==================== SHOOTING PRESETS ====================
             // Square (mech) = smash-and-shoot preset (close-range)
+            /*
+             * mechController.square().whileTrue(
+             * Commands.defer(
+             * () -> new SmashShot(
+             * flywheelSubsystem,
+             * hoodSubsystem,
+             * tower,
+             * HopperSubsystem,
+             * pivotIntake,
+             * learner),
+             * java.util.Set.of(
+             * flywheelSubsystem,
+             * hoodSubsystem,
+             * HopperSubsystem,
+             * tower,
+             * pivotIntake)));
+             */
             mechController.square().whileTrue(
                 Commands.defer(
-                    () -> new SmashShot(
+                    () -> new ShooterCircus(
+                        swerveSubsystem,
                         flywheelSubsystem,
                         hoodSubsystem,
-                        tower,
                         HopperSubsystem,
                         pivotIntake,
-                        learner),
+                        fmsSubsystem,
+                        tower),
                     java.util.Set.of(
+                        swerveSubsystem,
                         flywheelSubsystem,
                         hoodSubsystem,
                         HopperSubsystem,
-                        tower,
-                        pivotIntake)));
+                        pivotIntake,
+                        tower)));
+
 
             // ==================== INTERPOLATION TABLE CALIBRATION ====================
             // D-pad up/down: bump flywheel RPM offset (5 RPS per press)
@@ -354,7 +375,7 @@ public class RobotContainer {
 
             hoodSubsystem.setDefaultCommand(Commands.run(() -> {
                 if (DriverStation.isJoystickConnected(1)) {
-                    hoodSubsystem.setHoodAngle(((mechController.getR2Axis() + 1) / 2) * 0.1);
+                    hoodSubsystem.setHoodAngle(0.1 - (((mechController.getR2Axis() + 1) / 2) * 0.1));
                 }
             }, hoodSubsystem));
 
